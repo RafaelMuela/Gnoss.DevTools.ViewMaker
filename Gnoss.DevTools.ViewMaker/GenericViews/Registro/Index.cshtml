@@ -1,78 +1,203 @@
-﻿@model AutenticationModel
+﻿@*[security|||registro/index.cshtml|||elprado]*@
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Hosting
+@using System.Collections;
+@using System.Web;
+@using Microsoft.AspNetCore.Http;
+@inject IConfiguration Configuration
+@model AutenticationModel
 
-@{    
+@{
 
     CommunityModel Comunidad = Html.GetComunidad();
     HeaderModel Cabecera = Html.GetCabecera();
     UserIdentityModel IdentidadActual = Html.GetIdentidadActual();
 
-    string col01class = string.Empty;
-    if (!string.IsNullOrEmpty(Comunidad.ProjectLoginConfiguration))
-    {
-        Html.SetBodyClass("full operativaRegistro layout03 login");
-        col01class = " class=\"loginPersonalizado\" ";
+    HttpRequest urlCurrentUser = Context.Request;
+    string hostActual = urlCurrentUser.Host.Host;
 
+    string urlCurrent = GetUrlCurrent(urlCurrentUser);
+
+    bool doRedirect = DoRedirect(urlCurrent);
+   
+    if (doRedirect)
+    {
+        ConfigService _configService = new ConfigService(Configuration);
+        string urlLoginRedirect = _configService.GetConfig("urlLogin");
+        if (string.IsNullOrEmpty(urlLoginRedirect)) { urlLoginRedirect = "https://keycloakdevpmnp.gnoss.com/login"; }
+        urlLoginRedirect = FormatUrl(urlLoginRedirect);
+        string tokenLoginUsuario = System.Net.WebUtility.UrlEncode(Html.GetTokenLoginUsuario());
+        string proyectoID = GetProyectoID(Html.GetBaseUrlPersonalizacion());
+        List<string> removePath = new List<string> { "redirect", "login" };
+        urlCurrent = DeleteSpecifyPathFromUrl(urlCurrent, removePath);
+        Uri urlRedirect = CrearUrlRedirect(urlLoginRedirect, urlCurrent, tokenLoginUsuario, proyectoID);
+        Context.Response.Redirect(urlRedirect.AbsoluteUri);
     }
     else
     {
-        if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Login)
-        {
-            Html.SetBodyClass("layout04 full operativaRegistro login no-min-height-content");
-        }
-        else if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Registro || Model.TypePage == AutenticationModel.TypeAutenticationPage.RegistroConRedesSociales)
-        {
-            Html.SetBodyClass("layout04 full operativaRegistro registro no-min-height-content");
-        }
-    }
 
-    Html.SetOcultarMenusComunidad(true);
-}
+        string col01class = string.Empty;
+        if (!string.IsNullOrEmpty(Comunidad.ProjectLoginConfiguration))
+        {
+            Html.SetBodyClass("full operativaRegistro layout03 login");
+            col01class = " class=\"loginPersonalizado\" ";
 
-<div class="row">
-    <div id="col01" class="col" @Html.Raw(col01class)>
-        <div class="form formtheme01 formularioRegistroUsuarios panel-centrado">
-            <!--<h2>-->
-                @if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Login)
-                {
-                    if (Comunidad == null)
+        }
+        else
+        {
+            if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Login)
+            {
+                Html.SetBodyClass("layout04 full operativaRegistro login no-min-height-content");
+            }
+            else if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Registro || Model.TypePage == AutenticationModel.TypeAutenticationPage.RegistroConRedesSociales)
+            {
+                Html.SetBodyClass("layout04 full operativaRegistro registro no-min-height-content");
+            }
+        }
+
+        Html.SetOcultarMenusComunidad(true);
+
+
+        <div class="row">
+            <div id="col01" class="col" @Html.Raw(col01class)>
+                <div class="form formtheme01 formularioRegistroUsuarios panel-centrado">
+                    <!--<h2>-->
+                    @if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Login)
                     {
-                        <h1>Inicia sesión en <strong>myGNOSS</strong></h1>
+                        if (Comunidad == null)
+                        {
+                            <h1>Inicia sesión en <strong>myGNOSS</strong></h1>
+                        }
+                        else
+                        {
+                            <h1>Inicia sesión en <strong>@Comunidad.Name</strong></h1>
+                        }
                     }
-                    else { 
-                        <h1>Inicia sesión en <strong>@Comunidad.Name</strong></h1>
+                    else if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Registro || Model.TypePage == AutenticationModel.TypeAutenticationPage.RegistroConRedesSociales)
+                    {
+                        // <text>@Html.GetText("COMMON", "REGISTRO")</text>
                     }
-                }
-                else if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Registro || Model.TypePage == AutenticationModel.TypeAutenticationPage.RegistroConRedesSociales)
-                {
-                   // <text>@Html.GetText("COMMON", "REGISTRO")</text>
-                }
-            <!--</h2>-->
-            <div>
-                <!--<div class="box box01">-->
-                @if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Login)
-                {
-                    @Html.PartialView("_FormularioLogin");
-                }
-                else if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Registro || Model.TypePage == AutenticationModel.TypeAutenticationPage.RegistroConRedesSociales)
-                {
-                    @Html.PartialView("_FormularioRegistro", Model);
-                }
-                else if (Model.TypePage == AutenticationModel.TypeAutenticationPage.InvitacionUsada)
-                {
-                    @Html.PartialView("_InvitacionUsada");
-                }
-                <!--</div>-->
-                @if (Model.TypePage != AutenticationModel.TypeAutenticationPage.InvitacionUsada && Model.TypePage != AutenticationModel.TypeAutenticationPage.RegistroConRedesSociales)
-                {
-                <!-- Eliminado Panel de "Registro" . EAD"-->            
-                }
+                    <!--</h2>-->
+                <div>
+                        <!--<div class="box box01">-->
+                        @if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Login)
+                        {
+                            @Html.PartialView("_FormularioLogin")
+                            ;
+                        }
+                        else if (Model.TypePage == AutenticationModel.TypeAutenticationPage.Registro || Model.TypePage == AutenticationModel.TypeAutenticationPage.RegistroConRedesSociales)
+                        {
+                            @Html.PartialView("_FormularioRegistro", Model)
+                            ;
+                        }
+                        else if (Model.TypePage == AutenticationModel.TypeAutenticationPage.InvitacionUsada)
+                        {
+                            @Html.PartialView("_InvitacionUsada")
+                            ;
+                        }
+                        <!--</div>-->
+                        @if (Model.TypePage != AutenticationModel.TypeAutenticationPage.InvitacionUsada && Model.TypePage != AutenticationModel.TypeAutenticationPage.RegistroConRedesSociales)
+                        {
+                            <!-- Eliminado Panel de "Registro" . EAD"-->
+                        }
+                    </div>
+                </div>
             </div>
         </div>
-    </div> 
-</div>
-<div id="col02">
-    @if (!string.IsNullOrEmpty(Comunidad.ProjectLoginConfiguration))
-    {
-       @Html.Raw(Comunidad.ProjectLoginConfiguration)
+        <div id="col02">
+            @if (!string.IsNullOrEmpty(Comunidad.ProjectLoginConfiguration))
+            {
+                @Html.Raw(Comunidad.ProjectLoginConfiguration)
+            }
+        </div>
     }
-</div>
+}
+@functions {
+
+    public string GetUrlCurrent(HttpRequest urlCurrent)
+    {
+        string host = urlCurrent.Host.Value;
+        string schema = urlCurrent.Scheme;
+        string path = urlCurrent.Path.Value;
+        UriBuilder uriBuilder = new UriBuilder(schema, host);
+        uriBuilder.Path = urlCurrent.Path.Value;
+        uriBuilder.Query = urlCurrent.QueryString.Value;
+        return uriBuilder.Uri.AbsoluteUri;
+    }
+
+    public Uri CrearUrlRedirect(string baseUrl, string urlCurrent, string tokenUser, string proyectoId)
+    {
+        Uri urlRedirect = new Uri($"{baseUrl}?urlRedirect={urlCurrent}&token={tokenUser}&proyectoID={proyectoId}");
+        return urlRedirect;
+    }
+
+    public string FormatUrl(string urlLogin)
+    {
+
+        UriBuilder uriBuilder = new UriBuilder(urlLogin);
+        uriBuilder.Path = uriBuilder.Path == "/login" ? uriBuilder.Path : "/login";
+        return uriBuilder.Uri.AbsoluteUri;
+    }
+
+    public string DeleteSpecifyPathFromUrl(string url, List<string> removePath)
+    {
+        Uri nuevaUrl = new Uri(url);
+        List<string> newPath = new List<string>();
+        foreach (string item in nuevaUrl.Segments)
+        {
+            if (!removePath.Contains(item.ToLower().Trim('/').Trim('\\')))
+            {
+                newPath.Add(item);
+            }
+        }
+
+        UriBuilder uriBuilder = new UriBuilder(url);
+        uriBuilder.Path = string.Concat(newPath);
+
+        return uriBuilder.Uri.AbsoluteUri;
+    }
+
+    public string GetProyectoID(string url)
+    {
+        return System.IO.Path.GetFileName(url);
+    }
+
+    public bool DoRedirect(string currentUrl)
+    {
+        Uri uri = new Uri(currentUrl);
+        System.Collections.Specialized.NameValueCollection parametros = HttpUtility.ParseQueryString(uri.Query);
+        bool resultado = (parametros.Get("logingnoss") is null || string.IsNullOrEmpty(parametros.Get("logingnoss"))) ? true : false;
+        return resultado;
+    }
+
+
+    public class ConfigService
+    {
+        private readonly IConfiguration _config;
+
+
+        public ConfigService(IConfiguration config)
+        {
+            _config = config;
+
+        }
+
+        public string GetConfig(string key)
+        {
+            string value;
+            IDictionary environmentVariables = Environment.GetEnvironmentVariables();
+
+            if (environmentVariables.Contains(key.Replace(":", "__")))
+            {
+
+                return environmentVariables[key.Replace(":", "__")].ToString();
+
+            }
+
+            return _config.GetValue<string>(key);
+        }
+
+    }
+
+}
