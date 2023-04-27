@@ -1,0 +1,75 @@
+@using Es.Riam.Gnoss.Web.MVC.Models;
+@model CMSComponentHTML
+@{
+    CommunityModel Comunidad = ViewBag.Comunidad;
+    HeaderModel cabecera = ViewBag.Cabecera;
+    UserIdentityModel IdentidadActual = Html.GetIdentidadActual();
+    UserProfileModel perfil = Html.GetPerfil();
+    bool nuevaColumna = false;
+    string description = string.Empty;
+    foreach (string key in perfil.ExtraData.Keys)
+    {
+        if (key.ToLower().Contains("descrip"))
+        {
+            description = perfil.ExtraData[key];
+        }
+    }
+}
+@if (Model != null)
+{
+    if (IdentidadActual.IsGuestUser)
+    {
+        @Html.Raw(Model.HTML)
+    }
+    else
+    {
+        CommunityModel.TabModel pestanyaMiPrado = null;
+        foreach (CommunityModel.TabModel pestanya in Comunidad.Tabs)
+        {
+            if (pestanya.Url.EndsWith("mi-prado"))
+            {
+                pestanyaMiPrado = pestanya;
+            }
+        }
+        <div class="logueado">
+            <form class="form-general">
+                <figure class="avatar">
+                    @if (string.IsNullOrEmpty(perfil.Foto))
+                    {
+                        <span class="no-img">@perfil.Name.ToUpper()[0]</span>
+                    }
+                    else
+                    {
+                        <img src="@ViewBag.BaseURLContent/@perfil.Foto">
+                    }
+                    <figcaption>
+                        <h1>@perfil.Name</h1>
+                        @if (!string.IsNullOrEmpty(description))
+                        {
+                            <p>@description</p>
+                        }
+                        
+                    </figcaption>
+                </figure>
+                <div class="configura-cuenta">
+                    <select class="select-custom" name="configura-cuenta">
+                        <option value="@pestanyaMiPrado.Url">@pestanyaMiPrado.Name</option>
+                        @{
+                            List<CommunityModel.TabModel> pestanyasConectado = pestanyaMiPrado.SubTab;
+                            foreach (CommunityModel.TabModel pestanya in pestanyasConectado)
+                            {
+                                if (pestanya.Visible)
+                                {
+                                    <option value="@pestanya.Url">@pestanya.Name</option>
+                                }
+                            }
+                        }
+                        <option value="@perfil.Url@Html.GetText("URLSEM", "EDITARPERFIL")">@Html.Translate("MODIFICARPERFIL")</option>
+                        <option value="@Html.GetUrlLogout()">@Html.Translate("SALIR")</option>
+
+                    </select>
+                </div>
+            </form>
+        </div>
+    }
+}

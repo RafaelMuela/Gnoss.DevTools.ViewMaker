@@ -1,0 +1,89 @@
+@model CMSComponentSearch
+@if (Model != null)
+{  
+    <div id="@Model.Key" url="@Model.UrlSearcherCMS" class="buscadorAlfabetico">        
+		<div class="indice-alfabetico">
+			@if (!string.IsNullOrEmpty(Model.Title))
+            {
+                <h2>@Model.Title</h2>
+            }
+			@{
+string[] letras = new string[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" }; 
+			}
+			<div class="abc">
+				@foreach (string letra in letras)
+				{
+					if (Model.Filter.ToLower().StartsWith(letra))
+					{ 
+					<a class="on letra@(letra)" href="#">@letra</a> 
+					}
+					else
+					{ 
+					<a class="letra@(letra)" href="#">@letra</a> 
+					}
+				}
+			</div>
+			<div class="abc-small">
+				<select class="select-custom" title="Select ABC">
+                    <optgroup label="letras ABC">
+                        @foreach (string letra in letras)
+                        {
+                            if (Model.Filter.ToLower().StartsWith(letra))
+                            {
+                                <option value="@letra" selected="selected">@letra</option>
+                            }
+                            else
+                            {
+                                <option value="@letra">@letra</option>
+
+                            }
+                        }
+                    </optgroup>
+				</select>
+			</div>
+		</div>
+		<div class="indice-lista">
+			<div class="letra">
+				<h2>@Model.Filter.ToUpper().Replace("%", "").Replace("*", "")</h2>
+				<span>(@Model.Resultado.NumeroResultadosTotal)</span>
+			</div>
+			@if (Model.Resultado.NumeroPaginaActual > 1)
+			{ 
+				int paginaMenos=Model.Resultado.NumeroPaginaActual-1;
+				<a class="flecha menos desk" pag="@paginaMenos">Anterior</a> 
+			}
+			@if (Model.Resultado.NumeroPaginaActual < (int)Math.Ceiling((double)Model.Resultado.NumeroResultadosTotal / (double)Model.Resultado.NumeroResultadosPagina))
+			{    
+				int paginaMas=Model.Resultado.NumeroPaginaActual+1;
+				<a class="flecha mas desk" pag="@paginaMas">Siguiente</a> 
+			}
+			<ul class="iz">
+				@for (int i = 0; i < 11; i++)
+				{
+					if (Model.Resultado.ListaResultados.Count > i)
+					{
+						ResourceModel ficha = (ResourceModel)Model.Resultado.ListaResultados[i];      
+					<li>@Html.PartialView(Model.ViewNameResources, ficha)</li>     
+		
+					}
+				}
+			</ul>
+			@if (Model.Resultado.ListaResultados.Count > 11)
+			{ 
+				<ul class="de">
+					@for (int i = 11; i < 22; i++)
+					{
+						if (Model.Resultado.ListaResultados.Count > i)
+						{
+							ResourceModel ficha = (ResourceModel)Model.Resultado.ListaResultados[i]; 
+						<li>@Html.PartialView(Model.ViewNameResources, ficha)</li>     
+						}
+					}
+				</ul> 
+			}
+		</div>
+    </div> 
+}
+
+
+   

@@ -1,0 +1,63 @@
+@using Es.Riam.Gnoss.Web.MVC.Models;
+@using System.Web
+@model CMSComponentQuerySPARQL
+
+@if (Model != null)
+{    
+    Random random = new Random(Convert.ToInt32(DateTime.Today.ToString("yyyyMMdd")));
+    int randomObra = random.Next(Model.DataSetResult.Tables[0].Rows.Count-1);
+    System.Data.DataRow fila = Model.DataSetResult.Tables[0].Rows.Cast<System.Data.DataRow>().ElementAt(randomObra);    
+        if (fila != null)
+        {
+            string idGnoss = fila["s"].ToString();               
+            string tituloObra = fila["tituloObra"].ToString();
+            string descObra = fila["descObra"].ToString();
+            string imagenObra = fila["imagenObra"].ToString();
+            string nombreAutora = fila["nombreAutora"].ToString();
+            string anio = fila["anio"].ToString();
+            string[] result = idGnoss.Split('_');
+            string idCorto = result[result.Count() - 2];
+            string urlObra = Html.GetComunidad().Url + "/" + Html.GetText("URLSEM", "RECURSO") + "/" + Es.Riam.Util.UtilCadenas.EliminarCaracteresUrlSem(tituloObra) + "/" + idCorto;
+
+           if(!string.IsNullOrEmpty(descObra)){
+               descObra =  Es.Riam.Util.UtilCadenas.EliminarHtmlDeTexto(HttpUtility.HtmlDecode(descObra));
+           }           
+                <div class="wrap">
+                    <h2>@Model.Title</h2>
+                    <div class="cols">
+                        <figure>
+                            <img src="@Html.GetBaseUrlContent()/@imagenObra" alt="@tituloObra">
+                        </figure>
+                        <div>
+                            <h3>@tituloObra</h3>
+                            <p class="subtit">@nombreAutora</p>
+                            <p class="subtit">(@anio)</p>
+                            <br>
+                            <p>@TruncateAtWord(descObra,800)</p>
+                            <a href="@urlObra" class="botones-centrados">@Html.Translate("VERFICHAOBRA")</a>
+                        </div>
+                    </div>
+                </div>
+           
+                
+        }
+}
+
+@functions
+{
+    public static string TruncateAtWord(string value, int length)
+    {
+        if (value == null || value.Trim().Length <= length)
+            return value;
+
+        int index = value.Trim().LastIndexOf(" ");
+
+        while ((index + 3) > length)
+            index = value.Substring(0, index).Trim().LastIndexOf(" ");
+
+        if (index > 0)
+            return value.Substring(0, index) + "...";
+
+        return value.Substring(0, length - 3) + "...";
+    }
+}

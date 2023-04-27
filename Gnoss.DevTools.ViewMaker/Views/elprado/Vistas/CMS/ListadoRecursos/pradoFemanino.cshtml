@@ -1,0 +1,11 @@
+﻿@model CMSComponentResourceList
+@if (Model != null && Model.ResourceList.Count > 0)
+{
+	<h2><span>@Model.Title</span></h2>
+	<div class="rec">
+		@foreach (ResourceModel fichaModel in Model.ResourceList)
+		{
+			@Html.PartialView(Model.ViewNameResources, fichaModel)
+		}	
+	</div>
+}

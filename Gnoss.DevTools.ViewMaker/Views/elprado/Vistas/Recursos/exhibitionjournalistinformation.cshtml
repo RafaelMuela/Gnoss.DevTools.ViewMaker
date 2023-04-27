@@ -1,0 +1,368 @@
+@model ResourceViewModel
+
+@{
+    ResourceModel fichaRecurso = Model.Resource;
+    ResourceModel.ActionsModel acciones = fichaRecurso.Actions;
+
+    string idiomaNav = ViewBag.UtilIdiomas.LanguageCode;
+    ResourceModel FichaDocumento = Model.Resource;
+    SemanticResourceModel semCmsModel = Model.SemanticFrom;
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+
+    string titulo = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#title");
+    string antetitulo = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#preTitle");
+    string descripcion = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#description");
+    string fechaUpdate = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#updateDate");
+    string fechaOculta = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hideContentDate");
+    SemanticPropertyModel propImgsInst = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hasInstitutionalImages");
+    SemanticPropertyModel propFicheros = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hasFiles");
+
+    string fechaFormateada = string.Empty;
+    if(!string.IsNullOrEmpty(fechaUpdate))
+    {
+        fechaFormateada = ObtenerFechaFormateada(fechaUpdate, "f", idiomaNav).Replace(" 0:00", "");
+        if (!string.IsNullOrEmpty(fechaFormateada) && idiomaNav.Equals("es"))
+        {
+            fechaFormateada = string.Concat(fechaFormateada.Substring(0, 1).ToUpper(), fechaFormateada.Substring(1));
+        }
+    }
+}
+
+@functions
+{
+    public class Fichero
+    {
+        public Fichero(string pNombre, string pEnlace, string pExtension, int pOrden, bool pEsOculto)
+        {
+            this.Nombre = pNombre;
+            this.Enlace = pEnlace;
+            this.Orden = pOrden;
+            this.EsOculto = pEsOculto;
+			this.Extension = pExtension;
+        }
+
+        public string Nombre { get; set; }
+        public string Enlace { get; set; }
+        public int Orden { get; set; }
+        public bool EsOculto { get; set; }    
+		public string Extension { get; set; }		
+    }
+    
+    public class ImagenInstitucional
+    {
+        public ImagenInstitucional(string pNombre, string pEnlaceLow, string pEnlaceHigh, int pOrden)
+        {
+            this.Nombre = pNombre;
+            this.EnlaceLow = pEnlaceLow;
+            this.EnlaceHigh = pEnlaceHigh;
+            this.Orden = pOrden;          
+        }
+
+        public string Nombre { get; set; }
+        public string EnlaceLow { get; set; }
+        public string EnlaceHigh { get; set; }
+        public int Orden { get; set; }        
+    }
+
+    private static int[] ObtenerFechaNormalizada(string pFecha)
+    {
+        int[] fechaNormalizada = null;
+
+        try
+        {
+            if (!string.IsNullOrEmpty(pFecha) && pFecha.Length >= 8)
+            {
+                if (pFecha.Contains("/"))
+                {
+                    fechaNormalizada = new int[3];
+                    //dia
+                    fechaNormalizada[0] = Int32.Parse(pFecha.Substring(0, 2));
+                    //mes
+                    fechaNormalizada[1] = Int32.Parse(pFecha.Substring(3, 2));
+                    //anio
+                    fechaNormalizada[2] = Int32.Parse(pFecha.Substring(6, 4));
+                }
+                else if (pFecha.Length == 14)
+                {
+                    fechaNormalizada = new int[5];
+                    //dia
+                    fechaNormalizada[0] = Int32.Parse(pFecha.Substring(6, 2));
+                    //mes
+                    fechaNormalizada[1] = Int32.Parse(pFecha.Substring(4, 2));
+                    //anio
+                    fechaNormalizada[2] = Int32.Parse(pFecha.Substring(0, 4));
+                    //hora
+                    fechaNormalizada[3] = Int32.Parse(pFecha.Substring(8, 2));
+                    //minutos
+                    fechaNormalizada[4] = Int32.Parse(pFecha.Substring(10, 2));
+                }
+            }
+        }
+        catch (FormatException e)
+        {
+            fechaNormalizada = null;
+        }
+
+        return (fechaNormalizada);
+    }   
+
+    private static string ObtenerFechaFormateada(string pFecha, string pFormato, string pIdioma = null)
+    {
+        string fechaFormateada = string.Empty;
+        int[] fechaNormalizada = ObtenerFechaNormalizada(pFecha);
+
+        if (fechaNormalizada != null && fechaNormalizada.Count() == 3)
+        {
+            int dia = fechaNormalizada[0];
+            int mes = fechaNormalizada[1];
+            int anio = fechaNormalizada[2];
+
+            if (anio != null && mes != null && dia != null)
+            {
+                DateTime fecha = new DateTime(anio, mes, dia);
+
+                if (!string.IsNullOrEmpty(pIdioma))
+                {
+                    System.Globalization.CultureInfo cu = new System.Globalization.CultureInfo(pIdioma);
+                    fechaFormateada = fecha.ToString(pFormato, cu);
+                }
+                else
+                {
+                    fechaFormateada = fecha.ToString(pFormato);
+                }
+            }
+        }
+        else if (fechaNormalizada != null && fechaNormalizada.Count() == 5)
+        {
+            int dia = fechaNormalizada[0];
+            int mes = fechaNormalizada[1];
+            int anio = fechaNormalizada[2];
+            int hora = fechaNormalizada[3];
+            int minuto = fechaNormalizada[4];
+
+            if (anio != null && mes != null && dia != null && hora != null && minuto != null)
+            {
+                DateTime fecha = new DateTime(anio, mes, dia, hora, minuto, 0);
+
+                if (!string.IsNullOrEmpty(pIdioma))
+                {
+                    System.Globalization.CultureInfo cu = new System.Globalization.CultureInfo(pIdioma);
+                    fechaFormateada = fecha.ToString(pFormato, cu);
+                }
+                else
+                {
+                    fechaFormateada = fecha.ToString(pFormato);
+                }
+            }
+        }
+
+        if (string.IsNullOrEmpty(fechaFormateada))
+        {
+            fechaFormateada = pFecha;
+        }
+
+        return (fechaFormateada);
+    }
+}
+
+@{
+    //Convertir los fichero a objeto para poder ordenarlos
+    List<Fichero> listaFicheros = new List<Fichero>();    
+    if (propFicheros != null && propFicheros.PropertyValues != null && propFicheros.PropertyValues.Count() > 0)
+    {       
+        foreach (SemanticPropertyModel.PropertyValue propPdf in propFicheros.PropertyValues)
+        {                     
+            string nombrePdf = propPdf.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#fileName");
+            string orden = propPdf.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#order");
+            string oculto = propPdf.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hide");
+            SemanticPropertyModel enlacePdf = propPdf.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#file");
+
+            bool estaOculto = false;
+            if (oculto.Equals(@Html.GetText("COMMON", "SI")))
+            {
+                estaOculto = true;
+            }
+            
+            if(enlacePdf!=null)
+            {
+				string nombreFichero=enlacePdf.FirstPropertyValue.Value;
+				string extension="PDF";
+				if(nombreFichero.Contains("."))
+				{
+					extension=nombreFichero.Substring(nombreFichero.LastIndexOf(".")+1).ToUpper();
+				}
+				if(string.IsNullOrEmpty(nombrePdf))
+				{
+					nombrePdf=nombreFichero;
+				}
+                Fichero fichero = new Fichero(nombrePdf, enlacePdf.FirstPropertyValue.DownloadUrl,extension, Convert.ToInt16(orden), estaOculto);
+                listaFicheros.Add(fichero);
+            }
+        }
+        listaFicheros = listaFicheros.OrderBy(f => f.Orden).ToList();
+    }
+
+    //Convertir las imágenes institucionales a objeto para poder ordenarlas
+    List<ImagenInstitucional> listaImagenesInst = new List<ImagenInstitucional>();
+    if (propImgsInst != null && propImgsInst.PropertyValues != null && propImgsInst.PropertyValues.Count() > 0)
+    {
+        foreach (SemanticPropertyModel.PropertyValue propImg in propImgsInst.PropertyValues)
+        {
+            string imgTitulo = propImg.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#imageTitle");
+            string imgLow = propImg.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#imageLowResolution");
+            string imgHigh = propImg.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#imageHighResolution");
+            string orden = propImg.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#order");
+
+            ImagenInstitucional imagen = new ImagenInstitucional(imgTitulo, imgLow, imgHigh, Convert.ToInt16(orden));
+            listaImagenesInst.Add(imagen);
+        }
+        listaImagenesInst = listaImagenesInst.OrderBy(f => f.Orden).ToList();
+    }   
+}
+<section class="res-basica no-nav">	
+    <div class="res-cont full">
+        @if (!string.IsNullOrEmpty(antetitulo))
+        {
+            <strong class="antetitulo">@antetitulo</strong>
+        }
+        else
+        {
+            <strong class="rastro">@Html.Translate("ACCESOPROFESIONALES")</strong>
+        }
+
+        <div class="res-home">
+            <h1 class="res-main">
+                @if (!string.IsNullOrEmpty(titulo))
+                {
+                    <span class="res-obra" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#title"))>
+                        <em>@Html.Raw(@titulo)</em>
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(fechaFormateada))
+                {
+                    <span class="res-fecha" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#updateDate"))>@fechaFormateada</span>
+                }
+            </h1>
+            @if (!string.IsNullOrEmpty(descripcion))
+            {
+                <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#descripion"))><p>@Html.Raw(@descripcion)</p></span>
+            }
+        </div>
+
+        <div class="res-normal">
+            @{
+                DateTime fechaActual = DateTime.Now;
+                DateTime fechaDeOcultacion = DateTime.Now;
+
+                if (idiomaNav == "es")
+                {
+                    fechaDeOcultacion = Convert.ToDateTime(fechaOculta);
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(fechaOculta))
+                    {
+                        string[] fechaSplit = fechaOculta.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
+                        fechaOculta = fechaSplit[1] + "/" + fechaSplit[0] + "/" + fechaSplit[2];
+                        fechaDeOcultacion = Convert.ToDateTime(fechaOculta);
+                    }
+                }
+
+                int diferenciaFechas = DateTime.Compare(fechaDeOcultacion, fechaActual);
+
+                <!-- FICHEROS PDFS -->
+
+                if (listaFicheros != null && listaFicheros.Count() > 0)
+                {
+                    <ul class="descargas" @Html.Raw(semCmsModel.GetRDFAProperty(propFicheros))>
+                        @foreach (Fichero fichero in listaFicheros)
+                        {
+                            if (diferenciaFechas >= 0 || acciones.Edit)
+                            {
+                                <li>
+                                    <a href="@fichero.Enlace" class="boton-descarga"><span class="ico" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#fileName"))></span>@fichero.Extension</a>
+                                    <a href="@fichero.Enlace">@Html.Raw(@fichero.Nombre)</a>
+                                </li>
+                            }
+                            else
+                            {
+                                if (!fichero.EsOculto)
+                                {
+                                    <li>
+                                        <a href="@fichero.Enlace" class="boton-descarga"><span class="ico" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#fileName"))></span>@fichero.Extension</a>
+                                        <a href="@fichero.Enlace">@Html.Raw(@fichero.Nombre)</a>
+                                    </li>
+                                }
+                            }
+                        }
+                    </ul>
+                }
+
+
+                //Comprobamos si el usuario tiene acceso a las imágenes en Alta resolución
+                bool accesoAltaResolucion = true;
+                if (((List<KeyValuePair<string, string>>)(ViewBag.ListaInputHidden)).Exists(x => x.Key == "inpt_nombreGruposPerfilID"))
+                {
+                    List<string> nombresCortos = new List<string>(((List<KeyValuePair<string, string>>)(ViewBag.ListaInputHidden)).Find(x => x.Key == "inpt_nombreGruposPerfilID").Value.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                    if (nombresCortos.Contains("p1-blog"))
+                    {
+                        accesoAltaResolucion = false;
+                    }
+                }
+                <!-- IMÁGENES INSTITUCIONALES -->
+
+                if (diferenciaFechas >= 0 || acciones.Edit)
+                {
+                    if (listaImagenesInst != null && listaImagenesInst.Count() > 0)
+                    {
+                        foreach (ImagenInstitucional img in listaImagenesInst)
+                        {
+                            <div @Html.Raw(semCmsModel.GetRDFAProperty(propImgsInst))>
+                                <figure>
+                                    <img src="@ViewBag.BaseUrlContent/@img.EnlaceLow" alt="@img.Nombre" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hasInstitutionalImages@@@http://museodelprado.es/ontologia/pradomuseum.owl#imageLowResolution"))>
+                                    <figcaption>
+                                        <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hasInstitutionalImages@@@http://museodelprado.es/ontologia/pradomuseum.owl#imageTitle"))><p>@img.Nombre</p></span>
+                                    </figcaption>
+                                </figure>
+                                <ul class="descargas">
+                                    <li>
+                                        @if (accesoAltaResolucion)
+                                        {
+                                            <a href="@ViewBag.BaseUrlContent/@img.EnlaceHigh" class="boton-descarga" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hasInstitutionalImages@@@http://museodelprado.es/ontologia/pradomuseum.owl#imageHighResolution"))><span class="ico"></span>JPG</a>
+                                            <a href="@ViewBag.BaseUrlContent/@img.EnlaceHigh">@img.Nombre</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@ViewBag.BaseUrlContent/@img.EnlaceLow" class="boton-descarga" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hasInstitutionalImages@@@http://museodelprado.es/ontologia/pradomuseum.owl#imageLowResolution"))><span class="ico"></span>JPG</a>
+                                            <a href="@ViewBag.BaseUrlContent/@img.EnlaceLow">@img.Nombre</a>
+                                        }
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                    }
+                }
+            }
+            <!--<p><strong>Advertencia legal</strong>: Las imágenes que va a descargar se ceden, libres de derechos, excepto mención expresa del copyright sobre las mismas, exclusivamente para ilustrar contenidos informativos relacionados con la exposición y/o actividad de la que forman parte. Prohibida su reproducción total o parcial con una finalidad distinta a la expresada.</p>-->
+            <p><strong>@Html.Translate("ADVERTENCIALEGAL")</strong>: @Html.Translate("ADVERTENCIALEGALTEXTO")</p>
+             <a class="ico-rdf"href="@Html.GetURLRDF()">RDF</a>
+        </div>
+
+    </div>		
+</section>	
+
+@{   
+    if (acciones.Edit)
+    {
+		<a class="botones-centrados bc-estandar hv-estandar" href="@Model.UrlEdit">
+            <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "EDITAR")</span>
+		</a>
+		<a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
+            <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")</span>
+		</a>
+		<div class="confirmarBorrar oculto">@Html.Translate("PREGUNTAESTASSEGURO") 
+			<a onclick="AccionRecurso_Eliminar_Aceptar('@fichaRecurso.ListActions.UrlDelete', '@fichaRecurso.Key')">@Html.GetText("COMMON", "SI")</a> 
+			<a onclick="$('.preguntarBorrar').show();$('.confirmarBorrar').hide();">@Html.GetText("COMMON", "NO")</a>
+		</div>
+    }	
+}		

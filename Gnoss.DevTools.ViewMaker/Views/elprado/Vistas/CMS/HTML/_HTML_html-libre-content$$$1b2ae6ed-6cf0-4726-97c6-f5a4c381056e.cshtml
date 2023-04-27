@@ -1,0 +1,8 @@
+
+@model CMSComponentHTML
+@if(Model != null)
+{
+    string dateHoy = DateTime.UtcNow.ToString("yyyyMMdd");
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+	@Html.Raw(Model.HTML.Replace("URL_CONTENT", urlPersonalizacion).Replace("VERSIONGNOSS",dateHoy))    	
+}                               

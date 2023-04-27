@@ -1,0 +1,190 @@
+@model ResourceModel    
+@if (Model != null)
+{     
+	string idiomaNav = ViewBag.UtilIdiomas.LanguageCode;
+	switch (Model.RdfType)
+    {
+		case "post":
+			string mensaje=Model.Description;
+			if(mensaje.Length>130)
+			{
+				mensaje=mensaje.Substring(0,130)+"...";
+			}
+			string enlaceKey="sioc:link";
+			string enlace="";
+			string nombreAutorKey="sioc:creator_of";
+			string nombreAutor="";
+			string fechaPublicacionKey="dcterms:created";
+			DateTime? fechaPublicacion=null;
+			string fechaPublicacionTexto="";
+            string tipoRedSocialKey = "dce:type";
+            string tipoRedSocial = "";
+            string imagenKey = "pm:image";
+            string imagen = "";
+
+            string avatar = Model.Title;
+            if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+            {
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(imagenKey))
+                {
+                    imagen = Model.ViewSettings.SemanticProperties[imagenKey][0].Name;
+                }
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(enlaceKey))
+                {
+                    enlace = Model.ViewSettings.SemanticProperties[enlaceKey][0].Name;
+                }
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(nombreAutorKey))
+                {
+                    nombreAutor = Model.ViewSettings.SemanticProperties[nombreAutorKey][0].Name;
+                }
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(tipoRedSocialKey))
+                {
+                    tipoRedSocial = Model.ViewSettings.SemanticProperties[tipoRedSocialKey][0].Name;
+                }
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaPublicacionKey))
+                {
+                    fechaPublicacion = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaPublicacionKey][0].Name);
+                }
+                if (fechaPublicacion.HasValue)
+                {
+                    // Difference in days, hours, and minutes.
+                    TimeSpan ts = DateTime.UtcNow - fechaPublicacion.Value;
+
+                    if (ts.TotalMinutes < 60)
+                    {
+                        fechaPublicacionTexto = ts.Minutes + "m";
+                    }
+                    else if (ts.TotalHours < 24)
+                    {
+                        fechaPublicacionTexto = ts.Hours + "h " + ts.Minutes + "m";
+                    }
+                    else if (ts.TotalDays < 3)
+                    {
+                        if (idiomaNav == "es")
+                        {
+                            fechaPublicacionTexto = "hace " + ts.Days;
+                            if (ts.Days > 1)
+                            {
+                                fechaPublicacionTexto += " días";
+                            }
+                            else
+                            {
+                                fechaPublicacionTexto += " día";
+                            }
+                        }
+                        else
+                        {
+                            fechaPublicacionTexto = ts.Days.ToString();
+                            if (ts.Days > 1)
+                            {
+                                fechaPublicacionTexto += " days ago";
+                            }
+                            else
+                            {
+                                fechaPublicacionTexto += " day ago";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        System.Globalization.CultureInfo cu = new System.Globalization.CultureInfo(idiomaNav);
+                        string mes = fechaPublicacion.Value.ToString("MMMM", cu);
+                        string dia = fechaPublicacion.Value.ToString("dd");
+
+                        if (idiomaNav == "es")
+                        {
+                            fechaPublicacionTexto = dia + " de " + mes;
+                        }
+                        else
+                        {
+                            fechaPublicacionTexto = mes + " " + dia;
+                        }
+                    }
+                }
+            }
+
+
+            if (tipoRedSocial == "instagram")
+            {
+                <div class="item @tipoRedSocial" resourceid="@Model.Key">
+                    <div class="time-ago">@fechaPublicacionTexto</div>
+                    <div class="icono">@Html.Translate("INSTAGRAM")</div>
+                    <h2>@Html.Translate("INSTAGRAM")</h2>
+                    <a href="@enlace">
+                        <figure>
+                            @if (!string.IsNullOrEmpty(imagen))
+                            {
+                                if (imagen.Contains("imagenes"))
+                                {
+                                    string imagenContent = ViewBag.BaseURLContent + "/" + imagen;
+                                    <img src="@imagenContent">
+                                }
+                                else
+                                {
+                                    <img src="@imagen">
+                                }
+
+                            }
+
+                            <figcaption class="trunca-texto">
+                                <p>
+                                    @mensaje
+                                </p>
+                            </figcaption>
+                        </figure>
+                    </a>
+                </div>
+            }
+            else if (tipoRedSocial == "tiktok")
+            {
+                <div class="item @tipoRedSocial" resourceid="@Model.Key">
+                    <div class="time-ago">@fechaPublicacionTexto</div>
+                    <div class="icono">@Html.Translate("TIKTOK")</div>
+                    <h2>@Html.Translate("TIKTOK")</h2>
+                    <a href="@enlace">
+                        <figure>
+                            @if (!string.IsNullOrEmpty(imagen))
+                            {
+                                if (imagen.Contains("imagenes"))
+                                {
+                                    string imagenContent = ViewBag.BaseURLContent + "/" + imagen;
+                                    <img src="@imagenContent">
+                                }
+                                else
+                                {
+                                    <img src="@imagen">
+                                }
+
+                            }
+
+                            <figcaption class="trunca-texto">
+                                <p>
+                                    @mensaje
+                                </p>
+                            </figcaption>
+                        </figure>
+                    </a>
+                </div>
+            }
+            else
+            {
+<div class="item @tipoRedSocial" resourceid="@Model.Key">
+    <a href="@enlace">
+        <div class="time-ago">@fechaPublicacionTexto</div>
+        <div class="icono">@Html.Translate("Twitter")</div>
+        <p>@mensaje</p>
+    </a>
+    <a href="@enlace">
+        <figure class="avatar">
+            <img alt="avatar" src="@avatar">
+            <figcaption>
+                @nombreAutor
+        </figcaption>
+    </figure>
+    </a>
+
+</div>
+            }
+            break;
+	}	
+}

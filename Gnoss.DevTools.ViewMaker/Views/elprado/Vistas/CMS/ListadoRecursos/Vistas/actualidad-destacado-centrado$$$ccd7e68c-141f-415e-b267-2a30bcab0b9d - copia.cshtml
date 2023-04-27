@@ -1,0 +1,304 @@
+@*[security|||shared/_fichaactualidad.cshtml|||elprado]*@
+@model ResourceModel    
+@if (Model != null)
+{     
+    string idiomaNav= ViewBag.UtilIdiomas.LanguageCode;    	
+	string imagenClave="ecidoc:p65_E36_shows_visual_item";		
+	string imagenValor="";
+	string fechaInicioRegistroClave="pm:registrationDate@@@pm:startDate";			
+	DateTime? fechaInicioRegistroValor=null;
+	string fechaFinRegistroClave="pm:registrationDate@@@pm:endDate";			
+	DateTime? fechaFinRegistroValor=null;
+	string fechaInicioActividadClave="pm:activityDate@@@pm:startDate";			
+	DateTime? fechaInicioActividadValor=null;
+	string fechaFinActividadClave="pm:activityDate@@@pm:endDate";			
+	DateTime? fechaFinActividadValor=null;		
+	string fechaTextoActividadClave="pm:textDate";
+	string fechaTextoActividadValor="";
+	string captionImageClave="pm:caption";
+	string captionImageValor="";
+	string tituloClave="ecidoc:p1_E41_p102_has_title";
+	string tituloValor="";
+					
+	
+	string claveTipoPublicoActividad = "cidoc:p2_has_type@@@pm:activityNode@@@skos2:prefLabel||cidoc:p2_has_type@@@pm:activityNode@@@skos2:broader||cidoc:p2_has_type@@@pm:activityNode@@@dce:identifier";
+	HashSet<string> tipoPublicoActividad = new HashSet<string>();
+
+	string claveTipoActividad = "ecidoc:p2_has_type_activity@@@multiLan:textValue";
+	string tipoActividad = "";
+	
+	
+	
+	string bicentenarioClave="pm:bicentenario";
+	string claveTipoPrograma = "ecidoc:p2_has_type_program";
+	bool bicentenarioValor=false;
+	
+	string ticketURLKey="pm:ticketURL";
+	string ticketURLValor="";
+	
+	if (Model.ViewSettings!=null && Model.ViewSettings.SemanticProperties!=null )
+	{
+		if(Model.ViewSettings.SemanticProperties.ContainsKey(imagenClave))
+		{
+			imagenValor=ViewBag.BaseURLContent+"/"+Model.ViewSettings.SemanticProperties[imagenClave][0].Name;
+		}  
+		if(Model.ViewSettings.SemanticProperties.ContainsKey(fechaInicioRegistroClave))
+		{
+			fechaInicioRegistroValor=Html.GetDate(Model.ViewSettings.SemanticProperties[fechaInicioRegistroClave][0].Name.ToLower());
+		} 
+		if(Model.ViewSettings.SemanticProperties.ContainsKey(fechaFinRegistroClave))
+		{
+			fechaFinRegistroValor=Html.GetDate(Model.ViewSettings.SemanticProperties[fechaFinRegistroClave][0].Name.ToLower());
+		} 
+		if(Model.ViewSettings.SemanticProperties.ContainsKey(fechaInicioActividadClave))
+		{
+			fechaInicioActividadValor=Html.GetDate(Model.ViewSettings.SemanticProperties[fechaInicioActividadClave][0].Name.ToLower());
+		} 
+		if(Model.ViewSettings.SemanticProperties.ContainsKey(fechaFinActividadClave))
+		{
+			fechaFinActividadValor=Html.GetDate(Model.ViewSettings.SemanticProperties[fechaFinActividadClave][0].Name.ToLower());
+		}		
+		if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoActividad))
+		{
+			tipoActividad = Model.ViewSettings.SemanticProperties[claveTipoActividad][0].Name;
+		}
+		if (Model.ViewSettings.SemanticProperties.ContainsKey(ticketURLKey))
+		{
+			ticketURLValor = Model.ViewSettings.SemanticProperties[ticketURLKey][0].Name;
+		}
+		if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoPrograma))
+		{
+			foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveTipoPrograma])
+			{
+				if(propiedadSemantica.Name=="http://museodelprado.es/items/activityprogramtype_7")
+				{
+					bicentenarioValor=true;
+				}
+			}
+		}
+		if (Model.ViewSettings.SemanticProperties.ContainsKey(bicentenarioClave))
+		{
+			bicentenarioValor = bool.Parse(Model.ViewSettings.SemanticProperties[bicentenarioClave][0].Name);
+		}
+		
+		if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoPublicoActividad))
+		{
+			//Nombre, padre, identificador
+			List<string> listaPadres = new List<string>();
+			Dictionary<string, string> actividadIdentificadorNombre = new Dictionary<string, string>();
+			foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveTipoPublicoActividad])
+			{
+				string[] propMateria = propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+				if (propMateria.Length == 3)
+				{
+					string nombre = propMateria[0];
+					string padre = propMateria[1];
+					if (padre.Contains("_"))
+					{
+						padre = padre.Substring(padre.IndexOf("_") + 1);
+					}
+					if(string.IsNullOrEmpty(padre) && !string.IsNullOrEmpty(nombre))
+					{
+						tipoPublicoActividad.Add(Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(nombre));
+					}
+				}
+			}
+		}		
+		if(Model.ViewSettings.SemanticProperties.ContainsKey(fechaTextoActividadClave))
+		{
+			fechaTextoActividadValor=Model.ViewSettings.SemanticProperties[fechaTextoActividadClave][0].Name;
+		} 
+		if(Model.ViewSettings.SemanticProperties.ContainsKey(captionImageClave))
+		{
+			captionImageValor=Model.ViewSettings.SemanticProperties[captionImageClave][0].Name;
+		} 
+		if(Model.ViewSettings.SemanticProperties.ContainsKey(tituloClave))
+		{
+			tituloValor=Model.ViewSettings.SemanticProperties[tituloClave][0].Name;
+		} 
+	}	
+	
+	
+	
+	
+	@*
+	1) Inscripción abierta
+	2) Inscripción xx-xx-xxxx
+	3) Próxima inscripción  Va a tener inscripción pero aún no sabemos la fecha (MÁS DE DOS AÑOS)
+	4) Inscripción cerrada  Cuando la actividad no ha empezado pero sí ha terminado la inscripción.
+	5) En curso (sin etiqueta de estado). 
+	6) Futuras sin fecha de inscripción (sin etiqueta de estado).
+	7) Actividades sin fecha (sin etiqueta de estado).
+	8) Pasadas (Mantener la clase ‘old’).*@
+	string clase="item programa-actividades ";
+	string estado="";
+	if (fechaInicioRegistroValor.HasValue && fechaFinRegistroValor.HasValue && fechaInicioRegistroValor.Value < DateTime.Now && fechaFinRegistroValor.Value > DateTime.Now)
+	{
+		if (!string.IsNullOrEmpty(ticketURLValor))
+		{
+			estado = Html.Translate("VENTADEENTRADAS");
+		}else
+		{
+			estado = Html.Translate("INSCRIPCIONABIERTA");
+		}
+	}
+	else if (fechaInicioRegistroValor.HasValue && fechaInicioRegistroValor.Value > DateTime.Now.AddYears(2))
+	{
+		estado = Html.Translate("PROXIMAINSCRIPCION");						
+	}
+	else if (fechaInicioRegistroValor.HasValue && fechaInicioRegistroValor.Value > DateTime.Now)
+	{
+		if (!string.IsNullOrEmpty(ticketURLValor))
+		{
+			estado = Html.Translate("ENTRADAS") + " " + fechaInicioRegistroValor.Value.ToString("d");
+		}else
+		{
+			estado = Html.Translate("INSCRIPCION") + " " + fechaInicioRegistroValor.Value.ToString("d");
+		}
+	}
+	else if (fechaFinRegistroValor.HasValue && fechaInicioActividadValor.HasValue && fechaFinRegistroValor.Value < DateTime.Now && fechaInicioActividadValor.Value > DateTime.Now)
+	{
+		estado = Html.Translate("INSCRIPCIONCERRADA");
+	}else if (fechaInicioActividadValor.HasValue && fechaFinActividadValor.HasValue && fechaInicioActividadValor.Value < DateTime.Now && fechaFinActividadValor.Value > DateTime.Now)
+	{
+		estado = "";
+	}
+	else if (fechaInicioActividadValor.HasValue && !fechaInicioRegistroValor.HasValue && fechaInicioActividadValor.Value > DateTime.Now)
+	{
+		estado = "";
+	}
+	else if (!fechaInicioActividadValor.HasValue)
+	{
+		estado = "";
+	}else if( fechaFinActividadValor.HasValue && fechaFinActividadValor.Value < DateTime.Now)
+	{
+		//clase+=" old";
+	}	
+	
+	
+	string classSlide="texto";
+	string imageManchetaValor="";
+	if(Model.RdfType=="pmexhibition")
+	{
+		string cssManchetaClave="pm:highlightWhatsonDate@@@pm:cssClass";
+		string imageClave="pm:highlightWhatsonDate@@@pm:image";
+		string imageManchetaClave="pm:highlightWhatsonDate@@@pm:imageMancheta";
+		string imageManchetaClaveEn="pm:highlightWhatsonDate@@@pm:imageManchetaEn";
+		
+		if (Model.ViewSettings!=null && Model.ViewSettings.SemanticProperties!=null )
+		{
+			if(Model.ViewSettings.SemanticProperties.ContainsKey(cssManchetaClave))
+			{
+				classSlide = Model.ViewSettings.SemanticProperties[cssManchetaClave][0].Name;
+			}  
+			if(Model.ViewSettings.SemanticProperties.ContainsKey(imageClave))
+			{
+				imagenValor=ViewBag.BaseURLContent+"/"+Model.ViewSettings.SemanticProperties[imageClave][0].Name;
+			}  
+			if(Model.ViewSettings.SemanticProperties.ContainsKey(imageManchetaClave))
+			{
+				imageManchetaValor=ViewBag.BaseURLContent+"/"+Model.ViewSettings.SemanticProperties[imageManchetaClave][0].Name;
+			}  
+			if(idiomaNav=="en" && Model.ViewSettings.SemanticProperties.ContainsKey(imageManchetaClaveEn))
+			{
+				imageManchetaValor=ViewBag.BaseURLContent+"/"+Model.ViewSettings.SemanticProperties[imageManchetaClaveEn][0].Name;
+			} 
+		}
+	}
+	if(Model.RdfType=="museumrnews")
+	{
+		string imageClave="pm:highlightWhatsonDate@@@pm:image";
+		string fechaClave="rnews:datePublished";
+		
+		if (Model.ViewSettings!=null && Model.ViewSettings.SemanticProperties!=null )
+		{			
+			if(Model.ViewSettings.SemanticProperties.ContainsKey(imageClave))
+			{
+				imagenValor=ViewBag.BaseURLContent+"/"+Model.ViewSettings.SemanticProperties[imageClave][0].Name;
+			} 
+			if(Model.ViewSettings.SemanticProperties.ContainsKey(fechaClave))
+			{
+				DateTime? fecha=Html.GetDate(Model.ViewSettings.SemanticProperties[fechaClave][0].Name.ToLower());
+				if(fecha.HasValue)
+				{
+					fechaTextoActividadValor=fecha.Value.ToString("D");
+				}
+			} 
+		}
+	}
+	
+	<div class="slide @classSlide">
+		<figure>
+			@if (!string.IsNullOrEmpty(captionImageValor))
+			{
+				<div class="imageDesc">@Html.Raw(captionImageValor)</div>
+			}
+			<a href="@Model.CompletCardLink">			
+				@if(!string.IsNullOrEmpty(estado))
+				{
+					<div class="tag">@estado</div>								
+				}		
+				@if(bicentenarioValor)
+				{
+					<img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/[%%%_PROYECTO_ID_%%%]/ElPrado/img/svg/bicentenario_logo_cuadrado.svg" width="150" height="150" alt="Museo del Prado 200 años" class="logo-200" onclick="location.href='@Html.Translate("URL_BICENTENARIO")'; return false;">
+				}				
+				<img src="@imagenValor.Replace("imagenes/documentos/","imagenes/Documentos/")" alt="Exposición. @Model.Title">							
+				@if(!string.IsNullOrEmpty(imageManchetaValor))				
+				{
+					<figcaption>
+						<img src="@imageManchetaValor.Replace("imagenes/documentos/","imagenes/Documentos/")" alt="Exposición. @Model.Title" >		
+					</figcaption>
+				}else
+				{				
+					<figcaption>	
+						@if(Model.RdfType=="grant")
+						{
+							<strong class="categoria">@Model.RdfTypeName</strong>
+						}else if(Model.RdfType=="museumrnews")
+						{
+							<strong class="categoria">@Html.Translate("NOTICIAS")</strong>
+						}else
+						{
+							int num=0;						
+							foreach (string tipopublico in tipoPublicoActividad)
+							{
+								if(num>0)
+								{
+									<strong class="categoria"> · @tipopublico</strong>
+								}else
+								{
+									<strong class="categoria">@tipopublico</strong>
+								}
+								num++;
+							}
+							if (!string.IsNullOrEmpty(tipoActividad))
+							{
+								if(num>0)
+								{
+									<strong class="categoria"> · @tipoActividad</strong>
+								}else
+								{
+									<strong class="categoria">@tipoActividad</strong>
+								}
+								num++;
+							}
+						}	
+						@if(!string.IsNullOrEmpty(tituloValor))
+						{
+							<h2>@Html.Raw(tituloValor)</h2>
+						}else
+						{						
+							<h2>@Html.Raw(Model.Title)</h2>
+						}
+						@if(!string.IsNullOrEmpty(fechaTextoActividadValor))
+						{
+						  <h3>@Html.Raw(fechaTextoActividadValor)</h3>
+						}
+					</figcaption>
+				}
+			</a>
+		</figure>				
+	</div>
+	
+	
+}

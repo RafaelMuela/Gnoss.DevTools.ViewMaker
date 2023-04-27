@@ -1,0 +1,2572 @@
+@model ResourceViewModel
+@{ CommunityModel Comunidad = Html.GetComunidad();
+    SemanticResourceModel semCmsModel = Model.SemanticFrom;
+    ResourceModel FichaDocumento = Model.Resource;
+    ResourceModel.ActionsModel acciones = FichaDocumento.Actions;
+    string urlComunidad = Html.GetComunidad().Url;
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+    string idioma = ViewBag.UtilIdiomas.LanguageCode;
+    ViewBag.TituloPagina = Es.Riam.Util.UtilCadenas.EliminarHtmlDeTexto(ViewBag.TituloPagina);
+
+
+    Dictionary<string, string> mappingUrlProgram = new Dictionary<string, string>();
+    mappingUrlProgram.Add("http://museodelprado.es/items/activityProgramType_1", Html.Translate("URL_ACTIVIDADES_ACCIONCULTURAL"));
+    mappingUrlProgram.Add("http://museodelprado.es/items/activityProgramType_2", Html.Translate("URL_ACTIVIDADES_COMUNIDAD"));
+    mappingUrlProgram.Add("http://museodelprado.es/items/activityProgramType_3", Html.Translate("URL_ACTIVIDADES_ESTUDIANTESYPROFESORES"));
+    mappingUrlProgram.Add("http://museodelprado.es/items/activityProgramType_4", Html.Translate("URL_ACTIVIDADES_PROGRAMASPUBLICOS"));
+    mappingUrlProgram.Add("http://museodelprado.es/items/activityProgramType_5", Html.Translate("URL_ACTIVIDADES_PROYECTOS"));
+    mappingUrlProgram.Add("http://museodelprado.es/items/activityProgramType_6", Html.Translate("URL_ACTIVIDADES_ESCUELADELPRADO"));
+    mappingUrlProgram.Add("http://museodelprado.es/items/activityProgramType_7", Html.Translate("URL_ACTIVIDADES_BICENTENARIO"));
+    mappingUrlProgram.Add("http://museodelprado.es/items/activityProgramType_9", Html.Translate("URL_ACTIVIDADES_ELPRADOCONTIGO"));
+    Activity actividad = new Activity(semCmsModel, FichaDocumento, idioma, Html, mappingUrlProgram);
+
+    SemanticPropertyModel interactivos = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#interactiveItem");
+    bool mostrarInteractivosCarrusel = false;
+    if (interactivos != null && interactivos.PropertyValues != null && interactivos.PropertyValues.Count > 0)
+    {
+        foreach (SemanticPropertyModel.PropertyValue interactivoItem in interactivos.PropertyValues)
+        {
+            SemanticPropertyModel interactivo = interactivoItem.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#interactive");
+            if (interactivo != null && interactivo.PropertyValues != null && interactivo.PropertyValues.Count > 0)
+            {
+                mostrarInteractivosCarrusel = true;
+            }
+        }
+    } @*if(Html.GetComunidad().Url.Contains("www.museodelprado.es"))
+        {
+            <link media="all" type="text/css" rel="stylesheet" href="[%%%_URL_PERSONALIZACION_%%%]/ElPrado/css/prado2.css?v=2.3.1923a20180524-5" />
+        }*@ }
+@{ if (!string.IsNullOrEmpty(actividad.image))
+    {
+<section class="ficha-expo-carrusel" id="ficha-expo-carrusel">
+    <div class="loop full-width carousel inactive">
+        <div class="slide texto">
+            <figure>
+                @if (!string.IsNullOrEmpty(actividad.caption))
+                {
+<div class="imageDesc">@Html.Raw(actividad.caption)</div>}
+                @if (actividad.bicentenario)
+                {
+<img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/[%%%_PROYECTO_ID_%%%]/ElPrado/img/svg/bicentenario_logo_cuadrado.svg" width="150" height="150" alt="Museo del Prado 200 años" class="logo-200" onclick="location.href='@Html.Translate("URL_BICENTENARIO")'; return false;">}
+                <img src="@ViewBag.BaseURLContent/@actividad.image" alt="@actividad.title">
+                <figcaption>
+                    @if (actividad.activityType != null)
+                    {
+                        HashSet<string> textos = new HashSet<string>();
+                        /*if (actividad.activityCategory != null && actividad.activityCategory.Count > 0)
+                        {
+                            foreach (ActivityCategory activityCategory in actividad.activityCategory)
+                            {
+                                textos.Add(activityCategory.title);
+                            }
+                        }*/
+                        if (actividad.activityType != null)
+                        {
+                            textos.Add(actividad.activityType.title);
+                        }
+                        string texto = "";
+                        foreach (string textoIn in textos)
+                        {
+                            if (!string.IsNullOrEmpty(texto))
+                            {
+                                texto += " · ";
+                            }
+                            texto += textoIn;
+                        }
+                        if (!string.IsNullOrEmpty(texto))
+                        {
+    <strong>@texto</strong>}
+}
+                    <h2 @Html.Raw(actividad.propertyTitle)>@Html.Raw(actividad.title)</h2>
+                    <h3 @Html.Raw(actividad.propertytextDate)>@Html.Raw(actividad.textDate)</h3>
+                </figcaption>
+            </figure>
+        </div>
+    </div>
+</section> }
+
+
+
+
+if ((actividad.relatedChildrenActivity != null && actividad.relatedChildrenActivity.Count > 0) || (actividad.showMultimedia && ((actividad.relatedMultimedia != null && actividad.relatedMultimedia.Count > 0) || (actividad.relatedVideo != null && actividad.relatedVideo.Count > 0))) || (actividad.showActivity && actividad.activityPage != null && actividad.activityPage.Count > 0) || (actividad.showGallery && actividad.relatedArtWorks != null && actividad.relatedArtWorks.Count > 0) || (actividad.showResources && actividad.resources != null && actividad.resources.Count > 0) || (actividad.showProgram && actividad.program != null && actividad.program.Count > 0))
+{
+<section class="menu-nav">
+    <nav>
+        <div>
+            <ul class="menu-normal">
+                <li class="menu-ficha-actividad"><a>@Html.Translate("INICIO")</a></li>
+                @if (actividad.relatedChildrenActivity != null && actividad.relatedChildrenActivity.Count > 0)
+                {
+<li class="menu-actividades"><a>@Html.Translate("ACTIVIDADES")</a></li>
+}
+                @if (actividad.showMultimedia && ((actividad.relatedMultimedia != null && actividad.relatedMultimedia.Count > 0) || (actividad.relatedVideo != null && actividad.relatedVideo.Count > 0) || mostrarInteractivosCarrusel))
+                {
+                    if (actividad.relatedVideo != null && actividad.relatedVideo.Count > 0)
+                    {
+<li class="menu-video"><a>@Html.Translate("MULTIMEDIA")</a></li>
+ }
+else
+{
+<li class="menu-multimedia"><a>@Html.Translate("MULTIMEDIA")</a></li>
+}
+}
+                @if (actividad.showProgram && actividad.program != null && actividad.program.Count > 0)
+                {
+<li class="menu-programa"><a>@Html.Translate("PROGRAMA")</a></li>
+}
+                @if (actividad.showActivity && actividad.activityPage != null && actividad.activityPage.Count > 0)
+                {
+                    string nombreActividad = Html.Translate("ACTIVIDAD");
+                    if (!string.IsNullOrEmpty(actividad.alternativeType))
+                    {
+                        nombreActividad = actividad.alternativeType;
+                    }
+<li class="menu-actividad"><a>@nombreActividad</a></li>
+}
+                @if (actividad.showGallery && actividad.relatedArtWorks != null && actividad.relatedArtWorks.Count > 0)
+                {
+<li class="menu-galeria"><a>@Html.Translate("GALERIA")</a></li>
+}
+                @if (actividad.showResources && actividad.resources != null && actividad.resources.Count > 0)
+                {
+<li class="menu-recursos"><a>@Html.Translate("RECURSOS")</a></li>
+}
+
+            </ul>
+            <div class="menu-small">
+                <select class="select-custom">
+                    <option value="menu-ficha-actividad">@Html.Translate("INICIO")</option>
+                    @if (actividad.relatedChildrenActivity != null && actividad.relatedChildrenActivity.Count > 0)
+                    {
+    <option value="menu-actividades">Html.Translate("ACTIVIDADES")</option>
+}
+                    @if (actividad.showMultimedia && ((actividad.relatedMultimedia != null && actividad.relatedMultimedia.Count > 0) || (actividad.relatedVideo != null && actividad.relatedVideo.Count > 0) || mostrarInteractivosCarrusel))
+                    {
+                        if (actividad.relatedVideo != null && actividad.relatedVideo.Count > 0)
+                        {
+    <option value="menu-video">@Html.Translate("MULTIMEDIA")</option>
+ }
+else
+{
+<option value="menu-multimedia">@Html.Translate("MULTIMEDIA")</option>
+}
+}
+                    @if (actividad.showProgram && actividad.program != null && actividad.program.Count > 0)
+                    {
+    <option value="menu-programa">@Html.Translate("PROGRAMA")</option>
+}
+                    @if (actividad.showActivity && actividad.activityPage != null && actividad.activityPage.Count > 0)
+                    {
+                        string nombreActividad = Html.Translate("ACTIVIDAD");
+                        if (!string.IsNullOrEmpty(actividad.alternativeType))
+                        {
+                            nombreActividad = actividad.alternativeType;
+                        }
+    <option value="menu-actividad">@nombreActividad</option>
+}
+                    @if (actividad.showGallery && actividad.relatedArtWorks != null && actividad.relatedArtWorks.Count > 0)
+                    {
+    <option value="menu-galeria">@Html.Translate("GALERIA")</option>
+}
+                    @if (actividad.showResources && actividad.resources != null && actividad.resources.Count > 0)
+                    {
+    <option value="menu-recursos">@Html.Translate("RECURSOS")</option>
+}
+
+                </select>
+            </div>
+        </div>
+    </nav>
+</section> }
+<section class="ficha-actividad" id="ficha-actividad">
+    <div class="col-72 flt">
+        @if (actividad.activityType != null)
+        {
+<strong class="rastro">@actividad.activityType.title</strong>}
+        @if (!string.IsNullOrEmpty(actividad.friendsURL))
+        {
+            if (!acciones.Edit)
+            {
+                Context.Response.Redirect(actividad.friendsURL);
+            }
+            else
+            {
+<h1 class="tit-ficha" @Html.Raw(actividad.propertyTitle)>(Administradores) URL de amigos: @actividad.friendsURL (si no se tiene permiso de edición se redigirá a esta URL)</h1>
+                    <p></p>
+                                        <p></p>}
+                                }
+        @if (acciones.Edit && actividad.publicationDate.HasValue && actividad.publicationDate.Value > DateTime.Now)
+        {
+<h1 class="tit-ficha" @Html.Raw(actividad.propertyTitle)>(Administradores) La actividad se hará pública el @actividad.publicationDate.Value.ToString("f")</h1>
+                <p></p>
+                                <p></p>}
+        <h1 class="tit-ficha" @Html.Raw(actividad.propertyTitle)>@Html.Raw(actividad.title)</h1>
+        <p class="subtitulo" @Html.Raw(actividad.propertytextDate)>@Html.Raw(actividad.textDate)</p>
+        <span @Html.Raw(actividad.propertydescription)>@Html.Raw(@actividad.description)</span>
+
+        @{//Buscamos si hay algun hito marcado como LSE
+            bool tieneHitoLSE = false;
+            bool tieneHitoNOLSE = false;
+            if (actividad.schedule != null && actividad.schedule.Count > 0)
+            {
+                foreach (DateTime month in actividad.schedule.Keys)
+                {
+                    foreach (DateTime day in actividad.schedule[month].Keys)
+                    {
+
+                        foreach (DateTime hour in actividad.schedule[month][day].Keys)
+                        {
+                            if (actividad.schedule[month][day][hour].Item2)
+                            {
+                                tieneHitoLSE = true;
+                            }
+                            else
+                            {
+                                tieneHitoNOLSE = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (tieneHitoLSE)
+            {
+<div class="lse">
+    <h2>@Html.Translate("SERVICIOINTERPRETELSE")</h2>
+    @if (!string.IsNullOrEmpty(actividad.LSEAlternativeText))
+    {
+@Html.Raw(actividad.LSEAlternativeText) }
+else
+{
+List<string> fechasLista = new List<string>();
+foreach (DateTime month in actividad.schedule.Keys)
+{
+    foreach (DateTime day in actividad.schedule[month].Keys)
+    {
+        foreach (DateTime hour in actividad.schedule[month][day].Keys)
+        {
+            if (actividad.schedule[month][day][hour].Item2)
+            {
+                string minute = hour.Minute.ToString();
+                if (minute.Length == 1)
+                {
+                    minute = "0" + minute;
+                }
+                if (idioma == "es")
+                {
+
+                    fechasLista.Add("el día " + hour.Day + "/" + hour.Month + "/" + hour.Year + " a las " + hour.Hour + "." + minute + " h");
+                }
+                else
+                {
+                    fechasLista.Add("the day " + hour.Month + "/" + hour.Day + "/" + hour.Year + " at " + hour.Hour + "." + minute + " h");
+                }
+            }
+        }
+    }
+}
+string fechasTexto = "";
+int num = 0;
+string sep = "";
+foreach (string fecha in fechasLista)
+{
+    string fechaAux = fecha;
+    if (num == 0)
+    {
+        fechaAux = fechaAux.Substring(0, 1).ToUpper() + fechaAux.Substring(1);
+    }
+    fechasTexto += sep + fechaAux;
+    sep = ", ";
+    if (num == fechasLista.Count - 2)
+    {
+        if (idioma == "es")
+        {
+            sep = " y ";
+        }
+        else
+        {
+            sep = " and ";
+        }
+    }
+    num++;
+}
+
+string textolse = Html.Translate("SERVICIOINTERPRETELSEDESCRIPCION");
+textolse = textolse.Replace("XXXX", fechasTexto);
+
+@Html.Raw(textolse)}
+    @if (actividad.registrationDateStart.HasValue && actividad.registrationDateEnd.HasValue && DateTime.Now > actividad.registrationDateStart.Value && DateTime.Now < actividad.registrationDateEnd.Value)
+    {
+        if (!string.IsNullOrEmpty(actividad.ticketURL))
+        {
+<a class="botones-centrados bc-estandar hv-estandar" href="@actividad.ticketURL"><span class="txt">@Html.Translate("VENTADEENTRADAS")</span></a> }
+else if (!string.IsNullOrEmpty(actividad.urlRelatedActivityFormLSE))
+{
+<a class="botones-centrados bc-estandar hv-estandar" href="@actividad.urlRelatedActivityFormLSE"><span class="txt">@Html.Translate("INSCRIPCIONLSE")</span></a>}
+}
+</div> } }
+    </div>
+    <div class="col-25 frt">
+        @*Acciones inscripcion usuario*@
+        @if (actividad.registrationDateStart.HasValue && actividad.registrationDateEnd.HasValue && DateTime.Now > actividad.registrationDateStart.Value && DateTime.Now < actividad.registrationDateEnd.Value)
+        {
+            if (!string.IsNullOrEmpty(actividad.ticketURL))
+            {
+<div class="venta-entradas" style="margin-bottom:20px;">
+    <a href="@actividad.ticketURL">@Html.Translate("VENTADEENTRADAS")</a>
+</div>}
+else if (!string.IsNullOrEmpty(actividad.urlRelatedActivityForm))
+{
+<div class="botonera">
+    <a class="botones-centrados big bc-estandar hv-estandar" href="@actividad.urlRelatedActivityForm">@Html.Translate("INSCRIPCION")</a>
+</div> }
+else if (!string.IsNullOrEmpty(actividad.urlRelatedGenericForm))
+{
+<div class="botonera">
+    <a class="botones-centrados big bc-estandar hv-estandar" href="@actividad.urlRelatedGenericForm">@Html.Translate("INSCRIPCION")</a>
+</div>}
+}
+        @if (actividad.registrationDateStart.HasValue && DateTime.Now < actividad.registrationDateStart.Value)
+        {
+            if (!string.IsNullOrEmpty(actividad.ticketURL))
+            {
+<div class="botonera">
+    <div class="venta-entradas disabled" style="margin-bottom:20px;">
+        <a href="#">@Html.Translate("VENTADEENTRADAS")</a>
+    </div>
+    <p class="fechainsc">@Html.Translate("DISPONIBLEAPARTIR", actividad.registrationDateStart.Value.ToString("dd/MM/yyyy")) </p>
+
+</div> }
+else if (!string.IsNullOrEmpty(actividad.urlRelatedActivityForm))
+{
+<div class="botonera">
+    <a class="botones-centrados big bc-disabled hv-estandar">@Html.Translate("INSCRIPCION")</a>
+    <p class="fechainsc">@Html.Translate("INSCRIPCIONDISPONIBLEAPARTIR", actividad.registrationDateStart.Value.ToString("dd/MM/yyyy")) </p>
+</div> }
+else if (!string.IsNullOrEmpty(actividad.urlRelatedGenericForm))
+{
+<div class="botonera">
+    <a class="botones-centrados big bc-disabled hv-estandar">@Html.Translate("INSCRIPCION")</a>
+    <p class="fechainsc">@Html.Translate("INSCRIPCIONDISPONIBLEAPARTIR", actividad.registrationDateStart.Value.ToString("dd/MM/yyyy")) </p>
+</div>}
+}
+
+        @if (actividad.activityProgramType != null && actividad.activityProgramType.Any())
+        {
+<dl class="lista-programas">
+    @{ foreach (ActivityProgramType tipoPrograma in actividad.activityProgramType)
+        {
+<div>
+<dt><a href="@urlComunidad/@tipoPrograma.uri">@tipoPrograma.title</a></dt>
+</div> } }
+    </dl>}
+        @if ((actividad.activityCategory != null && actividad.activityCategory.Count > 0) || (actividad.activityType != null))
+        {
+<div class="tags">
+    @{ HashSet<string> agnadidos = new HashSet<string>();
+        if (actividad.activityCategory != null && actividad.activityCategory.Count > 0)
+        {
+            foreach (ActivityCategory activityCategory in actividad.activityCategory)
+            {
+                if (agnadidos.Add(activityCategory.title))
+                {
+<span><a href="@urlComunidad/@Html.Translate("URLBUSQUEDAACTIVIDADES")?@activityCategory.uri">@activityCategory.title</a></span> }
+if (activityCategory.child != null)
+{
+if (agnadidos.Add(activityCategory.child.title))
+{
+<span><a href="@urlComunidad/@Html.Translate("URLBUSQUEDAACTIVIDADES")?@activityCategory.child.uri">@activityCategory.child.title</a></span> }
+}
+}
+}
+if (actividad.activityType != null)
+{
+<span><a href="@urlComunidad/@Html.Translate("URLBUSQUEDAACTIVIDADES")?@actividad.activityType.uri">@actividad.activityType.title</a></span> } }
+</div> } @*@if (acciones.Edit || actividad.relatedExhibition.Count > 0 || actividad.relatedArtWork.Count > 0 || actividad.relatedParentActivity.Count > 0)
+    {*@
+        <h2>@Html.Translate("RDF")</h2>
+        <p><a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a></p>
+        <div class="relacionados">
+            @if (actividad.relatedParentActivity.Count > 0)
+            {
+<div class="item expo actividades-padre">
+    @foreach (RelatedActivity relatedActivity in actividad.relatedParentActivity)
+    {
+<figure>
+    <div class="thumb">
+        <a href="@relatedActivity.url"><img alt="" src="@ViewBag.BaseURLContent/@relatedActivity.image"></a>
+    </div>
+    <figcaption>
+        <a href="@relatedActivity.url">
+            <h3>@Html.Raw(relatedActivity.title)</h3>
+        </a>
+    </figcaption>
+</figure>}
+</div>}
+            @if (actividad.relatedExhibition.Count > 0)
+            {
+                actividad.relatedExhibition = actividad.relatedExhibition.OrderByDescending(x => x.start).ToList<Exhibition>();
+<div class="item expo expo-relacionada">
+    @if (actividad.relatedExhibition.Count == 1)
+    {
+<p class="tipo">@Html.Translate("EXPOSICIONRELACIONADA")</p> }
+else
+{
+<p class="tipo">@Html.Translate("EXPOSICIONESRELACIONADAS")</p>}
+    @foreach (Exhibition exhibition in actividad.relatedExhibition)
+    {
+<figure>
+    <div class="thumb">
+        <a href="@exhibition.downloadUrl"><img alt="" src="@ViewBag.BaseURLContent/@exhibition.image"></a>
+    </div>
+    <figcaption>
+        <a href="@exhibition.downloadUrl">
+            <h3>@exhibition.title</h3>
+            @{ DateTime? inicio = GetDate(exhibition.start);
+                DateTime? fin = GetDate(exhibition.end);
+                if (inicio.HasValue && fin.HasValue)
+                {
+                    string htmlFechaFin = "";
+<p class="fecha">
+    @inicio.Value.ToString("d") -
+    @if (fin.Value.ToString("d").Equals(@Html.Translate("FECHAEXPOSICIONINDEFINIDA")))
+    {
+        htmlFechaFin = Html.Translate("VALOREXPOSICIONINDEFINIDA");
+    }
+    else
+    {
+        htmlFechaFin = fin.Value.ToString("d");
+    }
+    @htmlFechaFin
+</p> } }
+        </a>
+    </figcaption>
+</figure>}
+</div>}
+            @if (actividad.relatedArtWork.Count > 0)
+            {
+<div class="item expo obra-relacionada">
+    @if (actividad.relatedArtWork.Count == 1)
+    {
+<p class="tipo">@Html.Translate("OBRARELACIONADA")</p> }
+else
+{
+<p class="tipo">@Html.Translate("OBRASRELACIONADAS")</p>}
+    @foreach (ArtWork artwork in actividad.relatedArtWork)
+    {
+<figure>
+    <div class="thumb">
+        <a href="@artwork.downloadUrl"><img alt="" src="@ViewBag.BaseURLContent/@artwork.image"></a>
+    </div>
+    <figcaption>
+        <a href="@artwork.downloadUrl">
+            <h3>@artwork.title</h3>
+            @if (artwork.author != null && artwork.author.Count > 0)
+            {
+<p class="autor">@artwork.author[0]</p>}
+        </a>
+    </figcaption>
+</figure>}
+</div>}
+            @if (acciones.Edit)
+            {
+<div class="copiaactividad">
+    <a id="copiarActividad" class="botones-centrados bc-estandar hv-estandar">
+        <span class="txt">(Administradores) Copiar actividad</span>
+    </a>
+</div>} @*<div class="bt-accesibilidad">
+                    <a href="@urlComunidad/@Html.Translate("URL_VISITAELMUSEO")#es-accesibilidad">
+                        <span class="ico">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0" y="0" viewBox="0 0 45 45" xml:space="preserve">
+                            <style type="text/css">
+                                .st0 {
+                                    fill: #7A7A7A;
+                                }
+
+                                .st1 {
+                                    fill: none;
+                                    stroke: #7A7A7A;
+                                    stroke-width: 3;
+                                    stroke-miterlimit: 10;
+                                }
+    </style>
+                            <circle class="st0" cx="17.5" cy="6.5" r="3.5"></circle><polyline class="st1" points="15.5 6.5 17.5 25.5 29.5 25.5 34.5 36.5 39.5 34.5 "></polyline><line class="st1" x1="26.5" y1="18.5" x2="16.5" y2="18.5"></line><path class="st0" d="M28 29.5c0 5.2-4.3 9.5-9.5 9.5S9 34.7 9 29.5c0-3.6 2-6.8 5-8.4l-0.2-3.2C9.2 19.8 6 24.3 6 29.5 6 36.4 11.6 42 18.5 42c5 0 9.4-3 11.4-7.3C29.9 34.7 28 29.5 28 29.5 28 29.5 28 29.5 28 29.5z"></path>
+                                    </svg>
+                        </span><span class="txt">@Html.Translate("ACCESIBILIDAD")</span>
+                    </a>
+                </div>*@
+
+
+        </div>
+        @*}*@
+        </div>
+        @if (actividad.organizators.Count > 0)
+        {
+<div class="fe-logotipos">
+    <dl>
+        @foreach (string organizerType in actividad.organizators.Keys)
+        {
+<dt>@organizerType</dt> foreach (Organizator organizator in actividad.organizators[organizerType])
+                    {
+<dd @Html.Raw(organizator.property)>
+    <span @Html.Raw(organizator.entity)>
+        <span @Html.Raw(organizator.propertyUrl)>
+            <a href="@organizator.url" @Html.Raw(organizator.propertyUrl)>
+                @if (!string.IsNullOrEmpty(organizator.image))
+                {
+<span @Html.Raw(organizator.propertyTitle)>
+    <img class="@organizator.cssImage" alt="@organizator.title" src="@ViewBag.BaseURLContent/@organizator.image" class="" />
+</span> }
+else
+{
+<p @Html.Raw(organizator.propertyTitle)>@organizator.title</p>}
+            </a>
+        </span>
+    </span>
+</dd>}
+                }
+    </dl>
+</div>}
+    </section> List<ExtraData> extraDataList = new List<ExtraData>();
+    if (!string.IsNullOrEmpty(actividad.extraData_inscription))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_INSCRIPCION");
+        extraData.description = actividad.extraData_inscription;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_speaker))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_PONENTE");
+        extraData.description = actividad.extraData_speaker;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_schedule))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_HORARIO");
+        extraData.description = actividad.extraData_schedule;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_duration))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_DURACION");
+        extraData.description = actividad.extraData_duration;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_recipients))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_DESTINATARIOS");
+        extraData.description = actividad.extraData_recipients;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_place))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_LUGARDEREALIZACION");
+        extraData.description = actividad.extraData_place;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_gauging))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_AFORO");
+        extraData.description = actividad.extraData_gauging;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_access))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_ACCESO");
+        extraData.description = actividad.extraData_access;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_meeting_point))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_PUNTO_DE_ENCUENTRO");
+        extraData.description = actividad.extraData_meeting_point;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_price))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_PRECIO");
+        extraData.description = actividad.extraData_price;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_tickets))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_ENTRADAS");
+        extraData.description = actividad.extraData_tickets;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_coordination))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_COORDINACION");
+        extraData.description = actividad.extraData_coordination;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_adress))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_DIRECCION");
+        extraData.description = actividad.extraData_adress;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_organization))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_ORGANIZACION");
+        extraData.description = actividad.extraData_organization;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_university_credits))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_CREDITOS_UNIVERSITARIOS");
+        extraData.description = actividad.extraData_university_credits;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_convalidation))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_CONVALIDACION");
+        extraData.description = actividad.extraData_convalidation;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_more_information))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_MASINFORMACION");
+        extraData.description = actividad.extraData_more_information;
+        extraDataList.Add(extraData);
+    }
+    if (!string.IsNullOrEmpty(actividad.extraData_accessivility))
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_ACCESIBILIDAD");
+        extraData.description = actividad.extraData_accessivility;
+        extraData.cssClass = "lse";
+        extraDataList.Add(extraData);
+    }
+    if (actividad.extraData_museum_friends)
+    {
+        ExtraData extraData = new ExtraData();
+        extraData.title = Html.Translate("EXTRADATA_AMIGOS_DEL_MUSEO");
+        if (!string.IsNullOrEmpty(actividad.friendsMuseumAlternativeText))
+        {
+            extraData.description = Html.Translate(actividad.friendsMuseumAlternativeText);
+        }
+        else
+        {
+            extraData.description = Html.Translate("EXTRADATA_PREFERENCIA_COMPRA_ENTRADAS");
+        }
+        extraData.cssClass = "amigos";
+        extraDataList.Add(extraData);
+    }
+    extraDataList.AddRange(actividad.extraData);
+
+
+
+    if ((extraDataList.Count > 0) ||
+    (actividad.schedule != null && actividad.schedule.Count > 0 && !actividad.hideSchedule) ||
+    ((actividad.registrationDateStart.HasValue && actividad.registrationDateEnd.HasValue && DateTime.Now > actividad.registrationDateStart.Value && DateTime.Now < actividad.registrationDateEnd.Value) && (!string.IsNullOrEmpty(actividad.ticketURL) || !string.IsNullOrEmpty(actividad.urlRelatedActivityForm)) || !string.IsNullOrEmpty(actividad.urlRelatedActivityFormLSE) || !string.IsNullOrEmpty(actividad.urlRelatedGenericForm)) ||
+    (acciones.Edit && (!string.IsNullOrEmpty(actividad.urlRelatedActivityForm) || tieneHitoNOLSE)) ||
+    (acciones.Edit && (!string.IsNullOrEmpty(actividad.urlRelatedActivityFormLSE) || tieneHitoLSE)) ||
+    (acciones.Edit && !string.IsNullOrEmpty(actividad.urlRelatedGenericForm))
+    )
+    {
+<section class="info-actividad">
+    <dl>
+        @{ int numRows = (extraDataList.Count + 2) / 3;
+            int rowActual = 0;
+            for (int i = 0; i < numRows; i++)
+            {
+<span class="row">
+    @for (int j = rowActual * 3; j < (rowActual + 1) * 3 && j < extraDataList.Count; j++)
+    {
+<div class="@extraDataList[j].cssClass">
+<dt>@Html.Raw(extraDataList[j].title)</dt>
+<dd>@Html.Raw(extraDataList[j].description)</dd>
+</div>}
+    </span> rowActual++;
+} }
+    </dl>
+    @if (actividad.schedule != null && actividad.schedule.Count > 0 && !actividad.hideSchedule)
+    {
+<div class="horarios">
+    <h2>@Html.Translate("HORARIOS")</h2>
+    @foreach (DateTime month in actividad.schedule.Keys)
+    {
+        string textMonth = month.ToString("MMMM") + " " + month.Year;
+        textMonth = textMonth.Substring(0, 1).ToUpper() + textMonth.Substring(1);
+<h3>@textMonth</h3>
+                        <dl class="horarios">
+                            @foreach (DateTime day in actividad.schedule[month].Keys)
+                            {
+                                string textDay = day.ToString("dddd").Substring(0, 3) + " " + day.Day;
+                                textDay = textDay.Substring(0, 1).ToUpper() + textDay.Substring(1);
+    <div>
+    <dt>@textDay</dt>
+    <dd>
+        @foreach (DateTime hour in actividad.schedule[month][day].Keys)
+        {
+            string clase = "";
+            if (actividad.schedule[month][day][hour].Item1)
+            {
+                clase += "amigos";
+            }
+            if (actividad.schedule[month][day][hour].Item2)
+            {
+                clase += " lse";
+            }
+            if (hour.ToString("HH:mm") != "00:00")
+            {
+<span class="@clase">@hour.ToString("HH:mm")</span> }
+else
+{
+<span class="@clase"></span>}
+}
+    </dd>
+</div>}
+                            </dl>}
+    </div>}
+    @if (acciones.Edit && (!string.IsNullOrEmpty(actividad.urlRelatedActivityForm) || tieneHitoNOLSE))
+    {
+<div class="botonera">
+    @if (acciones.Edit && !string.IsNullOrEmpty(actividad.urlRelatedActivityForm))
+    {
+<a class="botones-centrados big bc-estandar hv-estandar" href="@actividad.urlRelatedActivityForm">(Administradores) Ir al formulario de inscripción</a> }
+else if (acciones.Edit && actividad.schedule.Count > 0)
+{
+<a class="botones-centrados big bc-estandar hv-estandar" id="crearFormActividad" href="@actividad.urlRelatedActivityForm">(Administradores) Crear formulario de inscripción asociado</a>}
+    <div class="ko" id="errorCrearFormActividad"><p></p></div>
+</div>}
+    @if (acciones.Edit && (!string.IsNullOrEmpty(actividad.urlRelatedActivityFormLSE) || tieneHitoLSE))
+    {
+<div class="botonera">
+    @if (acciones.Edit && !string.IsNullOrEmpty(actividad.urlRelatedActivityFormLSE))
+    {
+<a class="botones-centrados big bc-estandar hv-estandar" href="@actividad.urlRelatedActivityFormLSE">(Administradores) Ir al formulario de inscripción LSE</a> }
+else if (acciones.Edit && actividad.schedule.Count > 0)
+{
+<a class="botones-centrados big bc-estandar hv-estandar" id="crearFormActividadLSE" href="@actividad.urlRelatedActivityFormLSE">(Administradores) Crear formulario de inscripción asociado LSE</a>}
+    <div class="ko" id="errorCrearFormActividadLSE"><p></p></div>
+</div>}
+    @if (acciones.Edit && !string.IsNullOrEmpty(actividad.urlRelatedGenericForm))
+    {
+<div class="botonera">
+    <a class="botones-centrados big bc-estandar hv-estandar" href="@actividad.urlRelatedGenericForm">(Administradores) Ir al formulario de inscripción</a>
+</div>}
+</section> } @*
+    1) Inscripción abierta
+    2) Inscripción xx-xx-xxxx
+    3) Próxima inscripción  Va a tener inscripción pero aún no sabemos la fecha (MÁS DE DOS AÑOS)
+    4) Inscripción cerrada  Cuando la actividad no ha empezado pero sí ha terminado la inscripción.
+    5) En curso (sin etiqueta de estado).
+    6) Futuras sin fecha de inscripción (sin etiqueta de estado).
+    7) Actividades sin fecha (sin etiqueta de estado).
+    8) Pasadas (Mantener la clase ‘old’).*@ Dictionary<int, List<RelatedActivity>> listaActividadesHijas = new Dictionary<int, List<RelatedActivity>>();
+listaActividadesHijas.Add(1, new List<RelatedActivity>());
+listaActividadesHijas.Add(2, new List<RelatedActivity>());
+listaActividadesHijas.Add(3, new List<RelatedActivity>());
+listaActividadesHijas.Add(4, new List<RelatedActivity>());
+listaActividadesHijas.Add(5, new List<RelatedActivity>());
+listaActividadesHijas.Add(6, new List<RelatedActivity>());
+listaActividadesHijas.Add(7, new List<RelatedActivity>());
+listaActividadesHijas.Add(8, new List<RelatedActivity>());
+
+
+
+if (actividad.relatedChildrenActivity != null && actividad.relatedChildrenActivity.Count > 0)
+{
+    foreach (RelatedActivity relatedActivity in actividad.relatedChildrenActivity)
+    {
+        int estado = 0;
+        if (relatedActivity.registrationDateStart.HasValue && relatedActivity.registrationDateEnd.HasValue && relatedActivity.registrationDateStart.Value < DateTime.Now && relatedActivity.registrationDateEnd.Value > DateTime.Now)
+        {
+            estado = 1;
+        }
+        else if (relatedActivity.registrationDateStart.HasValue && relatedActivity.registrationDateStart.Value > DateTime.Now.AddYears(2))
+        {
+            estado = 3;
+        }
+        else if (relatedActivity.registrationDateStart.HasValue && relatedActivity.registrationDateStart.Value > DateTime.Now)
+        {
+            estado = 2;
+        }
+        else if (relatedActivity.registrationDateEnd.HasValue && relatedActivity.activityDateStart.HasValue && relatedActivity.registrationDateEnd.Value < DateTime.Now && relatedActivity.activityDateStart.Value > DateTime.Now)
+        {
+            estado = 4;
+        }
+        else if (relatedActivity.activityDateStart.HasValue && relatedActivity.activityDateEnd.HasValue && relatedActivity.activityDateStart.Value < DateTime.Now && relatedActivity.activityDateEnd.Value > DateTime.Now)
+        {
+            estado = 5;
+        }
+        else if (relatedActivity.activityDateStart.HasValue && !relatedActivity.registrationDateStart.HasValue && relatedActivity.activityDateStart.Value > DateTime.Now)
+        {
+            estado = 6;
+        }
+        else if (!relatedActivity.activityDateStart.HasValue)
+        {
+            estado = 7;
+        }
+        else if (relatedActivity.activityDateEnd.HasValue && relatedActivity.activityDateEnd.Value < DateTime.Now)
+        {
+            estado = 8;
+        }
+        listaActividadesHijas[estado].Add(relatedActivity);
+    }
+
+<section class="programas-actividades" id="actividades">
+    <h2 class="heading"><span>@Html.Translate("ACTIVIDADES")</span></h2>
+    <div class="items">
+        @foreach (int estadoInt in listaActividadesHijas.Keys)
+        {
+            foreach (RelatedActivity relatedActivity in listaActividadesHijas[estadoInt])
+            {
+                string estado = "";
+                string clase = "item";
+                switch (estadoInt)
+                {
+                    case 1:
+                        if (!string.IsNullOrEmpty(relatedActivity.ticketUrl))
+                        {
+                            estado = Html.Translate("VENTADEENTRADAS");
+                        }
+                        else
+                        {
+                            estado = Html.Translate("INSCRIPCIONABIERTA");
+                        }
+                        break;
+                    case 2:
+                        if (!string.IsNullOrEmpty(relatedActivity.ticketUrl))
+                        {
+                            estado = Html.Translate("ENTRADAS") + " " + relatedActivity.registrationDateStart.Value.ToString("d");
+                        }
+                        else
+                        {
+                            estado = Html.Translate("INSCRIPCION") + " " + relatedActivity.registrationDateStart.Value.ToString("d");
+                        }
+                        break;
+                    case 3:
+                        estado = Html.Translate("PROXIMAINSCRIPCION");
+                        break;
+                    case 4:
+                        estado = Html.Translate("INSCRIPCIONCERRADA");
+                        break;
+                    case 8:
+                        //clase += " old";
+                        break;
+                }
+
+
+
+<a href="@relatedActivity.url" class="@clase">
+    <figure>
+        @if (!string.IsNullOrEmpty(estado))
+        {
+<div class="tag">@estado</div>}
+
+        <img src="@ViewBag.BaseURLContent/@relatedActivity.image" alt="">
+        <figcaption>
+            @* Si es de Escuela del prado no pintamos publico*@
+
+            @if ((relatedActivity.activityProgramType == null || !relatedActivity.activityProgramType.Contains("http://museodelprado.es/items/activityProgramType_6")) && relatedActivity.activityCategory != null && relatedActivity.activityCategory.Count > 0)
+            {
+                HashSet<string> categorias = new HashSet<string>();
+                foreach (ActivityCategory activityCategoryInt in relatedActivity.activityCategory)
+                {
+                    categorias.Add(activityCategoryInt.title);
+                }
+                foreach (string categoriaInt in categorias)
+                {
+<strong class="categoria">@categoriaInt</strong>}
+}
+            @if (relatedActivity.activityType != null)
+            {
+<strong class="categoria">@relatedActivity.activityType.title</strong>}
+            <h3>@Html.Raw(relatedActivity.title)</h3>
+            <p>@relatedActivity.textDate</p>
+        </figcaption>
+    </figure>
+</a>}
+}
+    </div>
+</section> }
+
+if (actividad.showMultimedia && ((actividad.relatedMultimedia != null && actividad.relatedMultimedia.Count > 0) || (actividad.relatedVideo != null && actividad.relatedVideo.Count > 0) || mostrarInteractivosCarrusel))
+{
+if (mostrarInteractivosCarrusel)
+{
+    if (interactivos != null && interactivos.PropertyValues != null && interactivos.PropertyValues.Count > 0)
+    {
+        foreach (SemanticPropertyModel.PropertyValue interactivoItem in interactivos.PropertyValues)
+        {
+            string visible = interactivoItem.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#visible").Element.Propiedad.UnicoValor.Key;
+            if (visible.ToLower() == "true")
+            {
+                SemanticPropertyModel interactivo = interactivoItem.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#interactive");
+                if (interactivo != null && interactivos.PropertyValues != null && interactivos.PropertyValues.Count > 0)
+                {
+<section class="interactivo" id="multimedia">
+    @{string html = interactivo.PropertyValues[0].RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_HTML").Replace("URLCONTENTINTERACTIVOS", urlPersonalizacion + "/ElPrado/interactivos");
+        string title = interactivo.PropertyValues[0].RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+        SemanticPropertyModel js = interactivo.PropertyValues[0].RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_JS");
+        SemanticPropertyModel css = interactivo.PropertyValues[0].RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_CSS");
+
+
+
+
+
+
+
+<h2 class="heading"><span>@title</span></h2>
+                                    @Html.Raw(html) if (js != null && js.PropertyValues != null && js.PropertyValues.Count > 0)
+                                    {
+                                        foreach (SemanticPropertyModel.PropertyValue jsItem in js.PropertyValues)
+                                        {
+                                            ViewBag.ListaJS.Add(urlPersonalizacion + "/ElPrado/interactivos/" + jsItem.Value);
+                                        }
+                                    }
+                                    if (css != null && css.PropertyValues != null && css.PropertyValues.Count > 0)
+                                    {
+                                        foreach (SemanticPropertyModel.PropertyValue cssItem in css.PropertyValues)
+                                        {
+                                            ViewBag.ListaCSS.Add(urlPersonalizacion + "/ElPrado/interactivos/" + cssItem.Value);
+                                        }
+                                    } }
+</section> }
+}
+}
+}
+}
+
+
+if (actividad.relatedVideo != null && actividad.relatedVideo.Count > 0)
+{
+<section class="multimedia" id="video">
+    <section class="multimedia video-gallery">
+        @*<h2 class="heading">@Html.Translate("VIDEOS")</h2>	*@
+        @{ Multimedia videoGrande = actividad.relatedVideo[0];
+<div class="video-grande">
+    <div class="videoWrapper" id="playerVideo">
+        <iframe width="100%" height="100%" src="//www.youtube-nocookie.com/embed/@videoGrande.id?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen=""></iframe>
+    </div>
+</div> }
+
+    </section>
+</section> }
+
+if (actividad.relatedMultimedia != null && actividad.relatedMultimedia.Count > 0)
+{
+<section class="videos" id="multimedia">
+    <h2 class="heading">@Html.Translate("MULTIMEDIA")</h2>
+    <div class="loop carousel inactive">
+        @foreach (Multimedia multimedia in actividad.relatedMultimedia.Values)
+        {
+            if (multimedia.type == "Interactive")
+            {
+<div class="slide">
+    <figure>
+        @if (string.IsNullOrEmpty(multimedia.image))
+        {
+<div class="thumb imgwrap">
+    <a href="@multimedia.url">
+        <div class="no-img">
+            <div class="outer">
+                <span>@Html.Translate("IMAGENNODISPONIBLE")</span>
+            </div>
+        </div>
+    </a>
+</div> }
+else
+{
+<a href="@multimedia.url">
+    <img alt="@multimedia.title" src="@ViewBag.BaseURLContent/@multimedia.image" />
+</a>}
+        <figcaption>
+            <strong class="media-type">@Html.Translate("INTERACTIVO")</strong>
+            @if (!string.IsNullOrEmpty(multimedia.title))
+            {
+<h3 class="name">
+    <a href="@multimedia.url">
+        <span>@Html.Raw(multimedia.title)</span>
+    </a>
+</h3>}
+        </figcaption>
+    </figure>
+</div> }
+else if (!string.IsNullOrEmpty(multimedia.url))
+{
+<div class="slide video">
+    <figure>
+        <a href="@multimedia.url" class="modal-videoPlayer">
+            @if (!string.IsNullOrEmpty(multimedia.duration))
+            {
+<span class="duracion">@multimedia.duration</span>}
+            @if (!string.IsNullOrEmpty(multimedia.image))
+            {
+<img alt="@multimedia.title" src="@ViewBag.BaseURLContent/@multimedia.image" />}
+        </a>
+        <figcaption>
+            @if (!string.IsNullOrEmpty(multimedia.type))
+            {
+<strong class="media-type">@multimedia.type</strong>}
+            @if (!string.IsNullOrEmpty(multimedia.title))
+            {
+<h3 class="name">
+    <a href="@multimedia.url" class="modal-videoPlayer">
+        <span>@Html.Raw(multimedia.title)</span>
+    </a>
+</h3>}
+        </figcaption>
+    </figure>
+</div>}
+}
+    </div>
+    <div class="ver-mas-multimedia"><a href="@Html.GetComunidad().Url/@Html.Translate("URLBUSQUEDACONTENIDOCOLECCION")?rdf:type=multimediaresource">@Html.Translate("VERMASMULTIMEDIA")</a></div>
+</section> }
+
+
+
+
+
+}
+if (actividad.showProgram && actividad.program != null && actividad.program.Count > 0)
+{
+<section class="actividades programa" id="programa">
+    <h2 class="heading"><span>@Html.Translate("PROGRAMA")</span></h2>
+    <div class="act-cont">
+        <div class="act-item catedra">
+            @foreach (int year in actividad.program.Keys)
+            {
+<h3>@year</h3>
+                    <div class="act-item catedra">
+                        @foreach (DateTime datetime in actividad.program[year].Keys)
+                        {
+    <div class="act-item-fecha">
+        <dl>
+            <dt>@datetime.ToString("MMMM").Substring(0, 3)</dt>
+            <dd>@datetime.Day</dd>
+        </dl>
+    </div>
+                            <div class="act-item-act">
+                                <dl>
+                                    @foreach (Program program in actividad.program[year][datetime])
+                                    {
+                                        string hora = program.date.ToString("HH") + "." + program.date.ToString("mm");
+                                        if (hora != "00.00")
+                                        {
+            <dt><span>@hora h</span><em>@Html.Raw(program.title)</em></dt> }
+                                        else
+                                        {
+            <dt><em>@Html.Raw(program.title)</em></dt> }
+                                        if (!string.IsNullOrEmpty(program.description))
+                                        {
+            <dd><p>@Html.Raw(program.description)</p></dd>}
+                                    }
+                                </dl>
+                            </div>}
+                    </div>}
+        </div>
+    </div>
+</section> }
+
+
+if (actividad.showActivity && actividad.activityPage != null && actividad.activityPage.Count > 0)
+{
+<section class="exposicion" id="actividad">
+    @{ string nombreActividad = Html.Translate("ACTIVIDAD");
+        if (!string.IsNullOrEmpty(actividad.alternativeType))
+        {
+            nombreActividad = actividad.alternativeType;
+        } }
+    <h2 class="heading"><span>@nombreActividad</span></h2>
+    <div class="exp-menu desktop">
+        <nav>
+            <ul class="menu-normal">
+                @foreach (ActivityPage activityPage in actividad.activityPage)
+                {
+                    if (!string.IsNullOrEmpty(activityPage.pageShortName) && !string.IsNullOrEmpty(activityPage.pageName) && !string.IsNullOrEmpty(activityPage.pageDescription))
+                    {
+                        string nombrecorto = Es.Riam.Util.UtilCadenas.EliminarHtmlDeTexto(activityPage.pageShortName);
+<li class="menu-@EliminarCaracteresEspeciales(nombrecorto)"><a>@Html.Raw(nombrecorto)</a></li>}
+                }
+            </ul>
+        </nav>
+    </div>
+    <div class="exp-cont">
+        <!-- Páginas de la exposición -->
+        @foreach (ActivityPage activityPage in actividad.activityPage)
+        {
+            string classImagen = "expo-cont-item";
+            if (activityPage.image != null)
+            {
+                if (activityPage.image.isHorizontal)
+                {
+                    classImagen = "expo-cont-item horizontal";
+                }
+                else
+                {
+                    classImagen = "expo-cont-item vertical";
+                }
+            }
+            string nombrecorto = Es.Riam.Util.UtilCadenas.EliminarHtmlDeTexto(activityPage.pageShortName);
+<div id="@EliminarCaracteresEspeciales(nombrecorto)" class="@classImagen">
+    <div>
+        @if (!string.IsNullOrEmpty(activityPage.pageName))
+        {
+<h2>@Html.Raw(activityPage.pageName)</h2>}
+        @if (activityPage.image != null)
+        {
+<div>
+    <figure>
+        @if (!string.IsNullOrEmpty(activityPage.image.pageImage))
+        {
+            if (!string.IsNullOrEmpty(activityPage.image.pageImageUrl))
+            {
+<a href="@activityPage.image.pageImageUrl">
+    <img src="@ViewBag.BaseURLContent/@activityPage.image.pageImage" alt="@activityPage.pageName" />
+</a> }
+else
+{
+<img src="@ViewBag.BaseURLContent/@activityPage.image.pageImage" alt="@activityPage.pageName" />}
+}
+        @if (!string.IsNullOrEmpty(activityPage.image.pageImageFooter))
+        {
+<figcaption>
+    <dl>
+        <dd>@Html.Raw(Html.DeleteFirstParagraph(activityPage.image.pageImageFooter))</dd>
+    </dl>
+</figcaption>}
+    </figure>
+</div>}
+        @if (!string.IsNullOrEmpty(activityPage.pageDescription))
+        {
+<div class="exp-cont-text">
+    <span>@Html.Raw(activityPage.pageDescription)</span>
+</div>}
+    </div>
+</div>}
+    </div>
+</section> }
+
+if (actividad.showGallery && actividad.relatedArtWorks != null && actividad.relatedArtWorks.Count > 0)
+{
+if (actividad.defaultGallery == "Galería")
+{
+<script type="text/javascript">
+    $(document).ready(function () {
+        setTimeout(function () {
+            $('li.galeria').click();
+        }, 100);
+    });
+</script> }
+
+
+
+<section class="obras-ficha-expo" id="galeria">
+    <h2 class="heading"><span>@Html.Translate("GALERIA")</span></h2>
+    <form novalidate="novalidate">
+        <ul class="vista-selector">
+            <li class="miniaturas selected" data-mode="vista-muro"><a>@Html.Translate("IMAGENES")</a></li>
+            @*<li class="listado" data-mode="vista-lista"><a>@Html.Translate("LISTADO")</a></li>*@
+            <li class="galeria" data-mode="big-galeria"><a>@Html.Translate("GALERIA")</a></li>
+        </ul>
+    </form>
+    <div class="vista-muro mostrable">
+        <div id="wall-container">
+            @{ int numObraMosaico = 0;
+                int paginaMosaicoObras = 0;
+                int obra_orden = 0;
+                foreach (RelatedArtWork relatedArtWork in actividad.relatedArtWorks)
+                {
+                    obra_orden++;
+                    //La siguiente clase la utilizaremos para que solo se vean las imágenes de los que tienen imagen
+                    string claseItem = "item";
+                    string obra_imagen = relatedArtWork.image;
+                    if (!string.IsNullOrEmpty(obra_imagen))
+                    {
+                        obra_imagen = ViewBag.BaseUrlContent + "/" + obra_imagen;
+                    }
+                    string src = "src=\"" + Html.ObtenerImagenConTamano(obra_imagen, 832) + "\"";
+                    if (string.IsNullOrEmpty(obra_imagen))
+                    {
+                        claseItem = "itemOculto oculto";
+                    }
+                    else
+                    {
+                        numObraMosaico++;
+                        paginaMosaicoObras = ((numObraMosaico - 1) / 9) + 1;
+                        if (paginaMosaicoObras > 1)
+                        {
+                            claseItem = "itemPaginado oculto";
+                            src = "srcAux=\"" + Html.ObtenerImagenConTamano(obra_imagen, 832) + "\"";
+                        }
+                    }
+
+<div class="@claseItem" pagina="@paginaMosaicoObras">
+    <div>
+        <div>
+            <figure>
+                @if (string.IsNullOrEmpty(relatedArtWork.url))
+                {
+                    if (!string.IsNullOrEmpty(obra_imagen))
+                    {
+<span>
+    <img alt="@obra_imagen" @Html.Raw(src) />
+</span> }
+
+if (obra_orden != null)
+{
+<div class="num">@obra_orden</div> }
+
+<figcaption class="textos">
+    <h2>@relatedArtWork.title</h2>
+    <span>@Html.Raw(relatedArtWork.description)</span>
+</figcaption> }
+else
+{
+<a href="@relatedArtWork.url">
+    @if (!string.IsNullOrEmpty(obra_imagen))
+    {
+<span>
+    <img alt="@obra_imagen" @Html.Raw(src) />
+</span>}
+    @if (obra_orden != null)
+    {
+<div class="num">@obra_orden</div>}
+    <figcaption class="textos">
+        <h2>@relatedArtWork.title</h2>
+        <span>@Html.Raw(relatedArtWork.description)</span>
+    </figcaption>
+</a>}
+            </figure>
+        </div>
+    </div>
+</div> } }
+        </div>
+        @if (paginaMosaicoObras > 1)
+        {
+<div class="ver-mas-general" pagina="2"><a>@Html.GetText("COMBUSQUEDAAVANZADA", "VERMAS")</a></div>}
+    </div>
+</section> @*<section class="vista-lista mostrable oculto"></section>*@
+                <section class="mostrable oculto big-galeria"></section> }
+
+            if (actividad.showResources && actividad.resources != null && actividad.resources.Count > 0)
+            {
+<section class="recursos" id="recursos">
+    <h2 class="heading"><span>@Html.Translate("RECURSOS")</span></h2>
+    @foreach (Resource resource in actividad.resources)
+    {
+        if (!string.IsNullOrEmpty(resource.title))
+        {
+<h3>@Html.Raw(resource.title)</h3> }
+if (!string.IsNullOrEmpty(resource.description))
+{
+@Html.Raw(resource.description) }
+if (resource.files != null && resource.files.Count > 0)
+{
+<ul class="descargas">
+    @foreach (File file in resource.files)
+    {
+<li>
+    @if (!string.IsNullOrEmpty(file.file) && !string.IsNullOrEmpty(file.fileName))
+    {
+<a href="@file.file" class="boton-descarga"><span class="ico"></span>@file.extension</a>
+                                <span><a href="@file.file">@Html.Raw(file.fileName)</a></span>}
+</li>}
+</ul>}
+}
+</section> }
+
+
+if (acciones.Edit)
+{
+<a class="botones-centrados bc-estandar hv-estandar" href="@Model.UrlEdit">
+    <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "EDITAR")</span>
+</a> }
+
+if (acciones.Delete)
+{
+<a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
+    <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")</span>
+</a>
+                <div class="confirmarBorrar oculto">
+                    @Html.Translate("PREGUNTAESTASSEGURO")
+                    <a onclick="AccionRecurso_Eliminar_Aceptar('@FichaDocumento.ListActions.UrlDelete', '@FichaDocumento.Key')">@Html.GetText("COMMON", "SI")</a>
+                    <a onclick="$('.preguntarBorrar').show();$('.confirmarBorrar').hide();">@Html.GetText("COMMON", "NO")</a>
+                </div> } }
+@functions
+{ public string EliminarCaracteresEspeciales(string pTexto)
+    {
+        return pTexto.Replace(" ", "-").Replace(".", "-").Replace("(", "-").Replace(")", "-").Replace(":", "-").Replace(",", "-").Replace("\"", "-").Replace("'", "-");
+    }
+
+    public class Activity
+    {
+        public Activity(SemanticResourceModel pSemCmsModel, ResourceModel pFichaDocumento, string pIdioma, IHtmlHelper pHtmlHelper, Dictionary<string, string> pMappingURLProgram)
+        {
+            string palSobreEsp = "sobre";
+            string palSobreEng = "on";
+            string sobreIdiomaNav = null;
+            switch (pIdioma)
+            {
+                case "es":
+                    sobreIdiomaNav = palSobreEsp;
+                    break;
+                case "en":
+                    sobreIdiomaNav = palSobreEng;
+                    break;
+                default:
+                    sobreIdiomaNav = palSobreEsp;
+                    break;
+            }
+
+            this.image = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_shows_visual_item");
+            this.caption = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#caption");
+            this.main_image = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image");
+            this.alternativeType = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#alternativeType");
+            this.title = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p1_E41_p102_has_title");
+            this.propertyTitle = pSemCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p1_E41_p102_has_title");
+            this.textDate = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#textDate");
+            this.propertytextDate = pSemCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#textDate");
+            this.description = pSemCmsModel.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note");
+            this.propertydescription = pSemCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note");
+            this.LSEAlternativeText = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#LSEAlternativeText");
+            this.showMultimedia = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#showMultimedia") == pHtmlHelper.GetText("COMMON", "SI");
+            this.showActivity = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#showActivity") == pHtmlHelper.GetText("COMMON", "SI");
+            this.showGallery = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#showGallery") == pHtmlHelper.GetText("COMMON", "SI");
+            this.defaultGallery = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#defaultGallery");
+            this.showResources = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#showResources") == pHtmlHelper.GetText("COMMON", "SI");
+            this.showProgram = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#showProgram") == pHtmlHelper.GetText("COMMON", "SI");
+            this.registrationDateStart = GetDate(pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#registrationDate@@@http://museodelprado.es/ontologia/pradomuseum.owl#startDate"));
+            this.registrationDateEnd = GetDate(pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#registrationDate@@@http://museodelprado.es/ontologia/pradomuseum.owl#endDate"));
+            this.activityDateStart = GetDate(pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityDate@@@http://museodelprado.es/ontologia/pradomuseum.owl#startDate"));
+            this.activityDateEnd = GetDate(pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityDate@@@http://museodelprado.es/ontologia/pradomuseum.owl#endDate"));
+            this.publicationDate = GetDate(pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#publicationDate"));
+
+
+            this.friendsURL = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#friendsURL");
+            if (this.friendsURL != null && !this.friendsURL.ToLower().StartsWith("http"))
+            {
+                this.friendsURL = "http://" + this.friendsURL;
+            }
+            this.ticketURL = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#ticketURL");
+            if (this.ticketURL != null && !this.ticketURL.ToLower().StartsWith("http"))
+            {
+                this.ticketURL = "http://" + this.ticketURL;
+            }
+
+            #region ActivityCategory
+            SemanticPropertyModel propActivityPath = pSemCmsModel.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p2_has_type");
+            this.activityCategory = new List<ActivityCategory>();
+            if (propActivityPath != null && propActivityPath.PropertyValues != null && propActivityPath.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue activityPath in propActivityPath.PropertyValues)
+                {
+                    SemanticPropertyModel propActivityNode = activityPath.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityNode");
+                    if (propActivityNode != null && propActivityNode.PropertyValues != null && propActivityNode.PropertyValues.Count() > 0)
+                    {
+                        ActivityCategory lastActivityCategory = null;
+                        int i = 0;
+                        foreach (SemanticPropertyModel.PropertyValue activityNode in propActivityNode.PropertyValues)
+                        {
+                            i++;
+                            ActivityCategory actividadActual = new ActivityCategory();
+                            actividadActual.title = activityNode.RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/2008/05/skos#prefLabel");
+                            actividadActual.uri = "cidoc:p2_has_type@@@pm:activityNode=" + activityNode.Value;
+                            if (i == 1)
+                            {
+                                this.activityCategory.Add(actividadActual);
+                            }
+                            else
+                            {
+                                lastActivityCategory.child = actividadActual;
+                            }
+                            lastActivityCategory = actividadActual;
+                        }
+                    }
+                }
+            }
+            #endregion
+
+
+            #region ActivityType
+            SemanticPropertyModel propActivityType = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p2_has_type_activity");
+            if (propActivityType != null && propActivityType.PropertyValues != null && propActivityType.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue activityType in propActivityType.PropertyValues)
+                {
+                    this.activityType = new ActivityType();
+                    this.activityType.title = activityType.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/multilang-property.owl#textValue");
+                    this.activityType.uri = "ecidoc:p2_has_type_activity@@@multiLan:textValue=" + this.activityType.title.ToLower() + "@" + pIdioma;
+                }
+            }
+            #endregion
+
+            #region ActivityProgramType
+            SemanticPropertyModel propActivityProgramType = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p2_has_type_program");
+            this.activityProgramType = new List<ActivityProgramType>();
+            if (propActivityProgramType != null && propActivityProgramType.PropertyValues != null && propActivityProgramType.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue activityProgramType in propActivityProgramType.PropertyValues)
+                {
+                    string url = "";
+                    if (pMappingURLProgram.ContainsKey(activityProgramType.Value))
+                    {
+                        url = pMappingURLProgram[activityProgramType.Value];
+                    }
+                    if (activityProgramType.Value == "http://museodelprado.es/items/activityProgramType_7")
+                    {
+                        this.bicentenario = true;
+                    }
+                    if (activityProgramType.Value != "http://museodelprado.es/items/activityProgramType_8")
+                    {
+                        ActivityProgramType activityProgramTypeObjetc = new ActivityProgramType(); ;
+                        activityProgramTypeObjetc.title = activityProgramType.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/multilang-property.owl#textValue");
+                        activityProgramTypeObjetc.uri = url;
+                        this.activityProgramType.Add(activityProgramTypeObjetc);
+                    }
+                }
+            }
+            #endregion
+
+            #region ExtraData
+            this.extraData_museum_friends = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_museum_friends") == pHtmlHelper.GetText("COMMON", "SI");
+            this.friendsMuseumAlternativeText = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#friendsMuseumAlternativeText");
+            this.extraData_access = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_access");
+            this.extraData_accessivility = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_accessivility");
+            this.extraData_convalidation = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_convalidation");
+            this.extraData_coordination = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_coordination");
+            this.extraData_adress = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_adress");
+            this.extraData_duration = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_duration");
+            this.extraData_gauging = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_gauging");
+            this.extraData_inscription = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_inscription");
+            this.extraData_speaker = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_speaker");
+            this.extraData_meeting_point = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_meeting_point");
+            this.extraData_more_information = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_more_information");
+            this.extraData_organization = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_organization");
+            this.extraData_place = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_place");
+            this.extraData_price = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_price");
+            this.extraData_recipients = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_recipients");
+            this.extraData_schedule = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_schedule");
+            this.extraData_tickets = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_tickets");
+            this.extraData_university_credits = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#extraData_university_credits");
+
+            this.extraData = new List<ExtraData>();
+            SemanticPropertyModel propExtraData = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#extraData");
+            if (propExtraData != null && propExtraData.PropertyValues != null && propExtraData.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyExtraData in propExtraData.PropertyValues)
+                {
+                    if (propertyExtraData != null && propertyExtraData.Value != null)
+                    {
+                        ExtraData extraData = new ExtraData();
+                        extraData.title = propertyExtraData.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/dc/elements/1.1/title");
+                        extraData.description = propertyExtraData.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/dc/elements/1.1/description");
+                        extraData.cssClass = propertyExtraData.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#cssClass");
+                        this.extraData.Add(extraData);
+                    }
+                }
+            }
+            #endregion
+
+            #region Organizator
+            SemanticPropertyModel propE39_Actor = pSemCmsModel.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p14_carried_out_by");
+            this.organizators = new Dictionary<string, List<Organizator>>();
+            if (propE39_Actor != null && propE39_Actor.PropertyValues != null && propE39_Actor.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyE39_Actor in propE39_Actor.PropertyValues)
+                {
+                    if (propertyE39_Actor != null && propertyE39_Actor.Value != null)
+                    {
+                        Organizator organizator = new Organizator();
+                        organizator.property = pSemCmsModel.GetRDFAProperty(propertyE39_Actor.Property);
+                        organizator.entity = pSemCmsModel.GetRDFAEntity(propertyE39_Actor.RelatedEntity);
+                        organizator.title = propertyE39_Actor.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title");
+                        organizator.propertyTitle = pSemCmsModel.GetRDFAProperty(propertyE39_Actor.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#title"));
+                        organizator.url = propertyE39_Actor.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p76_has_contact_point");
+                        organizator.propertyUrl = pSemCmsModel.GetRDFAProperty(propertyE39_Actor.RelatedEntity.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p76_has_contact_point"));
+                        organizator.image = propertyE39_Actor.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_shows_visual_item");
+                        organizator.cssImage = propertyE39_Actor.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#css");
+                        organizator.propertyimage = pSemCmsModel.GetRDFAProperty(propertyE39_Actor.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_shows_visual_item"));
+                        string organizerType = propertyE39_Actor.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#organizerType@@@http://museodelprado.es/ontologia/multilang-property.owl#textValue");
+
+                        if (!this.organizators.ContainsKey(organizerType))
+                        {
+                            this.organizators.Add(organizerType, new List<Organizator>());
+                        }
+                        this.organizators[organizerType].Add(organizator);
+                    }
+                }
+            }
+            #endregion
+
+            #region Exhibition
+            SemanticPropertyModel propExhibition = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#relatedExhibition");
+            this.relatedExhibition = new List<Exhibition>();
+            if (propExhibition != null && propExhibition.PropertyValues != null && propExhibition.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyExhibition in propExhibition.PropertyValues)
+                {
+                    if (propertyExhibition != null && propertyExhibition.Value != null)
+                    {
+                        Exhibition exhibition = new Exhibition();
+
+                        SemanticPropertyModel propTituloAct = propertyExhibition.RelatedEntity.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note");
+                        if (propTituloAct != null && propTituloAct.FirstPropertyValue != null)
+                        {
+                            exhibition.title = propTituloAct.FirstPropertyValue.Value;
+                            exhibition.downloadUrl = propTituloAct.FirstPropertyValue.DownloadUrl;
+                        }
+                        exhibition.image = propertyExhibition.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image").Replace(".jpg", "_300.jpg");
+                        exhibition.start = propertyExhibition.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p4_p79_has_time-span_beginning");
+                        exhibition.end = propertyExhibition.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p4_p80_has_time-span_end");
+                        this.relatedExhibition.Add(exhibition);
+                    }
+                }
+            }
+            #endregion
+
+            #region ArtWork
+            SemanticPropertyModel propArtWork = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#relatedArtWork");
+            this.relatedArtWork = new List<ArtWork>();
+            if (propArtWork != null && propArtWork.PropertyValues != null && propArtWork.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyArtWork in propArtWork.PropertyValues)
+                {
+                    if (propertyArtWork != null && propertyArtWork.Value != null)
+                    {
+                        ArtWork artWork = new ArtWork();
+                        artWork.author = new List<string>();
+                        SemanticPropertyModel propTituloArtWork = propertyArtWork.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p102_E35_p3_has_title");
+                        if (propTituloArtWork != null && propTituloArtWork.FirstPropertyValue != null)
+                        {
+                            artWork.title = propTituloArtWork.FirstPropertyValue.Value;
+                            artWork.downloadUrl = propTituloArtWork.FirstPropertyValue.DownloadUrl;
+                        }
+                        artWork.image = propertyArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image").Replace(".jpg", "_93.jpg");
+
+                        SemanticPropertyModel propObraAutores = propertyArtWork.RelatedEntity.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p14_carried_out_by");
+                        if (propObraAutores != null && propObraAutores.PropertyValues != null && propObraAutores.PropertyValues.Count > 0)
+                        {
+                            foreach (SemanticPropertyModel.PropertyValue obraAutor in propObraAutores.PropertyValues)
+                            {
+                                if (obraAutor != null && obraAutor.Value != null)
+                                {
+                                    SemanticPropertyModel propDeObraAutor = obraAutor.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#author");
+                                    if (propDeObraAutor != null && propDeObraAutor.PropertyValues != null && propDeObraAutor.PropertyValues.Count > 0)
+                                    {
+                                        string autor = propDeObraAutor.FirstPropertyValue.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title");
+                                        artWork.author.Add(autor);
+                                    }
+                                }
+                            }
+                        }
+                        this.relatedArtWork.Add(artWork);
+                    }
+                }
+            }
+            #endregion
+
+            #region Generic Form
+            SemanticPropertyModel proRelatedGenericForm = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#relatedGenericForm");
+            if (proRelatedGenericForm != null && proRelatedGenericForm.PropertyValues != null && proRelatedGenericForm.PropertyValues.Count > 0)
+            {
+                SemanticPropertyModel.PropertyValue propertyRelatedGenericForm = proRelatedGenericForm.PropertyValues[0];
+                if (propertyRelatedGenericForm != null && propertyRelatedGenericForm.Value != null)
+                {
+                    SemanticPropertyModel propTitleForm = propertyRelatedGenericForm.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#titleForm");
+                    if (propTitleForm != null)
+                    {
+                        this.urlRelatedGenericForm = propTitleForm.FirstPropertyValue.DownloadUrl;
+                    }
+                }
+            }
+            #endregion
+
+            #region Schedule
+
+            this.hideSchedule = pSemCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hideSchedule") == pHtmlHelper.GetText("COMMON", "SI");
+
+            SemanticPropertyModel proRelatedActivityForm = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#relatedActivityForm");
+            if (proRelatedActivityForm != null && proRelatedActivityForm.PropertyValues != null && proRelatedActivityForm.PropertyValues.Count > 0)
+            {
+                SemanticPropertyModel.PropertyValue propertyRelatedActivityForm = proRelatedActivityForm.PropertyValues[0];
+                if (propertyRelatedActivityForm != null && propertyRelatedActivityForm.Value != null)
+                {
+                    SemanticPropertyModel propTitleForm = propertyRelatedActivityForm.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#titleForm");
+                    if (propTitleForm != null)
+                    {
+                        this.urlRelatedActivityForm = propTitleForm.FirstPropertyValue.DownloadUrl;
+                    }
+                }
+            }
+
+            this.schedule = new SortedDictionary<DateTime, SortedDictionary<DateTime, SortedDictionary<DateTime, Tuple<bool, bool>>>>();
+            SemanticPropertyModel propActivityForm = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityForm");
+            if (propActivityForm != null && propActivityForm.PropertyValues != null && propActivityForm.PropertyValues.Count > 0)
+            {
+                SemanticPropertyModel.PropertyValue propertyActivityForm = propActivityForm.PropertyValues[0];
+                if (propertyActivityForm != null && propertyActivityForm.Value != null)
+                {
+                    SemanticPropertyModel propActivity = propertyActivityForm.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activity");
+                    if (propActivity != null && propActivity.PropertyValues != null && propActivity.PropertyValues.Count > 0)
+                    {
+                        foreach (SemanticPropertyModel.PropertyValue propertyActivity in propActivity.PropertyValues)
+                        {
+                            if (propertyActivity != null && propertyActivity.Value != null)
+                            {
+                                //aqui si
+                                SemanticPropertyModel propCall = propertyActivity.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#call");
+                                if (propCall != null && propCall.PropertyValues != null && propCall.PropertyValues.Count > 0)
+                                {
+                                    foreach (SemanticPropertyModel.PropertyValue propertyCall in propCall.PropertyValues)
+                                    {
+                                        if (propertyCall != null && propertyCall.Value != null)
+                                        {
+                                            DateTime dateCall = GetDate(propertyCall.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#startDateCall")).Value;
+                                            DateTime month = new DateTime(dateCall.Year, dateCall.Month, 1);
+                                            if (!this.schedule.ContainsKey(month))
+                                            {
+                                                this.schedule.Add(month, new SortedDictionary<DateTime, SortedDictionary<DateTime, Tuple<bool, bool>>>());
+                                            }
+                                            DateTime day = new DateTime(dateCall.Year, dateCall.Month, dateCall.Day);
+                                            if (!this.schedule[month].ContainsKey(day))
+                                            {
+                                                this.schedule[month].Add(day, new SortedDictionary<DateTime, Tuple<bool, bool>>());
+                                            }
+                                            DateTime time = new DateTime(dateCall.Year, dateCall.Month, dateCall.Day, dateCall.Hour, dateCall.Minute, 0);
+                                            bool amigos = propertyCall.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#friendsMuseum") == pHtmlHelper.GetText("COMMON", "SI") || propertyCall.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#friendsMuseum") == "true";
+                                            if (!this.schedule[month][day].ContainsKey(time))
+                                            {
+                                                this.schedule[month][day].Add(time, new Tuple<bool, bool>(amigos, false));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            SemanticPropertyModel proRelatedActivityFormLSE = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#relatedActivityFormLSE");
+            if (proRelatedActivityFormLSE != null && proRelatedActivityFormLSE.PropertyValues != null && proRelatedActivityFormLSE.PropertyValues.Count > 0)
+            {
+                SemanticPropertyModel.PropertyValue propertyRelatedActivityForm = proRelatedActivityFormLSE.PropertyValues[0];
+                if (propertyRelatedActivityForm != null && propertyRelatedActivityForm.Value != null)
+                {
+                    SemanticPropertyModel propTitleForm = propertyRelatedActivityForm.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#titleForm");
+                    if (propTitleForm != null)
+                    {
+                        this.urlRelatedActivityFormLSE = propTitleForm.FirstPropertyValue.DownloadUrl;
+                    }
+                }
+            }
+
+            SemanticPropertyModel propActivityFormLSE = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityFormLSE");
+            if (propActivityFormLSE != null && propActivityFormLSE.PropertyValues != null && propActivityFormLSE.PropertyValues.Count > 0)
+            {
+                SemanticPropertyModel.PropertyValue propertyActivityForm = propActivityFormLSE.PropertyValues[0];
+                if (propertyActivityForm != null && propertyActivityForm.Value != null)
+                {
+                    SemanticPropertyModel propActivity = propertyActivityForm.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activity");
+                    if (propActivity != null && propActivity.PropertyValues != null && propActivity.PropertyValues.Count > 0)
+                    {
+                        foreach (SemanticPropertyModel.PropertyValue propertyActivity in propActivity.PropertyValues)
+                        {
+                            if (propertyActivity != null && propertyActivity.Value != null)
+                            {
+                                //aqui si
+                                SemanticPropertyModel propCall = propertyActivity.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#call");
+                                if (propCall != null && propCall.PropertyValues != null && propCall.PropertyValues.Count > 0)
+                                {
+                                    foreach (SemanticPropertyModel.PropertyValue propertyCall in propCall.PropertyValues)
+                                    {
+                                        if (propertyCall != null && propertyCall.Value != null)
+                                        {
+                                            DateTime dateCall = GetDate(propertyCall.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#startDateCall")).Value;
+                                            DateTime month = new DateTime(dateCall.Year, dateCall.Month, 1);
+                                            if (!this.schedule.ContainsKey(month))
+                                            {
+                                                this.schedule.Add(month, new SortedDictionary<DateTime, SortedDictionary<DateTime, Tuple<bool, bool>>>());
+                                            }
+                                            DateTime day = new DateTime(dateCall.Year, dateCall.Month, dateCall.Day);
+                                            if (!this.schedule[month].ContainsKey(day))
+                                            {
+                                                this.schedule[month].Add(day, new SortedDictionary<DateTime, Tuple<bool, bool>>());
+                                            }
+                                            DateTime time = new DateTime(dateCall.Year, dateCall.Month, dateCall.Day, dateCall.Hour, dateCall.Minute, 0);
+                                            bool amigos = propertyCall.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#friendsMuseum") == pHtmlHelper.GetText("COMMON", "SI") || propertyCall.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#friendsMuseum") == "true";
+                                            if (!this.schedule[month][day].ContainsKey(time))
+                                            {
+                                                this.schedule[month][day].Add(time, new Tuple<bool, bool>(amigos, true));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+            #endregion
+
+            #region RelatedParentActivity
+            SemanticPropertyModel propRelatedParentActivity = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#relatedActivity");
+            this.relatedParentActivity = new List<RelatedActivity>();
+            if (propRelatedParentActivity != null && propRelatedParentActivity.PropertyValues != null && propRelatedParentActivity.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyRelatedActivity in propRelatedParentActivity.PropertyValues)
+                {
+                    if (propertyRelatedActivity != null && propertyRelatedActivity.Value != null)
+                    {
+                        RelatedActivity relatedActivity = new RelatedActivity();
+                        SemanticPropertyModel propTituloRelatedActivity = propertyRelatedActivity.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p1_E41_p102_has_title");
+                        if (propTituloRelatedActivity != null && propTituloRelatedActivity.FirstPropertyValue != null)
+                        {
+                            relatedActivity.title = propTituloRelatedActivity.FirstPropertyValue.Value;
+                            relatedActivity.url = propTituloRelatedActivity.FirstPropertyValue.DownloadUrl;
+                        }
+                        relatedActivity.image = propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image");
+                        relatedActivity.publicationDate = GetDate(propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#publicationDate"));
+
+                        //Pendiente -->Fecha publicacion existe y es posterior a la fecha actual
+                        //En curso -->startDate y endDate existen y  Fecha actual>startDate && Fecha actual < endDate
+                        //Inscripción XXXX -->Fecha inscripción existe y Fecha inscripción > Fecha actual
+                        //Inscripción abierta -->Fecha inscripción existe y Fecha actual entre fecha de inscripción
+                        //Si no está pendiente se añade
+                        if ((!relatedActivity.publicationDate.HasValue || relatedActivity.publicationDate.Value < DateTime.Now) && !string.IsNullOrEmpty(relatedActivity.title))
+                        {
+                            this.relatedParentActivity.Add(relatedActivity);
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region RelatedChildrenActivity
+            SemanticPropertyModel propRelatedChildrenActivity = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#i_relatedActivity");
+            this.relatedChildrenActivity = new List<RelatedActivity>();
+            if (propRelatedChildrenActivity != null && propRelatedChildrenActivity.PropertyValues != null && propRelatedChildrenActivity.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyRelatedActivity in propRelatedChildrenActivity.PropertyValues)
+                {
+                    if (propertyRelatedActivity != null && propertyRelatedActivity.Value != null)
+                    {
+                        RelatedActivity relatedActivity = new RelatedActivity();
+                        SemanticPropertyModel propTituloRelatedActivity = propertyRelatedActivity.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p1_E41_p102_has_title");
+                        if (propTituloRelatedActivity != null && propTituloRelatedActivity.FirstPropertyValue != null)
+                        {
+                            relatedActivity.title = propTituloRelatedActivity.FirstPropertyValue.Value;
+                            relatedActivity.url = propTituloRelatedActivity.FirstPropertyValue.DownloadUrl;
+                        }
+
+                        SemanticPropertyModel propActivityPathInt = propertyRelatedActivity.RelatedEntity.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p2_has_type");
+                        relatedActivity.activityCategory = new List<ActivityCategory>();
+                        if (propActivityPathInt != null && propActivityPathInt.PropertyValues != null && propActivityPathInt.PropertyValues.Count > 0)
+                        {
+                            foreach (SemanticPropertyModel.PropertyValue activityPath in propActivityPathInt.PropertyValues)
+                            {
+                                SemanticPropertyModel propActivityNode = activityPath.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityNode");
+                                if (propActivityNode != null && propActivityNode.PropertyValues != null && propActivityNode.PropertyValues.Count() > 0)
+                                {
+                                    ActivityCategory lastActivityCategory = null;
+                                    int i = 0;
+                                    foreach (SemanticPropertyModel.PropertyValue activityNode in propActivityNode.PropertyValues)
+                                    {
+                                        i++;
+                                        ActivityCategory actividadActual = new ActivityCategory();
+                                        actividadActual.title = activityNode.RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/2008/05/skos#prefLabel");
+                                        if (i == 1)
+                                        {
+                                            relatedActivity.activityCategory.Add(actividadActual);
+                                        }
+                                        else
+                                        {
+                                            lastActivityCategory.child = actividadActual;
+                                        }
+                                        lastActivityCategory = actividadActual;
+                                    }
+                                }
+                            }
+                        }
+
+                        SemanticPropertyModel propActivityTypeInt = propertyRelatedActivity.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p2_has_type_activity");
+                        if (propActivityTypeInt != null && propActivityTypeInt.PropertyValues != null && propActivityTypeInt.PropertyValues.Count > 0)
+                        {
+                            foreach (SemanticPropertyModel.PropertyValue activityTypeInt in propActivityTypeInt.PropertyValues)
+                            {
+                                relatedActivity.activityType = new ActivityType();
+                                relatedActivity.activityType.title = activityTypeInt.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/multilang-property.owl#textValue");
+                                relatedActivity.activityType.uri = "ecidoc:p2_has_type_activity@@@multiLan:textValue=" + this.activityType.title.ToLower() + "@" + pIdioma;
+                            }
+                        }
+
+                        SemanticPropertyModel propProgramTypeInt = propertyRelatedActivity.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p2_has_type_program");
+                        if (propProgramTypeInt != null && propProgramTypeInt.PropertyValues != null && propProgramTypeInt.PropertyValues.Count > 0)
+                        {
+                            relatedActivity.activityProgramType = new List<string>();
+                            foreach (SemanticPropertyModel.PropertyValue programTypeInt in propProgramTypeInt.PropertyValues)
+                            {
+                                string activityProgramType = programTypeInt.Value;
+                                relatedActivity.activityProgramType.Add(activityProgramType);
+                            }
+                        }
+
+
+
+                        relatedActivity.textDate = propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#textDate");
+                        relatedActivity.image = propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image");
+                        relatedActivity.alternativeType = propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#alternativeType");
+                        relatedActivity.ticketUrl = propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#ticketURL");
+                        relatedActivity.publicationDate = GetDate(propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#publicationDate"));
+                        relatedActivity.activityDateStart = GetDate(propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityDate@@@http://museodelprado.es/ontologia/pradomuseum.owl#startDate"));
+                        relatedActivity.activityDateEnd = GetDate(propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityDate@@@http://museodelprado.es/ontologia/pradomuseum.owl#endDate"));
+                        relatedActivity.registrationDateStart = GetDate(propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#registrationDate@@@http://museodelprado.es/ontologia/pradomuseum.owl#startDate"));
+                        relatedActivity.registrationDateEnd = GetDate(propertyRelatedActivity.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#registrationDate@@@http://museodelprado.es/ontologia/pradomuseum.owl#endDate"));
+
+                        //Pendiente -->Fecha publicacion existe y es posterior a la fecha actual
+                        //En curso -->startDate y endDate existen y  Fecha actual>startDate && Fecha actual < endDate
+                        //Inscripción XXXX -->Fecha inscripción existe y Fecha inscripción > Fecha actual
+                        //Inscripción abierta -->Fecha inscripción existe y Fecha actual entre fecha de inscripción
+                        //Si no está pendiente se añade
+                        if (!relatedActivity.publicationDate.HasValue || relatedActivity.publicationDate.Value < DateTime.Now)
+                        {
+                            this.relatedChildrenActivity.Add(relatedActivity);
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region Multimedia
+            SemanticPropertyModel propMultimedia = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/efrbrer.owl#has_multimedia");
+            this.relatedMultimedia = new Dictionary<string, Multimedia>();
+            if (propMultimedia != null && propMultimedia.PropertyValues != null && propMultimedia.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyMultimedia in propMultimedia.PropertyValues)
+                {
+                    if (propertyMultimedia != null && propertyMultimedia.Value != null)
+                    {
+                        Multimedia multimedia = new Multimedia();
+                        multimedia.longid = propertyMultimedia.RelatedEntity.Entity.Uri;
+                        multimedia.title = propertyMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                        multimedia.type = propertyMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+                        if (!string.IsNullOrEmpty(multimedia.type))
+                        {
+                            multimedia.type = multimedia.type.Replace("http://museodelprado.es/ontologia/efrbrer.owl#", "");
+                        }
+                        multimedia.duration = propertyMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#duration");
+                        multimedia.url = propertyMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#url");
+                        if (multimedia.type == "Interactive")
+                        {
+                            SemanticPropertyModel propTituloInteractivo = propertyMultimedia.RelatedEntity.GetPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                            if (propTituloInteractivo != null && propTituloInteractivo.PropertyValues.Count > 0)
+                            {
+                                multimedia.url = propTituloInteractivo.FirstPropertyValue.DownloadUrl;
+                            }
+                        }
+                        multimedia.image = propertyMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image");
+                        if (!string.IsNullOrEmpty(multimedia.image))
+                        {
+                            multimedia.image = multimedia.image.Replace(".jpg", "_300.jpg");
+                        }
+                        if (multimedia.type == "Interactive" || !string.IsNullOrEmpty(multimedia.url))
+                        {
+                            if (!this.relatedMultimedia.ContainsKey(multimedia.longid))
+                            {
+                                this.relatedMultimedia.Add(multimedia.longid, multimedia);
+                            }
+                        }
+                    }
+                }
+            }
+
+            SemanticPropertyModel propI_Multimedia = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/efrbrer.owl#i_has_multimedia");
+            if (propI_Multimedia != null && propI_Multimedia.PropertyValues != null && propI_Multimedia.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyI_Multimedia in propI_Multimedia.PropertyValues)
+                {
+                    if (propertyI_Multimedia != null && propertyI_Multimedia.Value != null)
+                    {
+                        Multimedia multimedia = new Multimedia();
+                        multimedia.longid = propertyI_Multimedia.RelatedEntity.Entity.Uri;
+                        multimedia.title = propertyI_Multimedia.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                        multimedia.type = propertyI_Multimedia.RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+                        if (!string.IsNullOrEmpty(multimedia.type))
+                        {
+                            multimedia.type = multimedia.type.Replace("http://museodelprado.es/ontologia/efrbrer.owl#", "");
+                        }
+                        multimedia.duration = propertyI_Multimedia.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#duration");
+                        multimedia.url = propertyI_Multimedia.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#url");
+                        if (multimedia.type == "Interactive")
+                        {
+                            SemanticPropertyModel propTituloInteractivo = propertyI_Multimedia.RelatedEntity.GetPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                            if (propTituloInteractivo != null && propTituloInteractivo.PropertyValues.Count > 0)
+                            {
+                                multimedia.url = propTituloInteractivo.FirstPropertyValue.DownloadUrl;
+                            }
+                        }
+                        multimedia.image = propertyI_Multimedia.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image");
+                        if (!string.IsNullOrEmpty(multimedia.image))
+                        {
+                            multimedia.image = multimedia.image.Replace(".jpg", "_300.jpg");
+                        }
+                        if (multimedia.type == "Interactive" || !string.IsNullOrEmpty(multimedia.url))
+                        {
+                            if (!this.relatedMultimedia.ContainsKey(multimedia.longid))
+                            {
+                                this.relatedMultimedia.Add(multimedia.longid, multimedia);
+                            }
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region Video
+            SemanticPropertyModel propVideo = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/efrbrer.owl#has_video");
+            this.relatedVideo = new List<Multimedia>();
+            if (propVideo != null && propVideo.PropertyValues != null && propVideo.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyVideo in propVideo.PropertyValues)
+                {
+                    if (propertyVideo != null && propertyVideo.Value != null)
+                    {
+                        Multimedia multimedia = new Multimedia();
+                        multimedia.title = propertyVideo.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                        multimedia.description = propertyVideo.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/vocab/frbr/core#p3016_has_summarization_of_content");
+                        multimedia.type = propertyVideo.RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+                        if (!string.IsNullOrEmpty(multimedia.type))
+                        {
+                            multimedia.type = multimedia.type.Replace("http://museodelprado.es/ontologia/efrbrer.owl#", "");
+                        }
+
+                        multimedia.duration = propertyVideo.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#duration");
+                        multimedia.url = propertyVideo.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#url");
+                        multimedia.image = propertyVideo.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image");
+                        if (!string.IsNullOrEmpty(multimedia.image))
+                        {
+                            multimedia.image = multimedia.image.Replace(".jpg", "_300.jpg");
+                        }
+                        if (!string.IsNullOrEmpty(multimedia.url) && multimedia.url.IndexOf("watch?v=") > 0)
+                        {
+                            multimedia.id = multimedia.url.Substring(multimedia.url.IndexOf("watch?v=") + 8);
+                        }
+
+                        if (!string.IsNullOrEmpty(multimedia.url) && !string.IsNullOrEmpty(multimedia.id))
+                        {
+                            this.relatedVideo.Add(multimedia);
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region ActivityPage
+            SemanticPropertyModel propActivityPage = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityPage");
+            this.activityPage = new List<ActivityPage>();
+            if (propActivityPage != null && propActivityPage.PropertyValues != null && propActivityPage.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyActivityPage in propActivityPage.PropertyValues)
+                {
+                    if (propertyActivityPage != null && propertyActivityPage.Value != null)
+                    {
+                        ActivityPage activityPage = new ActivityPage();
+                        activityPage.pageShortName = propertyActivityPage.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#pageShortName");
+                        activityPage.pageName = propertyActivityPage.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#pageName");
+                        activityPage.pageDescription = propertyActivityPage.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#pageDescription");
+                        SemanticPropertyModel propActivityPageImage = propertyActivityPage.RelatedEntity.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p65_shows_visual_item");
+                        if (propActivityPageImage != null && propActivityPageImage.PropertyValues != null && propActivityPageImage.PropertyValues.Count > 0)
+                        {
+                            foreach (SemanticPropertyModel.PropertyValue propertyActivityPageImage in propActivityPageImage.PropertyValues)
+                            {
+                                if (propertyActivityPageImage != null && propertyActivityPageImage.Value != null)
+                                {
+                                    activityPage.image = new ActivityPageImage();
+                                    activityPage.image.isHorizontal = propertyActivityPageImage.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#isHorizontal") == pHtmlHelper.GetText("COMMON", "SI");
+                                    activityPage.image.pageImage = propertyActivityPageImage.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#pageImage");
+                                    activityPage.image.pageImageFooter = propertyActivityPageImage.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#pageImageFooter");
+                                    activityPage.image.pageImageUrl = propertyActivityPageImage.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#pageImageUrl");
+                                }
+                            }
+                        }
+                        this.activityPage.Add(activityPage);
+                    }
+                }
+            }
+            #endregion
+
+            #region RelatedArtWork
+            SemanticPropertyModel propRelatedArtWork = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activityArtWork");
+            this.relatedArtWorks = new List<RelatedArtWork>();
+            if (propRelatedArtWork != null && propRelatedArtWork.PropertyValues != null && propRelatedArtWork.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyRelatedArtWork in propRelatedArtWork.PropertyValues)
+                {
+                    if (propertyRelatedArtWork != null && propertyRelatedArtWork.Value != null)
+                    {
+                        RelatedArtWork relatedArtwork = new RelatedArtWork();
+                        this.relatedArtWorks.Add(relatedArtwork);
+
+                        SemanticPropertyModel propExternalArtWork = propertyRelatedArtWork.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#relatedExternalArtWork");
+                        if (propExternalArtWork != null && propExternalArtWork.PropertyValues != null && propExternalArtWork.PropertyValues.Count > 0)
+                        {
+                            foreach (SemanticPropertyModel.PropertyValue propertyExternalArtWork in propExternalArtWork.PropertyValues)
+                            {
+                                if (propertyExternalArtWork != null && propertyExternalArtWork.Value != null)
+                                {
+                                    relatedArtwork.title = propertyExternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note");
+                                    relatedArtwork.description = propertyExternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p3_has_note");
+                                    relatedArtwork.image = propertyExternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#artWorkImage");
+                                }
+                            }
+                        }
+
+                        SemanticPropertyModel propInternalArtWork = propertyRelatedArtWork.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#relatedInternalArtWork");
+                        if (propInternalArtWork != null && propInternalArtWork.PropertyValues != null && propInternalArtWork.PropertyValues.Count > 0)
+                        {
+                            foreach (SemanticPropertyModel.PropertyValue propertyInternalArtWork in propInternalArtWork.PropertyValues)
+                            {
+                                if (propertyInternalArtWork != null && propertyInternalArtWork.Value != null)
+                                {
+                                    SemanticPropertyModel proptituloObra = propertyInternalArtWork.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p102_E35_p3_has_title");
+                                    if (proptituloObra != null && proptituloObra.PropertyValues.Count > 0)
+                                    {
+                                        relatedArtwork.title = proptituloObra.FirstPropertyValue.Value;
+                                        relatedArtwork.url = proptituloObra.FirstPropertyValue.DownloadUrl;
+                                    }
+
+                                    List<string> autores = new List<string>();
+                                    SemanticPropertyModel propAutores = propertyInternalArtWork.RelatedEntity.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#organizators");
+                                    if (propAutores != null && propAutores.PropertyValues.Count() > 0)
+                                    {
+                                        foreach (SemanticPropertyModel.PropertyValue autor in propAutores.PropertyValues)
+                                        {
+                                            SemanticPropertyModel propAutor = autor.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#author");
+                                            if (propAutor != null && propAutor.PropertyValues.Count() > 0)
+                                            {
+                                                foreach (SemanticPropertyModel.PropertyValue autorInt in propAutor.PropertyValues)
+                                                {
+                                                    autores.Add(autorInt.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#title"));
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    string formatoFisico = string.Empty;
+                                    string numeroCatalogoObraRelacionada = propertyInternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p48_has_preferred_identifier@@@http://www.cidoc-crm.org/cidoc-crm#p102_has_title");
+                                    string soporteObraRelacionada = propertyInternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p126_employed_support@@@http://museodelprado.es/ontologia/pradomuseum.owl#supportNode@@@http://www.w3.org/2008/05/skos#prefLabel");
+                                    string materiaObraRelacionada = propertyInternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p126_employed_medium@@@http://museodelprado.es/ontologia/pradomuseum.owl#mediumNode@@@http://www.w3.org/2008/05/skos#prefLabel");
+
+                                    string letraObraRelacionada = string.Empty;
+                                    if (!string.IsNullOrEmpty(numeroCatalogoObraRelacionada))
+                                    {
+                                        System.Text.RegularExpressions.Regex re = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z]+");
+                                        System.Text.RegularExpressions.MatchCollection mc = re.Matches(numeroCatalogoObraRelacionada);
+
+                                        if (mc != null)
+                                        {
+                                            letraObraRelacionada = mc[0].Groups[0].Value;
+                                        }
+                                    }
+
+
+                                    SemanticPropertyModel tesauroTecnicaObraRelacionada = propertyInternalArtWork.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p32_used_general_technique@@@http://museodelprado.es/ontologia/pradomuseum.owl#techniqueNode");
+                                    string tecnicaObraRelacionada = null;
+
+                                    if (tesauroTecnicaObraRelacionada != null && tesauroTecnicaObraRelacionada.PropertyValues.Count > 0)
+                                    {
+                                        tecnicaObraRelacionada = tesauroTecnicaObraRelacionada.PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/2008/05/skos#prefLabel");
+
+                                        if (letraObraRelacionada.Equals("E") || letraObraRelacionada.Equals("O"))
+                                        {
+                                            if (!string.IsNullOrEmpty(materiaObraRelacionada))
+                                            {
+                                                formatoFisico = formatoFisico + materiaObraRelacionada + ", ";
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!string.IsNullOrEmpty(tecnicaObraRelacionada))
+                                            {
+                                                formatoFisico = formatoFisico + tecnicaObraRelacionada;
+                                            }
+                                            if (!string.IsNullOrEmpty(soporteObraRelacionada))
+                                            {
+                                                formatoFisico = formatoFisico + " " + sobreIdiomaNav + " " + soporteObraRelacionada.ToLower();
+                                            }
+                                        }
+                                    }
+                                    string alto = "";
+                                    string ancho = "";
+                                    string profundidad = string.Empty;
+                                    string unidadMedida = propertyInternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p43_E54_has_dimension@@@http://museodelprado.es/ontologia/ecidoc.owl#p91_E58_has_unit");
+                                    if (propertyInternalArtWork.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p43_E54_has_dimension") != null)
+                                    {
+                                        foreach (SemanticPropertyModel.PropertyValue propDimension in propertyInternalArtWork.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p43_E54_has_dimension").PropertyValues)
+                                        {
+                                            SemanticPropertyModel propTipo = propDimension.RelatedEntity.GetProperty("http://museodelprado.es/ontologia/ecidoc.owl#p2_E55_has_type");
+                                            SemanticPropertyModel propValor = propDimension.RelatedEntity.GetProperty("http://museodelprado.es/ontologia/ecidoc.owl#p90_E60_has_value");
+                                            SemanticPropertyModel propFactorConversion = propDimension.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#conversion_factor");
+
+                                            float factorConversion = 0;
+
+                                            if (propTipo.PropertyValues.Count > 0 && propValor.PropertyValues.Count > 0)
+                                            {
+                                                if (propFactorConversion != null)
+                                                {
+
+                                                    string factorConv = propFactorConversion.FirstPropertyValue.Value;
+
+                                                    if (!string.IsNullOrEmpty(factorConv))
+                                                    {
+                                                        factorConversion = float.Parse(factorConv);
+                                                    }
+                                                }
+
+                                                if (propTipo.FirstPropertyValue.Value == "Alto" || propTipo.FirstPropertyValue.Value == "High/Height")
+                                                {
+                                                    float altoFloat = float.Parse(propValor.FirstPropertyValue.Value) / factorConversion;
+                                                    alto = altoFloat.ToString();
+                                                }
+                                                else if (propTipo.FirstPropertyValue.Value == "Ancho" || propTipo.FirstPropertyValue.Value == "Width")
+                                                {
+                                                    float anchoFloat = float.Parse(propValor.FirstPropertyValue.Value) / factorConversion;
+                                                    ancho = anchoFloat.ToString();
+                                                }
+                                                else if (propTipo.FirstPropertyValue.Value == "Fondo" || propTipo.FirstPropertyValue.Value == "Base/bottom")
+                                                {
+                                                    float profundidadFloat = float.Parse(propValor.FirstPropertyValue.Value) / factorConversion;
+                                                    profundidad = profundidadFloat.ToString();
+                                                }
+                                            }
+                                        }
+
+                                        // Dimensiones
+                                        if (!string.IsNullOrEmpty(alto) && !string.IsNullOrEmpty(ancho) && !string.IsNullOrEmpty(unidadMedida))
+                                        {
+                                            formatoFisico += ", " + alto + " x " + ancho + " " + unidadMedida;
+                                        }
+                                    }
+                                    string fecha = propertyInternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/edate.owl#textDate");
+                                    string procedencia = "Madrid, Museo Nacional del Prado";
+                                    string ubicacionObra = propertyInternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p55_has_current_location");
+                                    string salaObra = propertyInternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p55_has_current_location_type");
+
+                                    relatedArtwork.description = "<p>";
+                                    if (autores.Count() > 0)
+                                    {
+                                        int numAutor = 0;
+                                        foreach (string autor in autores)
+                                        {
+                                            numAutor++;
+                                            if (numAutor > 1)
+                                            {
+                                                relatedArtwork.description += "; ";
+                                            }
+                                            relatedArtwork.description += autor;
+                                        }
+                                        relatedArtwork.description += "<br>";
+                                    }
+                                    if (!string.IsNullOrEmpty(formatoFisico))
+                                    {
+                                        relatedArtwork.description += formatoFisico + "<br>";
+                                    }
+                                    if (!string.IsNullOrEmpty(fecha))
+                                    {
+                                        relatedArtwork.description += fecha + "<br>";
+                                    }
+                                    if (!string.IsNullOrEmpty(procedencia))
+                                    {
+                                        relatedArtwork.description += procedencia + "<br>";
+                                    }
+
+                                    if (!string.IsNullOrEmpty(salaObra))
+                                    {
+                                        if (salaObra.Contains("Expuesto"))
+                                        {
+                                            if (!string.IsNullOrEmpty(ubicacionObra))
+                                            {
+                                                relatedArtwork.description += ubicacionObra;
+                                            }
+                                        }
+                                    }
+
+                                    relatedArtwork.description += "</p>";
+                                    relatedArtwork.image = propertyInternalArtWork.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image");
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+            }
+            #endregion
+
+            #region hasResources
+            SemanticPropertyModel propResources = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hasResources");
+            this.resources = new List<Resource>();
+            if (propResources != null && propResources.PropertyValues != null && propResources.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyResource in propResources.PropertyValues)
+                {
+                    if (propertyResource != null && propertyResource.Value != null)
+                    {
+                        Resource resource = new Resource();
+                        resource.title = propertyResource.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/dc/elements/1.1/title");
+                        resource.description = propertyResource.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/dc/elements/1.1/description");
+                        resource.files = new List<File>();
+
+                        SemanticPropertyModel propFiles = propertyResource.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#hasFiles");
+                        if (propFiles != null && propFiles.PropertyValues != null && propFiles.PropertyValues.Count > 0)
+                        {
+                            foreach (SemanticPropertyModel.PropertyValue propertyFile in propFiles.PropertyValues)
+                            {
+                                if (propertyFile != null && propertyFile.Value != null)
+                                {
+
+                                    SemanticPropertyModel propFile = propertyFile.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#file");
+                                    string fileName = propertyFile.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#fileName");
+                                    string nombreDescarga = string.Empty;
+                                    string extension = "PDF";
+                                    string urlDescarga = string.Empty;
+                                    if (propFile != null && propFile.PropertyValues != null && propFile.PropertyValues.Count > 0)
+                                    {
+                                        File file = new File();
+                                        file.file = propFile.PropertyValues[0].DownloadUrl;
+                                        file.fileName = propFile.PropertyValues[0].Value;
+                                        if (file.fileName.Contains("."))
+                                        {
+                                            file.extension = file.fileName.Substring(file.fileName.LastIndexOf(".") + 1).ToUpper();
+                                        }
+                                        if (!string.IsNullOrEmpty(fileName))
+                                        {
+                                            file.fileName = fileName;
+                                        }
+                                        resource.files.Add(file);
+                                    }
+                                }
+                            }
+                        }
+                        this.resources.Add(resource);
+                    }
+                }
+            }
+            #endregion
+
+            #region program
+            SemanticPropertyModel propProgram = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#program");
+            this.program = new SortedDictionary<int, SortedDictionary<DateTime, List<Program>>>();
+            if (propProgram != null && propProgram.PropertyValues != null && propProgram.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propertyProgram in propProgram.PropertyValues)
+                {
+                    if (propertyProgram != null && propertyProgram.Value != null)
+                    {
+                        Program program = new Program();
+                        program.title = propertyProgram.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/dc/elements/1.1/title");
+                        program.description = propertyProgram.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/dc/elements/1.1/description");
+                        program.date = GetDate(propertyProgram.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/dc/elements/1.1/date")).Value;
+                        DateTime day = GetDateDay(propertyProgram.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/dc/elements/1.1/date")).Value;
+                        int year = program.date.Year;
+                        if (!this.program.ContainsKey(year))
+                        {
+                            this.program.Add(year, new SortedDictionary<DateTime, List<Program>>());
+                        }
+                        if (!this.program[year].ContainsKey(day))
+                        {
+                            this.program[year].Add(day, new List<Program>());
+                        }
+                        this.program[year][day].Add(program);
+                        this.program[year][day].Sort((p, q) => p.date.CompareTo(q.date));
+                    }
+                }
+            }
+            #endregion
+        }
+
+        #region propiedades
+        public string image { get; set; }
+        public string caption { get; set; }
+        public string main_image { get; set; }
+        public string alternativeType { get; set; }
+        public string title { get; set; }
+        public bool bicentenario { get; set; }
+        public List<ActivityCategory> activityCategory { get; set; }
+        public ActivityType activityType { get; set; }
+        public List<ActivityProgramType> activityProgramType { get; set; }
+        public string propertyTitle { get; set; }
+        public string textDate { get; set; }
+        public string propertytextDate { get; set; }
+        public string description { get; set; }
+        public string LSEAlternativeText { get; set; }
+        public string propertydescription { get; set; }
+        public bool extraData_museum_friends { get; set; }
+        public string friendsMuseumAlternativeText { get; set; }
+        public string extraData_access { get; set; }
+        public string extraData_accessivility { get; set; }
+        public string extraData_convalidation { get; set; }
+        public string extraData_coordination { get; set; }
+        public string extraData_adress { get; set; }
+        public string extraData_duration { get; set; }
+        public string extraData_gauging { get; set; }
+        public string extraData_inscription { get; set; }
+        public string extraData_speaker { get; set; }
+        public string extraData_meeting_point { get; set; }
+        public string extraData_more_information { get; set; }
+        public string extraData_organization { get; set; }
+        public string extraData_place { get; set; }
+        public string extraData_price { get; set; }
+        public string extraData_recipients { get; set; }
+        public string extraData_schedule { get; set; }
+        public string extraData_tickets { get; set; }
+        public string extraData_university_credits { get; set; }
+        public List<ExtraData> extraData { get; set; }
+        public Dictionary<string, List<Organizator>> organizators { get; set; }
+        public List<Exhibition> relatedExhibition { get; set; }
+        public List<ArtWork> relatedArtWork { get; set; }
+        public bool hideSchedule { get; set; }
+        public SortedDictionary<DateTime, SortedDictionary<DateTime, SortedDictionary<DateTime, Tuple<bool, bool>>>> schedule { get; set; }
+        public string urlRelatedActivityForm { get; set; }
+        public string urlRelatedActivityFormLSE { get; set; }
+        public string urlRelatedGenericForm { get; set; }
+        public List<RelatedActivity> relatedParentActivity { get; set; }
+        public List<RelatedActivity> relatedChildrenActivity { get; set; }
+        public bool showMultimedia { get; set; }
+        public Dictionary<string, Multimedia> relatedMultimedia { get; set; }
+        public List<Multimedia> relatedVideo { get; set; }
+        public bool showActivity { get; set; }
+        public List<ActivityPage> activityPage { get; set; }
+        public bool showGallery { get; set; }
+        public string defaultGallery { get; set; }
+        public List<RelatedArtWork> relatedArtWorks { get; set; }
+        public bool showResources { get; set; }
+        public List<Resource> resources { get; set; }
+        public bool showProgram { get; set; }
+        public SortedDictionary<int, SortedDictionary<DateTime, List<Program>>> program { get; set; }
+        public DateTime? registrationDateStart { get; set; }
+        public DateTime? registrationDateEnd { get; set; }
+        public DateTime? activityDateStart { get; set; }
+        public DateTime? activityDateEnd { get; set; }
+        public DateTime? publicationDate { get; set; }
+        public string friendsURL { get; set; }
+        public string ticketURL { get; set; }
+        #endregion
+    }
+
+    public class ActivityCategory
+    {
+        public string title { get; set; }
+        public string uri { get; set; }
+        public ActivityCategory child { get; set; }
+    }
+
+    public class ActivityType
+    {
+        public string title { get; set; }
+        public string uri { get; set; }
+    }
+
+    public class ActivityProgramType
+    {
+        public string title { get; set; }
+        public string uri { get; set; }
+    }
+
+    public class ExtraData
+    {
+        public string title { get; set; }
+        public string description { get; set; }
+        public string cssClass { get; set; }
+    }
+
+    public class Organizator
+    {
+        public string title { get; set; }
+        public string propertyTitle { get; set; }
+        public string property { get; set; }
+        public string entity { get; set; }
+        public string url { get; set; }
+        public string propertyUrl { get; set; }
+        public string image { get; set; }
+        public string cssImage { get; set; }
+        public string propertyimage { get; set; }
+    }
+
+    public class Exhibition
+    {
+        public string title { get; set; }
+        public string downloadUrl { get; set; }
+        public string image { get; set; }
+        public string start { get; set; }
+        public string end { get; set; }
+    }
+
+    public class ArtWork
+    {
+        public string title { get; set; }
+        public string downloadUrl { get; set; }
+        public string image { get; set; }
+        public List<string> author { get; set; }
+    }
+
+    public class RelatedActivity
+    {
+        public string title { get; set; }
+        public List<ActivityCategory> activityCategory { get; set; }
+        public ActivityType activityType { get; set; }
+        public List<string> activityProgramType { get; set; }
+        public string url { get; set; }
+        public string ticketUrl { get; set; }
+        public string alternativeType { get; set; }
+        public string textDate { get; set; }
+        public string image { get; set; }
+        public DateTime? publicationDate { get; set; }
+        public DateTime? activityDateStart { get; set; }
+        public DateTime? activityDateEnd { get; set; }
+        public DateTime? registrationDateStart { get; set; }
+        public DateTime? registrationDateEnd { get; set; }
+    }
+
+    public class Multimedia
+    {
+        public string longid { get; set; }
+        public string title { get; set; }
+        public string type { get; set; }
+        public string duration { get; set; }
+        public string url { get; set; }
+        public string image { get; set; }
+        public string id { get; set; }
+        public string description { get; set; }
+    }
+
+    public class ActivityPage
+    {
+        public string pageShortName { get; set; }
+        public string pageName { get; set; }
+        public string pageDescription { get; set; }
+        public ActivityPageImage image { get; set; }
+    }
+
+    public class ActivityPageImage
+    {
+        public bool isHorizontal { get; set; }
+        public string pageImage { get; set; }
+        public string pageImageFooter { get; set; }
+        public string pageImageUrl { get; set; }
+    }
+
+    public class RelatedArtWork
+    {
+        public string title { get; set; }
+        public string description { get; set; }
+        public string image { get; set; }
+        public string url { get; set; }
+    }
+
+    public class Resource
+    {
+        public string title { get; set; }
+        public string description { get; set; }
+        public List<File> files { get; set; }
+    }
+
+    public class File
+    {
+        public string file { get; set; }
+        public string fileName { get; set; }
+        public string extension { get; set; }
+    }
+
+    public class Program
+    {
+        public string title { get; set; }
+        public string description { get; set; }
+        public DateTime date { get; set; }
+    }
+
+    public static DateTime? GetDate(string pDate)
+    {
+        DateTime? fecha = null;
+        try
+        {
+            int anio = 0; ;
+            int mes = 0; ;
+            int dia = 0;
+            int hora = 0;
+            int minuto = 0;
+            int segundo = 0;
+            if (pDate.Length == 14)
+            {
+                anio = int.Parse(pDate.Substring(0, 4));
+                mes = int.Parse(pDate.Substring(4, 2));
+                dia = int.Parse(pDate.Substring(6, 2));
+                hora = int.Parse(pDate.Substring(8, 2));
+                minuto = int.Parse(pDate.Substring(10, 2));
+                segundo = int.Parse(pDate.Substring(12, 2));
+            }
+            else if (pDate.Length >= 10 && pDate.Contains("/"))
+            {
+                anio = int.Parse(pDate.Substring(6, 4));
+                mes = int.Parse(pDate.Substring(3, 2));
+                dia = int.Parse(pDate.Substring(0, 2));
+                if (pDate.Length > 10)
+                {
+                    hora = int.Parse(pDate.Substring(11, 2));
+                    minuto = int.Parse(pDate.Substring(14, 2));
+                    segundo = int.Parse(pDate.Substring(17, 2));
+                }
+            }
+
+            fecha = new DateTime(anio, mes, dia, hora, minuto, segundo);
+        }
+        catch
+        {
+        }
+
+        return fecha;
+    }
+
+    public static DateTime? GetDateDay(string pDate)
+    {
+        DateTime? fecha = null;
+        try
+        {
+            int anio = 0; ;
+            int mes = 0; ;
+            int dia = 0;
+            if (pDate.Length == 14)
+            {
+                anio = int.Parse(pDate.Substring(0, 4));
+                mes = int.Parse(pDate.Substring(4, 2));
+                dia = int.Parse(pDate.Substring(6, 2));
+            }
+            else if (pDate.Length >= 10 && pDate.Contains("/"))
+            {
+                anio = int.Parse(pDate.Substring(6, 4));
+                mes = int.Parse(pDate.Substring(3, 2));
+                dia = int.Parse(pDate.Substring(0, 2));
+            }
+
+            fecha = new DateTime(anio, mes, dia);
+        }
+        catch
+        {
+        }
+
+        return fecha;
+    } }

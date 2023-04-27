@@ -1,0 +1,23 @@
+@model CMSComponentSearch
+@if (Model != null)
+{
+    string filtro = "search=pradoenfemenino&ordenarPor=pm:activityDate@@@pm:startDate&orden=desc";
+    //if (!string.IsNullOrEmpty(Model.Styles))
+    //{
+    //    filtro = Model.Styles;
+    //}
+    <div class="wrap">
+        <h2>@Html.Translate("ACTIVIDADES")</h2>
+        <div class="clr no-carousel" id="@Model.Key" url="@Model.UrlSearcherCMS">
+            @foreach (ResourceModel fichaModel in Model.Resultado.ListaResultados)
+                {
+                    @Html.PartialView(Model.ViewNameResources, fichaModel)
+                }  
+          </div>
+        <div class="cnt">
+            <a href="@Html.GetComunidad().Url/@Html.Translate("URLBUSQUEDAACTIVIDADES")?@filtro" class="botones-centrados">@Html.Translate("VERTODAS")</a>
+        </div>
+    </div>
+
+ }
+

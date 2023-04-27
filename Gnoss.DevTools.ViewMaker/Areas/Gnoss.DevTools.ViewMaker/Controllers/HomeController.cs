@@ -34,7 +34,7 @@ namespace Gnoss.DevTools.ViewMaker.Areas.Gnoss.DevTools.ViewMaker.Controllers
 
             ViewBag.LastURLs = lastURLs;
             ViewBag.LastSessionID = UtilConfiguration.GetAutocompleteData("sessionID");
-            ViewBag.Session = HttpContext;
+            ViewBag.Session = HttpContext;          
             return View("/Areas/Gnoss.DevTools.ViewMaker/Views/Home/Index.cshtml");
         }
         [Route("/LoadURL")]
