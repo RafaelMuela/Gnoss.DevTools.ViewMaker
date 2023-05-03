@@ -1000,9 +1000,10 @@
                 {
                     <strong class="rastro">@antetitulo</strong>
                 }
-				else{
-					<strong class="rastro">@Html.Translate("EXPOSICION")</strong>
-				}
+                else
+                {
+                    <strong class="rastro">@Html.Translate("EXPOSICION")</strong>
+                }
                 <h1 @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note"))>@titulo</h1>
                 <p class="subtitulo">
                     @{
@@ -1188,133 +1189,133 @@
                 </div>
             }
         </div>
-    <h2>@Html.Translate("RDF")</h2>
-    <p><a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a></p>
+        <h2>@Html.Translate("RDF")</h2>
+        <p><a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a></p>
         @{
 
-                        // Organizadores Exposición
+            // Organizadores Exposición
 
-                        SemanticPropertyModel organizadores = semCmsModel.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p14_carried_out_by");
-                        List<object> organizacionesJsonLD = new List<object>();
+            SemanticPropertyModel organizadores = semCmsModel.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p14_carried_out_by");
+            List<object> organizacionesJsonLD = new List<object>();
 
-                        if (organizadores != null && organizadores.PropertyValues != null && organizadores.PropertyValues.Count() > 0)
+            if (organizadores != null && organizadores.PropertyValues != null && organizadores.PropertyValues.Count() > 0)
+            {
+                System.Data.DataTable datatableTipoOrganizador = new System.Data.DataTable("tipoOrganizador");
+                datatableTipoOrganizador.Columns.Add("es");
+                datatableTipoOrganizador.Columns.Add("en");
+
+                // datatableTipoOrganizador contiene todos los tipos de organizador que puede haber en una exposición ordenados como deben mostrarse en la web.
+                datatableTipoOrganizador.Rows.Add("Patrocinada por:", "Sponsored by:");
+                datatableTipoOrganizador.Rows.Add("Gracias al patrocinio de:", "Thanks to the sponsorship of:");
+                datatableTipoOrganizador.Rows.Add("Con el patrocinio tecnológico de:", "With the technological sponsorship of:");
+                datatableTipoOrganizador.Rows.Add("Copatrocinada por:", "Copatrocinada por:");
+                datatableTipoOrganizador.Rows.Add("Organizada por:", "Organized by:");
+                datatableTipoOrganizador.Rows.Add("Proyecto organizado por:", "A project organized by:");
+                datatableTipoOrganizador.Rows.Add("Coorganizada por:", "Co-organized by:");
+                datatableTipoOrganizador.Rows.Add("Con la colaboración de:", "With the collaboration of:");
+                datatableTipoOrganizador.Rows.Add("Con la colaboración especial de:", "In special collaboration with:");
+                datatableTipoOrganizador.Rows.Add("Colaborador tecnológico:", "Technological support:");
+                datatableTipoOrganizador.Rows.Add("Con el patrocinio exclusivo de la:", "Exclusive Sponsorship:");
+                datatableTipoOrganizador.Rows.Add("Producido por:", "Produced by:");
+                datatableTipoOrganizador.Rows.Add("Con el apoyo de:", "Supported by:");
+                datatableTipoOrganizador.Rows.Add("Protector del Programa de Restauración:", "Protector of the restoration program:");
+                datatableTipoOrganizador.Rows.Add("Gracias a la generosidad de:", "Thanks to the generosity of:");
+
+
+                // datatableOrganizadores almacena un recurso de tipo Organizador y sus propiedades tipo y orden, para ordenar en primer lugar por Tipo de Organizador y después por orden.
+
+                System.Data.DataTable datatableOrganizadores = new System.Data.DataTable("Organizadores");
+                datatableOrganizadores.Columns.Add("Organizador", typeof(SemanticPropertyModel.PropertyValue));
+                datatableOrganizadores.Columns.Add("Tipo", typeof(string));
+                datatableOrganizadores.Columns.Add("Orden", typeof(int));
+
+
+                //Dictionary<SemanticPropertyModel.PropertyValue, string> diccionarioOrganizadores = new Dictionary<SemanticPropertyModel.PropertyValue, string>();
+                //List<SemanticPropertyModel.PropertyValue> listadoOrganizadoresPorTipo = new List<SemanticPropertyModel.PropertyValue>();
+
+                foreach (SemanticPropertyModel.PropertyValue organizador in organizadores.PropertyValues)
+                {
+                    string tipoOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#organizerType@@@http://museodelprado.es/ontologia/multilang-property.owl#textValue");
+                    string propOrdenOrganizador = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#order");
+                    int ordenOrganizador = 1000;
+
+
+                    if (!string.IsNullOrEmpty(propOrdenOrganizador))
+                    {
+                        try
                         {
-                            System.Data.DataTable datatableTipoOrganizador = new System.Data.DataTable("tipoOrganizador");
-                            datatableTipoOrganizador.Columns.Add("es");
-                            datatableTipoOrganizador.Columns.Add("en");
+                            ordenOrganizador = Int32.Parse(propOrdenOrganizador);
+                        }
+                        catch (FormatException e)
+                        {
+                            ordenOrganizador = 1000;
+                        }
+                    }
 
-                            // datatableTipoOrganizador contiene todos los tipos de organizador que puede haber en una exposición ordenados como deben mostrarse en la web.
-                            datatableTipoOrganizador.Rows.Add("Patrocinada por:", "Sponsored by:");
-                            datatableTipoOrganizador.Rows.Add("Gracias al patrocinio de:", "Thanks to the sponsorship of:");
-                            datatableTipoOrganizador.Rows.Add("Con el patrocinio tecnológico de:", "With the technological sponsorship of:");
-                            datatableTipoOrganizador.Rows.Add("Copatrocinada por:", "Copatrocinada por:");
-                            datatableTipoOrganizador.Rows.Add("Organizada por:", "Organized by:");
-                            datatableTipoOrganizador.Rows.Add("Proyecto organizado por:", "A project organized by:");
-                            datatableTipoOrganizador.Rows.Add("Coorganizada por:", "Co-organized by:");
-                            datatableTipoOrganizador.Rows.Add("Con la colaboración de:", "With the collaboration of:");
-                            datatableTipoOrganizador.Rows.Add("Con la colaboración especial de:", "In special collaboration with:");
-                            datatableTipoOrganizador.Rows.Add("Colaborador tecnológico:", "Technological support:");
-                            datatableTipoOrganizador.Rows.Add("Con el patrocinio exclusivo de la:", "Exclusive Sponsorship:");
-                            datatableTipoOrganizador.Rows.Add("Producido por:", "Produced by:");
-                            datatableTipoOrganizador.Rows.Add("Con el apoyo de:", "Supported by:");
-                            datatableTipoOrganizador.Rows.Add("Protector del Programa de Restauración:", "Protector of the restoration program:");
-                            datatableTipoOrganizador.Rows.Add("Gracias a la generosidad de:", "Thanks to the generosity of:");
+                    datatableOrganizadores.Rows.Add(organizador, tipoOrganizadorExposicion, ordenOrganizador);
 
 
-                            // datatableOrganizadores almacena un recurso de tipo Organizador y sus propiedades tipo y orden, para ordenar en primer lugar por Tipo de Organizador y después por orden.
+                    //string tipoOrganizadorExposicion = string.Empty;
 
-                            System.Data.DataTable datatableOrganizadores = new System.Data.DataTable("Organizadores");
-                            datatableOrganizadores.Columns.Add("Organizador", typeof(SemanticPropertyModel.PropertyValue));
-                            datatableOrganizadores.Columns.Add("Tipo", typeof(string));
-                            datatableOrganizadores.Columns.Add("Orden", typeof(int));
+                    //if (propTipoOrganizador != null && propTipoOrganizador.PropertyValues.Count() > 0)
+                    //{
+                    //    tipoOrganizadorExposicion = propTipoOrganizador.FirstPropertyValue.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/multilang-property.owl#textValue");
+                    //}
 
-
-                            //Dictionary<SemanticPropertyModel.PropertyValue, string> diccionarioOrganizadores = new Dictionary<SemanticPropertyModel.PropertyValue, string>();
-                            //List<SemanticPropertyModel.PropertyValue> listadoOrganizadoresPorTipo = new List<SemanticPropertyModel.PropertyValue>();
-
-                            foreach (SemanticPropertyModel.PropertyValue organizador in organizadores.PropertyValues)
-                            {
-                                string tipoOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#organizerType@@@http://museodelprado.es/ontologia/multilang-property.owl#textValue");
-                                string propOrdenOrganizador = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#order");
-                                int ordenOrganizador = 1000;
-
-
-                                if (!string.IsNullOrEmpty(propOrdenOrganizador))
-                                {
-                                    try
-                                    {
-                                        ordenOrganizador = Int32.Parse(propOrdenOrganizador);
-                                    }
-                                    catch (FormatException e)
-                                    {
-                                        ordenOrganizador = 1000;
-                                    }
-                                }
-
-                                datatableOrganizadores.Rows.Add(organizador, tipoOrganizadorExposicion, ordenOrganizador);
-
-
-                                //string tipoOrganizadorExposicion = string.Empty;
-
-                                //if (propTipoOrganizador != null && propTipoOrganizador.PropertyValues.Count() > 0)
-                                //{
-                                //    tipoOrganizadorExposicion = propTipoOrganizador.FirstPropertyValue.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/multilang-property.owl#textValue");
-                                //}
-
-                                //diccionarioOrganizadores.Add(organizador, tipoOrganizadorExposicion);
-                            }
+                    //diccionarioOrganizadores.Add(organizador, tipoOrganizadorExposicion);
+                }
 
 
 
-                            List<string> listadoTiposOrganizador = datatableTipoOrganizador.AsEnumerable().Select(id => id.Field<string>(idiomaNav)).ToList();
+                List<string> listadoTiposOrganizador = datatableTipoOrganizador.AsEnumerable().Select(id => id.Field<string>(idiomaNav)).ToList();
 
-                            // Muestra los organizadores de la Exposición ordenados por tipo
-                            if (listadoTiposOrganizador != null && listadoTiposOrganizador.Count() > 0)
-                            {
+                // Muestra los organizadores de la Exposición ordenados por tipo
+                if (listadoTiposOrganizador != null && listadoTiposOrganizador.Count() > 0)
+                {
                     <div class="fe-logotipos">
                         <dl>
                             @foreach (string tipo in listadoTiposOrganizador)
-                    {
-                        // Obtiene los organizadores del tipo "tipo" que tiene la Exposición
-                        // listadoOrganizadoresPorTipo = diccionarioOrganizadores.Where(par => par.Value.Equals(tipo)).Select(par => par.Key).ToList();
+                            {
+                                // Obtiene los organizadores del tipo "tipo" que tiene la Exposición
+                                // listadoOrganizadoresPorTipo = diccionarioOrganizadores.Where(par => par.Value.Equals(tipo)).Select(par => par.Key).ToList();
 
-                        List<object> listadoOrganizadoresDelTipo = datatableOrganizadores.AsEnumerable().Where(row => row["Tipo"].Equals(tipo)).OrderBy(row => row["Orden"]).Select(row => row["Organizador"]).ToList();
+                                List<object> listadoOrganizadoresDelTipo = datatableOrganizadores.AsEnumerable().Where(row => row["Tipo"].Equals(tipo)).OrderBy(row => row["Orden"]).Select(row => row["Organizador"]).ToList();
 
-                        if (listadoOrganizadoresDelTipo != null && listadoOrganizadoresDelTipo.Count > 0)
-                        {
-                            string tipoOrganizador = string.Empty;
+                                if (listadoOrganizadoresDelTipo != null && listadoOrganizadoresDelTipo.Count > 0)
+                                {
+                                    string tipoOrganizador = string.Empty;
 
 
                                     <dt>@tipo</dt>
 
                                     foreach (SemanticPropertyModel.PropertyValue organizador in listadoOrganizadoresDelTipo)
-                            {
-                                string nombreOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title");
-                                string imagenOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_shows_visual_item");
-                                string urlOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p76_has_contact_point");
-                                string cssImagenOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#css");
+                                    {
+                                        string nombreOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title");
+                                        string imagenOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_shows_visual_item");
+                                        string urlOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p76_has_contact_point");
+                                        string cssImagenOrganizadorExposicion = organizador.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#css");
 
-                                Dictionary<string, List<object>> orgJsonLD = new Dictionary<string, List<object>>();
-                                organizacionesJsonLD.Add(orgJsonLD);
-                                orgJsonLD.Add("@type", new List<object>(new string[] { "Organization" }));
+                                        Dictionary<string, List<object>> orgJsonLD = new Dictionary<string, List<object>>();
+                                        organizacionesJsonLD.Add(orgJsonLD);
+                                        orgJsonLD.Add("@type", new List<object>(new string[] { "Organization" }));
 
-                                if (!string.IsNullOrEmpty(nombreOrganizadorExposicion))
-                                {
-                                    orgJsonLD.Add("name", new List<object>(new string[] { nombreOrganizadorExposicion }));
-                                }
+                                        if (!string.IsNullOrEmpty(nombreOrganizadorExposicion))
+                                        {
+                                            orgJsonLD.Add("name", new List<object>(new string[] { nombreOrganizadorExposicion }));
+                                        }
 
-                                if (!string.IsNullOrEmpty(imagenOrganizadorExposicion))
-                                {
-                                    orgJsonLD.Add("image", new List<object>(new string[] { ViewBag.BaseUrlContent + "/" + imagenOrganizadorExposicion }));
-                                }
+                                        if (!string.IsNullOrEmpty(imagenOrganizadorExposicion))
+                                        {
+                                            orgJsonLD.Add("image", new List<object>(new string[] { ViewBag.BaseUrlContent + "/" + imagenOrganizadorExposicion }));
+                                        }
 
-                                if (!string.IsNullOrEmpty(urlOrganizadorExposicion))
-                                {
-                                    orgJsonLD.Add("url", new List<object>(new string[] { urlOrganizadorExposicion }));
-                                }
+                                        if (!string.IsNullOrEmpty(urlOrganizadorExposicion))
+                                        {
+                                            orgJsonLD.Add("url", new List<object>(new string[] { urlOrganizadorExposicion }));
+                                        }
 
-                                if (!string.IsNullOrEmpty(imagenOrganizadorExposicion) || !string.IsNullOrEmpty(nombreOrganizadorExposicion))
-                                {
+                                        if (!string.IsNullOrEmpty(imagenOrganizadorExposicion) || !string.IsNullOrEmpty(nombreOrganizadorExposicion))
+                                        {
                                             <dd @Html.Raw(semCmsModel.GetRDFAProperty(organizador.Property))>
                                                 <span @Html.Raw(semCmsModel.GetRDFAEntity(organizador.RelatedEntity))>
                                                     <span @Html.Raw(semCmsModel.GetRDFAProperty(organizador.RelatedEntity.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p76_has_contact_point")))>
@@ -1328,7 +1329,7 @@
                                                             else
                                                             {
                                                                 <p @Html.Raw(semCmsModel.GetRDFAProperty(organizador.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title")))>@nombreOrganizadorExposicion</p>
-            }
+                                                            }
                                                         </a>
                                                     </span>
                                                 </span>
@@ -1345,40 +1346,40 @@
         }
     </section>
     @{
-                if (interactivos != null && interactivos.PropertyValues != null && interactivos.PropertyValues.Count > 0)
+        if (interactivos != null && interactivos.PropertyValues != null && interactivos.PropertyValues.Count > 0)
+        {
+            foreach (SemanticPropertyModel.PropertyValue interactivoItem in interactivos.PropertyValues)
+            {
+                string visible = interactivoItem.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#visible").Element.Propiedad.UnicoValor.Key;
+                if (visible.ToLower() == "true")
                 {
-                    foreach (SemanticPropertyModel.PropertyValue interactivoItem in interactivos.PropertyValues)
+                    SemanticPropertyModel interactivo = interactivoItem.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#interactive");
+                    if (interactivo != null && interactivos.PropertyValues != null && interactivos.PropertyValues.Count > 0)
                     {
-                        string visible = interactivoItem.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#visible").Element.Propiedad.UnicoValor.Key;
-                        if (visible.ToLower() == "true")
-                        {
-                            SemanticPropertyModel interactivo = interactivoItem.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#interactive");
-                            if (interactivo != null && interactivos.PropertyValues != null && interactivos.PropertyValues.Count > 0)
-                            {
                         <section class="interactivo">
                             @{string html = interactivo.PropertyValues[0].RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_HTML").Replace("URLCONTENTINTERACTIVOS", urlPersonalizacion + "/ElPrado/interactivos");
-                string title = interactivo.PropertyValues[0].RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
-                SemanticPropertyModel js = interactivo.PropertyValues[0].RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_JS");
-                SemanticPropertyModel css = interactivo.PropertyValues[0].RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_CSS");
+                                string title = interactivo.PropertyValues[0].RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                                SemanticPropertyModel js = interactivo.PropertyValues[0].RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_JS");
+                                SemanticPropertyModel css = interactivo.PropertyValues[0].RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_CSS");
 
 
 
                                 <h2 class="heading"><span>@title</span></h2>
                                 @Html.Raw(html)
                                 if (js != null && js.PropertyValues != null && js.PropertyValues.Count > 0)
-            {
-                foreach (SemanticPropertyModel.PropertyValue jsItem in js.PropertyValues)
-                {
-                    ViewBag.ListaJS.Add(urlPersonalizacion + "/ElPrado/interactivos/" + jsItem.Value);
-                }
-            }
-            if (css != null && css.PropertyValues != null && css.PropertyValues.Count > 0)
-            {
-                foreach (SemanticPropertyModel.PropertyValue cssItem in css.PropertyValues)
-                {
-                    ViewBag.ListaCSS.Add(urlPersonalizacion + "/ElPrado/interactivos/" + cssItem.Value);
-                }
-            }
+                                {
+                                    foreach (SemanticPropertyModel.PropertyValue jsItem in js.PropertyValues)
+                                    {
+                                        ViewBag.ListaJS.Add(urlPersonalizacion + "/ElPrado/interactivos/" + jsItem.Value);
+                                    }
+                                }
+                                if (css != null && css.PropertyValues != null && css.PropertyValues.Count > 0)
+                                {
+                                    foreach (SemanticPropertyModel.PropertyValue cssItem in css.PropertyValues)
+                                    {
+                                        ViewBag.ListaCSS.Add(urlPersonalizacion + "/ElPrado/interactivos/" + cssItem.Value);
+                                    }
+                                }
                             }
                         </section>}
                 }
@@ -1393,20 +1394,20 @@
             <div class="loop carousel inactive">
                 @if (interactivos != null && interactivos.PropertyValues != null && interactivos.PropertyValues.Count > 0)
                 {
-                foreach (SemanticPropertyModel.PropertyValue interactivoItem in interactivos.PropertyValues)
-                {
-                    SemanticPropertyModel interactivo = interactivoItem.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#interactive");
-                    if (interactivo != null && interactivo.PropertyValues != null && interactivo.PropertyValues.Count > 0)
+                    foreach (SemanticPropertyModel.PropertyValue interactivoItem in interactivos.PropertyValues)
                     {
-                        string tituloInteractivo = "";
-                        string urlInteractivo = "";
-                        SemanticPropertyModel propTituloInteractivo = interactivo.PropertyValues[0].RelatedEntity.GetPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
-                        if (propTituloInteractivo != null && propTituloInteractivo.PropertyValues.Count > 0)
+                        SemanticPropertyModel interactivo = interactivoItem.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#interactive");
+                        if (interactivo != null && interactivo.PropertyValues != null && interactivo.PropertyValues.Count > 0)
                         {
-                            tituloInteractivo = propTituloInteractivo.FirstPropertyValue.Value;
-                            urlInteractivo = propTituloInteractivo.FirstPropertyValue.DownloadUrl;
-                        }
-                        string imagenInteractivo = interactivo.PropertyValues[0].RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image");
+                            string tituloInteractivo = "";
+                            string urlInteractivo = "";
+                            SemanticPropertyModel propTituloInteractivo = interactivo.PropertyValues[0].RelatedEntity.GetPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                            if (propTituloInteractivo != null && propTituloInteractivo.PropertyValues.Count > 0)
+                            {
+                                tituloInteractivo = propTituloInteractivo.FirstPropertyValue.Value;
+                                urlInteractivo = propTituloInteractivo.FirstPropertyValue.DownloadUrl;
+                            }
+                            string imagenInteractivo = interactivo.PropertyValues[0].RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image");
 
 
 
@@ -1425,7 +1426,7 @@
                                         </div>
                                     }
                                     else
-            {
+                                    {
                                         <a href="@urlInteractivo">
                                             @if (!string.IsNullOrEmpty(imagenInteractivo))
                                             {
@@ -1450,51 +1451,103 @@
                 }
                 @if (videos != null && videos.PropertyValues != null && videos.PropertyValues.Count > 0)
                 {
-                foreach (SemanticPropertyModel.PropertyValue video in videos.PropertyValues)
-                {
-                    string tituloVideoRelacionado = video.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
-                    string tipoVideoRelacionado = video.RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-
-                    if (!string.IsNullOrEmpty(tipoVideoRelacionado))
+                    foreach (SemanticPropertyModel.PropertyValue video in videos.PropertyValues)
                     {
-                        tipoVideoRelacionado = tipoVideoRelacionado.Replace("http://museodelprado.es/ontologia/efrbrer.owl#", "");
-                    }
-
-                    string duracionVideoRelacionado = video.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#duration");
-                    string urlVideoRelacionado = video.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#url");
-                    string imagenVideoRelacionado = video.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image");
-
-                    if (!string.IsNullOrEmpty(urlVideoRelacionado))
-                    {
-                            <div class="slide video" @Html.Raw(semCmsModel.GetRDFAProperty(video.Property))>
-                                <figure @Html.Raw(semCmsModel.GetRDFAEntity(video.RelatedEntity))>
-                                    <a href="@urlVideoRelacionado" class="modal-videoPlayer">
-                                        @if (!string.IsNullOrEmpty(duracionVideoRelacionado))
-                                        {
-                                            <span class="duracion">@duracionVideoRelacionado</span>
-                                        }
-                                        @if (!string.IsNullOrEmpty(imagenVideoRelacionado))
-                                        {
-                                            <img alt="@tituloVideoRelacionado" src="@ViewBag.BaseURLContent/@imagenVideoRelacionado" />
-                                        }
-                                    </a>
-                                    <figcaption>
-                                        @if (!string.IsNullOrEmpty(tipoVideoRelacionado))
-                                        {
-                                            <strong class="media-type">@tipoVideoRelacionado</strong>
-                                        }
-                                        @if (!string.IsNullOrEmpty(tituloVideoRelacionado))
-                                        {
-                                            <h3 class="name">
-                                                <a href="@urlVideoRelacionado" class="modal-videoPlayer">
-                                                    <span @Html.Raw(semCmsModel.GetRDFAProperty(video.RelatedEntity.GetPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation")))>@Html.Raw(tituloVideoRelacionado)</span>
-                                                </a>
-                                            </h3>
-                                        }
-                                    </figcaption>
-                                </figure>
-                            </div>
+                        string tituloVideoRelacionado = string.Empty; //video.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                        string urlInteractivo = string.Empty;
+                        SemanticPropertyModel propTituloInteractivo = video.RelatedEntity.GetPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                        if (propTituloInteractivo != null && propTituloInteractivo.PropertyValues.Count > 0)
+                        {
+                            tituloVideoRelacionado = propTituloInteractivo.FirstPropertyValue.Value;
+                            urlInteractivo = propTituloInteractivo.FirstPropertyValue.DownloadUrl;
                         }
+                        string tipoVideoRelacionado = video.RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+
+                        if (!string.IsNullOrEmpty(tipoVideoRelacionado))
+                        {
+                            tipoVideoRelacionado = tipoVideoRelacionado.Replace("http://museodelprado.es/ontologia/efrbrer.owl#", "");
+                        }
+                        string tipoRM = tipoVideoRelacionado;
+
+                        if (!string.IsNullOrEmpty(tipoVideoRelacionado) && tipoVideoRelacionado.Contains('#'))
+                        {
+                            tipoRM = tipoVideoRelacionado.Split(new Char[] { '#' }).Last();
+                        }
+                        string duracionVideoRelacionado = video.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#duration");
+                        string urlVideoRelacionado = video.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#url");
+                        string imagenVideoRelacionado = video.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image");
+
+                        if (!string.IsNullOrEmpty(urlVideoRelacionado))
+                        {
+                            if (!urlVideoRelacionado.ToLower().Contains("instagram") && !urlVideoRelacionado.ToLower().Contains("tiktok"))
+                            {
+                                <div class="slide video" @Html.Raw(semCmsModel.GetRDFAProperty(video.Property))>
+                                    <figure @Html.Raw(semCmsModel.GetRDFAEntity(video.RelatedEntity))>
+                                        <a href="@urlVideoRelacionado" class="modal-videoPlayer">
+                                            @if (!string.IsNullOrEmpty(duracionVideoRelacionado))
+                                            {
+                                                <span class="duracion">@duracionVideoRelacionado</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(imagenVideoRelacionado))
+                                            {
+                                                <img alt="@tituloVideoRelacionado" src="@ViewBag.BaseURLContent/@imagenVideoRelacionado" />
+                                            }
+                                        </a>
+                                        <figcaption>
+                                            @if (!string.IsNullOrEmpty(tipoVideoRelacionado))
+                                            {
+                                                <strong class="media-type">@tipoVideoRelacionado</strong>
+                                            }
+                                            @if (!string.IsNullOrEmpty(tituloVideoRelacionado))
+                                            {
+                                                <h3 class="name">
+                                                    <a href="@urlVideoRelacionado" class="modal-videoPlayer">
+                                                        <span @Html.Raw(semCmsModel.GetRDFAProperty(video.RelatedEntity.GetPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation")))>@Html.Raw(tituloVideoRelacionado)</span>
+                                                    </a>
+                                                </h3>
+                                            }
+                                        </figcaption>
+                                    </figure>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="slide video">
+                                    <figure>
+                                        <a href="@urlInteractivo">
+                                            @if (!string.IsNullOrEmpty(duracionVideoRelacionado))
+                                            {
+                                                <span class="duracion">@duracionVideoRelacionado</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(imagenVideoRelacionado))
+                                            {
+                                                string imagenRMUrlCompleta = string.Concat(ViewBag.BaseUrlContent, "/", imagenVideoRelacionado);
+                                                <img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
+                                            }
+                                            else
+                                            {
+                                                <img alt="" src="img/provisionales/miniatura_multimedia.png" onclick="" />
+                                            }
+                                        </a>
+                                        <figcaption>
+                                            @if (!string.IsNullOrEmpty(tipoRM))
+                                            {
+                                                <div class="media-type">@tipoRM</div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(tituloVideoRelacionado))
+                                            {
+                                                <h3 class="name"><a href="@urlInteractivo" class="modal-videoPlayer">@tituloVideoRelacionado</a></h3>
+                                            }
+                                        </figcaption>
+                                    </figure>
+                                </div>
+                            }
+
+
+                        }
+
+
+
                     }
                 }
             </div>
@@ -1504,8 +1557,8 @@
     <!-- EXPOSICIONES -->
     @if (exposiciones != null && exposiciones.PropertyValues != null && exposiciones.PropertyValues.Count() > 0 && !ocultarPaginas)
     {
-                Dictionary<SemanticPropertyModel.PropertyValue, int> dicExposiciones = ObtenerDiccionarioPaginasOrden(exposiciones);
-                Dictionary<SemanticPropertyModel.PropertyValue, int> dicExposicionesConIdiomaNav = new Dictionary<SemanticPropertyModel.PropertyValue, int>();
+        Dictionary<SemanticPropertyModel.PropertyValue, int> dicExposiciones = ObtenerDiccionarioPaginasOrden(exposiciones);
+        Dictionary<SemanticPropertyModel.PropertyValue, int> dicExposicionesConIdiomaNav = new Dictionary<SemanticPropertyModel.PropertyValue, int>();
 
         <section class="exposicion" id="exposicion">
             <h1><span>@Html.Translate("EXPOSICION")</span></h1>

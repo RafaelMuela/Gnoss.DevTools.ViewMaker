@@ -251,8 +251,8 @@
 
         <div class="res-normal">
             @{
-                DateTime fechaActual = DateTime.Now;
-                DateTime fechaDeOcultacion = DateTime.Now;
+                    DateTime fechaActual = DateTime.Now;
+                    DateTime fechaDeOcultacion = DateTime.Now.AddDays(1);
 
                 if (idiomaNav == "es")
                 {

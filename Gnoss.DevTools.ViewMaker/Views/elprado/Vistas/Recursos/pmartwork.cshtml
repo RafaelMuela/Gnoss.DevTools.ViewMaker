@@ -805,13 +805,12 @@
             </nav>
             <!-- <a class="anclaInit">@Html.Translate("BAJAR")</a> -->
             <a href="#ficha-obra" class="scroll-to" title="Continuar a ficha de la obra">Continuar a ficha de la obra</a>
-         <a href="#ficha-obra" class="scroll-to" title="Continuar a ficha de la obra">Continuar a ficha de la obra</a>
-              <div id="descarga-modal" class="menu-modal mfp-hide">
-                <div class="menu-modal-heading">Descargar</div>
-                <div><a onclick="goMenuModal('@urlDescargaPersonal')"><p>@Html.Translate("USOPERSONAL")</p></a></div>
-                <div><a onclick="goMenuModal('@urlDescargaComercial')"><p>@Html.Translate("USOCOMERCIAL")</p></a></div>
+            <dl id="descarga-modal" class="menu-modal mfp-hide">
+                <dt>Descargar</dt>
+                <dd><a onclick="goMenuModal('@urlDescargaPersonal')"><p>@Html.Translate("USOPERSONAL")</p></a></dd>
+                <dd><a onclick="goMenuModal('@urlDescargaComercial')"><p>@Html.Translate("USOCOMERCIAL")</p></a></dd>
                 <button title="Close (Esc)" type="button" class="mfp-close">×</button>
-            </div>
+            </dl>
         </section>
         <!-- Fin Visor Zoom -->
     }
@@ -868,9 +867,7 @@
     <section @Html.Raw(semCmsModel.GetRDFANamespaces()) @Html.Raw(semCmsModel.GetRDFAEntity(semCmsModel.RootEntities[0]))>
         <!-- Si tiene RDFa -->
         <section class="ficha-obra" id="ficha-obra">
-            @{
-                PintarAutorLateral2(listaAutores, idiomaNav);
-            }
+            @{PintarAutorLateral2(listaAutores, idiomaNav);}
 
             <div class="obra">
                 <article>
@@ -885,9 +882,9 @@
                     @{
                         if (!string.IsNullOrEmpty(textoCabecera))
                         {
-                                    <strong class="subtitulo">
-                                        @Html.Raw(textoCabecera)     <br />
-                                        @if (expuesto == "Expuesto" || expuesto == "On display")
+                            <strong class="subtitulo">
+                                @Html.Raw(textoCabecera)     <br />
+                                @if (expuesto == "Expuesto" || expuesto == "On display")
                                 {
                                     if (!string.IsNullOrEmpty(ubicacionObra))
                                     {
@@ -895,14 +892,14 @@
                                         {
                                             if (ubicacionObra.Contains("Sala"))
                                             {
-                                                        <a href="@FichaDocumento.UrlSearch?cidoc:p55_has_current_location=@ubicacionObra&ordenarPor=pm:relevance">@ubicacionObra.Replace("Sala", "Room").Trim()</a>}
+                                                <a href="@FichaDocumento.UrlSearch?cidoc:p55_has_current_location=@ubicacionObra&ordenarPor=pm:relevance">@ubicacionObra.Replace("Sala", "Room").Trim()</a>}
                                             else
                                             {
-                                                        <a href="@FichaDocumento.UrlSearch?cidoc:p55_has_current_location=@ubicacionObra&ordenarPor=pm:relevance">@ubicacionObra</a>}
+                                                <a href="@FichaDocumento.UrlSearch?cidoc:p55_has_current_location=@ubicacionObra&ordenarPor=pm:relevance">@ubicacionObra</a>}
                                         }
                                         else
                                         {
-                                                    <a href="@FichaDocumento.UrlSearch?cidoc:p55_has_current_location=@ubicacionObra&ordenarPor=pm:relevance">@ubicacionObra</a>}
+                                            <a href="@FichaDocumento.UrlSearch?cidoc:p55_has_current_location=@ubicacionObra&ordenarPor=pm:relevance">@ubicacionObra</a>}
 
                                     }
                                 }
@@ -911,18 +908,18 @@
                                     switch (salaObra.ToLower())
                                     {
                                         case "depósito":
-                                                    <span>@Html.Translate("DEPOSITO_OTRA_INSTITUCION")</span>
+                                            <span>@Html.Translate("DEPOSITO_OTRA_INSTITUCION")</span>
                                             break;
                                         case "exposición temporal":
-                                                    <span>@Html.Translate("EN_EXPOSICION_TEMPORAL")</span>
+                                            <span>@Html.Translate("EN_EXPOSICION_TEMPORAL")</span>
                                             break;
                                         default:
-                                                    <span>@Html.Translate("NO_EXPUESTO")</span>
+                                            <span>@Html.Translate("NO_EXPUESTO")</span>
                                             break;
                                     }
 
                                 }
-                                    </strong>
+                            </strong>
                         }
 
                         if (!string.IsNullOrEmpty(descripcionObra))
@@ -930,23 +927,23 @@
 
                             if (!string.IsNullOrEmpty(descripcionObraAumentado))
                             {
-                                        <div class="colapsado normal" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note"))>
+                                <div class="colapsado normal" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note"))>
                                             @Html.Raw(descripcionObraAumentado)
-                                            @if (!string.IsNullOrEmpty(textoExtractado))
+                                    @if (!string.IsNullOrEmpty(textoExtractado))
                                     {
-                                                <p class="extract">@Html.Raw(textoExtractado)</p>}
-                                        </div> }
+                                        <p class="extract">@Html.Raw(textoExtractado)</p>}
+                                </div> }
                             else
                             {
-                                        <div class="colapsado normal" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note"))>
+                                <div class="colapsado normal" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note"))>
                                             @Html.Raw(descripcionObra)
-                                            @if (!string.IsNullOrEmpty(textoExtractado))
+                                    @if (!string.IsNullOrEmpty(textoExtractado))
                                     {
-                                                <p class="extract">@Html.Raw(textoExtractado)</p>}
-                                        </div> }
+                                        <p class="extract">@Html.Raw(textoExtractado)</p>}
+                                </div> }
                         }
 
-                                @*if (!string.IsNullOrEmpty(tituloObraAumentado) || !string.IsNullOrEmpty(descripcionObraAumentado))
+                        @*if (!string.IsNullOrEmpty(tituloObraAumentado) || !string.IsNullOrEmpty(descripcionObraAumentado))
                             {
                                 <div class="switch red-blue">
                                     <input type="checkbox" class="switch-check" id="switchAnotacion" style="border: 0px; padding: 0px; margin-top: 0px;" checked>
@@ -985,18 +982,18 @@
 
                         if ((enciclopediaEnlazada != null && enciclopediaEnlazada.PropertyValues != null && enciclopediaEnlazada.PropertyValues.Count > 0) || (estaEnCronoscopio))
                         {
-                                    <ul class="enlaces-pag">
-                                        @if (enciclopediaEnlazada != null && enciclopediaEnlazada.PropertyValues != null && enciclopediaEnlazada.PropertyValues.Count > 0)
+                            <ul class="enlaces-pag">
+                                @if (enciclopediaEnlazada != null && enciclopediaEnlazada.PropertyValues != null && enciclopediaEnlazada.PropertyValues.Count > 0)
                                 {
                                     string enlaceRecEnciclopedia = enciclopediaEnlazada.FirstPropertyValue.DownloadUrl;
-                                            @*<li><a href="@enlaceRecEnciclopedia" class="enlace-pag">@Html.Translate("VERVOZDELAENCICLOPEDIA")</a></li>*@
-                                            <li><a href="@enlaceRecEnciclopedia">@Html.Translate("VERVOZDELAENCICLOPEDIA")</a></li>
+                                    @*<li><a href="@enlaceRecEnciclopedia" class="enlace-pag">@Html.Translate("VERVOZDELAENCICLOPEDIA")</a></li>*@
+                                    <li><a href="@enlaceRecEnciclopedia">@Html.Translate("VERVOZDELAENCICLOPEDIA")</a></li>
                                 }
-                                        @if (estaEnCronoscopio)
+                                @if (estaEnCronoscopio)
                                 {
-                                            <li><a target="_blank" class="cronoscopio" href="@Html.GetComunidad().Url/@Html.Translate("URL_CRONOSCOPIO")?search=@semCmsModel.RootEntities[0].Entity.Uri"><span>@Html.Translate("VER_OBRA_EN_LINEA_DEL_TIEMPO")</span></a></li>
+                                    <li><a target="_blank" class="cronoscopio" href="@Html.GetComunidad().Url/@Html.Translate("URL_CRONOSCOPIO")?search=@semCmsModel.RootEntities[0].Entity.Uri"><span>@Html.Translate("VER_OBRA_EN_LINEA_DEL_TIEMPO")</span></a></li>
                                 }
-                                    </ul>
+                            </ul>
                         }
                     }
                 </article>
@@ -1005,12 +1002,12 @@
                 @{
                     if (editorEntidades)
                     {
-                                <a class="botones-centrados bc-estandar hv-estandar sherlockAnotateArtwork" style="display:none">
-                                    <span class="txt">Anotar</span>
-                                </a>
-                                <a class="botones-centrados bc-estandar hv-estandar sherlockDeleteAnotateArtwork" style="display:none">
-                                    <span class="txt">Eliminar anotación</span>
-                                </a>
+                        <a class="botones-centrados bc-estandar hv-estandar sherlockAnotateArtwork" style="display:none">
+                            <span class="txt">Anotar</span>
+                        </a>
+                        <a class="botones-centrados bc-estandar hv-estandar sherlockDeleteAnotateArtwork" style="display:none">
+                            <span class="txt">Eliminar anotación</span>
+                        </a>
                         string revised = "true";
                         string nerRevisedEs = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#nerRevisedEs");
                         string nerRevisedEn = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#nerRevisedEn");
@@ -1020,30 +1017,30 @@
                         {
                             revised = "false";
                         }
-                                <a revised="@revised" class="botones-centrados bc-estandar hv-estandar hh sherlockSaveAnotateArtwork" style="display:none">
-                                    <span class="txt">Guardar/Revisar</span>
-                                </a>
+                        <a revised="@revised" class="botones-centrados bc-estandar hv-estandar hh sherlockSaveAnotateArtwork" style="display:none">
+                            <span class="txt">Guardar/Revisar</span>
+                        </a>
 
-                                <script>
-                                    $(document).ready(function () {
-                                    @if (!string.IsNullOrEmpty(tituloObra))
+                        <script>
+                            $(document).ready(function () {
+                            @if (!string.IsNullOrEmpty(tituloObra))
                             {
-                                    @Html.Raw("comportamientoAnotacion.title=\"" + tituloObra.Replace("\"", "\\\"") + "\";");
+							@Html.Raw("comportamientoAnotacion.title=\"" + tituloObra.Replace("\"", "\\\"") + "\";");
                             }
-                                    @if (!string.IsNullOrEmpty(descripcionObra))
+                            @if (!string.IsNullOrEmpty(descripcionObra))
                             {
-                                    @Html.Raw("comportamientoAnotacion.description=\"" + descripcionObra.Replace("\"", "\\\"") + "\";");
+							@Html.Raw("comportamientoAnotacion.description=\"" + descripcionObra.Replace("\"", "\\\"") + "\";");
                             }
-                                    @if (!string.IsNullOrEmpty(tituloObraAumentado))
+                            @if (!string.IsNullOrEmpty(tituloObraAumentado))
                             {
-                                    @Html.Raw("comportamientoAnotacion.titleAugmented=\"" + tituloObraAumentado.Replace("\"", "\\\"") + "\";");
+							@Html.Raw("comportamientoAnotacion.titleAugmented=\"" + tituloObraAumentado.Replace("\"", "\\\"") + "\";");
                             }
-                                    @if (!string.IsNullOrEmpty(descripcionObraAumentado))
+                            @if (!string.IsNullOrEmpty(descripcionObraAumentado))
                             {
-                                    @Html.Raw("comportamientoAnotacion.descriptionAugmented=\"" + descripcionObraAumentado.Replace("\"", "\\\"") + "\";");
+							@Html.Raw("comportamientoAnotacion.descriptionAugmented=\"" + descripcionObraAumentado.Replace("\"", "\\\"") + "\";");
                             }
-                                });
-                                </script>
+                        });
+                        </script>
 
                     }
                 }
@@ -1052,36 +1049,36 @@
 
                     if (propTags != null && propTags.PropertyValues != null && propTags.PropertyValues.Count > 0)
                     {
-                                <h1>@Html.Translate("ETIQUETAS")</h1>
-                                <div class="tags">
-                                    @{int numTag = 0;
+                        <h1>@Html.Translate("ETIQUETAS")</h1>
+                        <div class="tags">
+                            @{int numTag = 0;
                                 foreach (SemanticPropertyModel.PropertyValue propTag in propTags.PropertyValues)
                                 {
                                     if (numTag < 6)
                                     {
-                                                        <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/muto/core#tagLabel"))><a href="@FichaDocumento.UrlSearch?search=@propTag.Value.ToLower()&ordenarPor=pm:relevance">@propTag.Value</a></span>
+                                        <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/muto/core#tagLabel"))><a href="@FichaDocumento.UrlSearch?search=@propTag.Value.ToLower()&ordenarPor=pm:relevance">@propTag.Value</a></span>
                                     }
                                     numTag++;
                                 }
                                 if (numTag > 6)
                                 {
                                     numTag = 0;
-                                                    <div class="oculto">
-                                                        @foreach (SemanticPropertyModel.PropertyValue propTag in propTags.PropertyValues)
+                                    <div class="oculto">
+                                        @foreach (SemanticPropertyModel.PropertyValue propTag in propTags.PropertyValues)
                                         {
                                             if (numTag >= 6)
                                             {
-                                                                <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/muto/core#tagLabel"))><a href="@FichaDocumento.UrlSearch?search=@propTag.Value.ToLower()&ordenarPor=pm:relevance">@propTag.Value</a></span>
+                                                <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/muto/core#tagLabel"))><a href="@FichaDocumento.UrlSearch?search=@propTag.Value.ToLower()&ordenarPor=pm:relevance">@propTag.Value</a></span>
                                             }
                                             numTag++;
                                         }
-                                                    </div>
-                                                    <span class="mas-info"><a onclick="muestraTags()">+</a></span>
+                                    </div>
+                                    <span class="mas-info"><a onclick="muestraTags()">+</a></span>
                                 }
-                                    }
-                                </div> }
-                            <h2>@Html.Translate("RDF")</h2>
-                            <p><a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a></p>
+                            }
+                        </div> }
+                    <h2>@Html.Translate("RDF")</h2>
+                    <p><a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a></p>
 
                 }
             </div>
@@ -1094,10 +1091,10 @@
             {
                 recMultimediaJsonLD = new List<object>();
 
-                        <section class="multimedia" id="multimedia">
-                            <h2 class="heading">@Html.Translate("MULTIMEDIA")</h2>
-                            <div class="carousel inactive">
-                                @foreach (SemanticPropertyModel.PropertyValue recursoMultimedia in propRecursosMultimedia.PropertyValues)
+                <section class="multimedia" id="multimedia">
+                    <h2 class="heading">@Html.Translate("MULTIMEDIA")</h2>
+                    <div class="carousel inactive">
+                        @foreach (SemanticPropertyModel.PropertyValue recursoMultimedia in propRecursosMultimedia.PropertyValues)
                         {
                             string tituloRM = "";
                             string urlInteractivo = "";
@@ -1165,110 +1162,110 @@
 
                             if (tipoRM.Equals("Interactive"))
                             {
-                                        <div class="slide">
-                                            <figure>
-                                                @if (string.IsNullOrEmpty(imagenRM))
+                                <div class="slide">
+                                    <figure>
+                                        @if (string.IsNullOrEmpty(imagenRM))
                                         {
-                                                    <div class="thumb imgwrap">
-                                                        <a href="@urlInteractivo">
-                                                            <div class="no-img">
-                                                                <div class="outer">
-                                                                    <span>@Html.Translate("IMAGENNODISPONIBLE")</span>
-                                                                </div>
-                                                            </div>
-                                                        </a>
+                                            <div class="thumb imgwrap">
+                                                <a href="@urlInteractivo">
+                                                    <div class="no-img">
+                                                        <div class="outer">
+                                                            <span>@Html.Translate("IMAGENNODISPONIBLE")</span>
+                                                        </div>
                                                     </div>
+                                                </a>
+                                            </div>
                                         }
                                         else
                                         {
-                                                    <a href="@urlInteractivo">
-                                                        @if (!string.IsNullOrEmpty(imagenRM))
+                                            <a href="@urlInteractivo">
+                                                @if (!string.IsNullOrEmpty(imagenRM))
                                                 {
-                                                            <img alt="@tituloRM" src="@ViewBag.BaseURLContent/@imagenRM" />
+                                                    <img alt="@tituloRM" src="@ViewBag.BaseURLContent/@imagenRM" />
                                                 }
-                                                    </a>
+                                            </a>
                                         }
-                                                <figcaption>
-                                                    @if (!string.IsNullOrEmpty(tipoRM))
+                                        <figcaption>
+                                            @if (!string.IsNullOrEmpty(tipoRM))
                                             {
-                                                        <div class="media-type">@Html.Translate("INTERACTIVO")</div>
+                                                <div class="media-type">@Html.Translate("INTERACTIVO")</div>
                                             }
-                                                    @if (!string.IsNullOrEmpty(tituloRM))
+                                            @if (!string.IsNullOrEmpty(tituloRM))
                                             {
-                                                        <h3 class="name"><a href="@urlInteractivo">@tituloRM</a></h3>
+                                                <h3 class="name"><a href="@urlInteractivo">@tituloRM</a></h3>
                                             }
-                                                </figcaption>
-                                            </figure>
-                                        </div>
+                                        </figcaption>
+                                    </figure>
+                                </div>
                             }
-                            else if (urlRM.ToLower().Contains("instagram")|| urlRM.ToLower().Contains("tiktok"))
+                            else if (urlRM.ToLower().Contains("instagram") || urlRM.ToLower().Contains("tiktok"))
                             {
-                                        <div class="slide video">
-                                            <figure>
-                                                <a href="@urlInteractivo">
-                                                    @if (!string.IsNullOrEmpty(duracionRM))
+                                <div class="slide video">
+                                    <figure>
+                                        <a href="@urlInteractivo">
+                                            @if (!string.IsNullOrEmpty(duracionRM))
                                             {
-                                                        <span class="duracion">@duracionRM</span>
+                                                <span class="duracion">@duracionRM</span>
                                             }
-                                                    @if (!string.IsNullOrEmpty(imagenRM))
+                                            @if (!string.IsNullOrEmpty(imagenRM))
                                             {
                                                 string imagenRMUrlCompleta = string.Concat(ViewBag.BaseUrlContent, "/", imagenRM);
-                                                        <img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
+                                                <img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
                                             }
                                             else
                                             {
-                                                        <img alt="" src="img/provisionales/miniatura_multimedia.png" onclick="" />
+                                                <img alt="" src="img/provisionales/miniatura_multimedia.png" onclick="" />
                                             }
-                                                </a>
-                                                <figcaption>
-                                                    @if (!string.IsNullOrEmpty(tipoRM))
+                                        </a>
+                                        <figcaption>
+                                            @if (!string.IsNullOrEmpty(tipoRM))
                                             {
-                                                        <div class="media-type">@tipoRM</div>
+                                                <div class="media-type">@tipoRM</div>
                                             }
-                                                    @if (!string.IsNullOrEmpty(tituloRM))
+                                            @if (!string.IsNullOrEmpty(tituloRM))
                                             {
-                                                        <h3 class="name"><a href="@urlInteractivo">@tituloRM</a></h3>
+                                                <h3 class="name"><a href="@urlInteractivo" class="modal-videoPlayer">@tituloRM</a></h3>
                                             }
-                                                </figcaption>
-                                            </figure>
-                                        </div>
+                                        </figcaption>
+                                    </figure>
+                                </div>
                             }
                             else if (!string.IsNullOrEmpty(urlRM))
                             {
-                                        <div class="slide video">
-                                            <figure>
-                                                <a href="@urlRM" class="modal-videoPlayer">
-                                                    @if (!string.IsNullOrEmpty(duracionRM))
+                                <div class="slide video">
+                                    <figure>
+                                        <a href="@urlRM" class="modal-videoPlayer">
+                                            @if (!string.IsNullOrEmpty(duracionRM))
                                             {
-                                                        <span class="duracion">@duracionRM</span>
+                                                <span class="duracion">@duracionRM</span>
                                             }
-                                                    @if (!string.IsNullOrEmpty(imagenRM))
+                                            @if (!string.IsNullOrEmpty(imagenRM))
                                             {
                                                 string imagenRMUrlCompleta = string.Concat(ViewBag.BaseUrlContent, "/", imagenRM);
-                                                        <img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
+                                                <img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
                                             }
                                             else
                                             {
-                                                        <img alt="" src="img/provisionales/miniatura_multimedia.png" onclick="" />
+                                                <img alt="" src="img/provisionales/miniatura_multimedia.png" onclick="" />
                                             }
-                                                </a>
-                                                <figcaption>
-                                                    @if (!string.IsNullOrEmpty(tipoRM))
+                                        </a>
+                                        <figcaption>
+                                            @if (!string.IsNullOrEmpty(tipoRM))
                                             {
-                                                        <div class="media-type">@tipoRM</div>
+                                                <div class="media-type">@tipoRM</div>
                                             }
-                                                    @if (!string.IsNullOrEmpty(tituloRM))
+                                            @if (!string.IsNullOrEmpty(tituloRM))
                                             {
-                                                        <h3 class="name"><a href="@urlRM" class="modal-videoPlayer">@tituloRM</a></h3>
+                                                <h3 class="name"><a href="@urlRM" class="modal-videoPlayer">@tituloRM</a></h3>
                                             }
-                                                </figcaption>
-                                            </figure>
-                                        </div>
+                                        </figcaption>
+                                    </figure>
+                                </div>
                             }
                         }
-                            </div>
-                            <div class="ver-mas-multimedia"><a href="@Html.GetComunidad().Url/@Html.Translate("URLBUSQUEDACONTENIDOCOLECCION")?rdf:type=multimediaresource">@Html.Translate("VERMASMULTIMEDIA")</a></div>
-                        </section>
+                    </div>
+                    <div class="ver-mas-multimedia"><a href="@Html.GetComunidad().Url/@Html.Translate("URLBUSQUEDACONTENIDOCOLECCION")?rdf:type=multimediaresource">@Html.Translate("VERMASMULTIMEDIA")</a></div>
+                </section>
             }
         }
         <!-- Si tiene RDFa -->
@@ -1288,9 +1285,9 @@
 
                         if (!string.IsNullOrEmpty(urlImagenObra))
                         {
-                                    <!-- section-viewer -->
-                                    <div class="section-viewer">
-                                        @{
+                            <!-- section-viewer -->
+                            <div class="section-viewer">
+                                @{
 
                                     if (propimagenes != null && propimagenes.PropertyValues != null && propimagenes.PropertyValues.Count > 0)
                                     {
@@ -1327,64 +1324,64 @@
                                             }
                                         }
                                     }
-                                        }
-                                        @if (listaImagenesObraAnchoAlto.Count > 0)
+                                }
+                                @if (listaImagenesObraAnchoAlto.Count > 0)
                                 {
-                                            <!-- main -->
-                                            <div class="main">
-                                                @{
+                                    <!-- main -->
+                                    <div class="main">
+                                        @{
                                             int numObra = 0;
                                             foreach (Tuple<string, string, string> imagen in listaImagenesObraAnchoAlto)
                                             {
-                                                                <div class="slide">
-                                                                    <a onclick="javascript:muestraImagen(@numObra);">
-                                                                        <img data-lazy="@Html.ObtenerImagenConTamano(imagen.Item1, 832)" data-pyr="@imagen.Item1.Replace(".jpg", "/")" class="img_cache" data-width="@imagen.Item2" data-height="@imagen.Item3">
-                                                                        <noscript><img alt=" " src="@Html.ObtenerImagenConTamano(imagen.Item1, 832)"></noscript>
-                                                                        <span class="help">@Html.Translate("CLICKPARAAMPLIAR")</span>
-                                                                    </a>
-                                                                </div>
+                                                <div class="slide">
+                                                    <a onclick="javascript:muestraImagen(@numObra);">
+                                                        <img data-lazy="@Html.ObtenerImagenConTamano(imagen.Item1, 832)" data-pyr="@imagen.Item1.Replace(".jpg", "/")" class="img_cache" data-width="@imagen.Item2" data-height="@imagen.Item3">
+                                                        <noscript><img alt=" " src="@Html.ObtenerImagenConTamano(imagen.Item1, 832)"></noscript>
+                                                        <span class="help">@Html.Translate("CLICKPARAAMPLIAR")</span>
+                                                    </a>
+                                                </div>
                                                 numObra++;
                                             }
-                                                }
-                                            </div>
-                                            <!-- /main -->
-                                            <script>
-                                                $(document).ready(function () {
+                                        }
+                                    </div>
+                                    <!-- /main -->
+                                    <script>
+                                        $(document).ready(function () {
+                                            $('.help').addClass('off');
+                                            $('.section-viewer .main').on('afterChange', function (event, slick, currentSlide) {
+                                                $('.help').removeClass('off');
+                                                var timeoutHelp = window.setTimeout(function () {
                                                     $('.help').addClass('off');
-                                                    $('.section-viewer .main').on('afterChange', function (event, slick, currentSlide) {
-                                                        $('.help').removeClass('off');
-                                                        var timeoutHelp = window.setTimeout(function () {
-                                                            $('.help').addClass('off');
-                                                        }, 2000);
-                                                    });
-                                                });
-                                            </script>
+                                                }, 2000);
+                                            });
+                                        });
+                                    </script>
 
                                 }
-                                        <!--Sólo se muestra el carrusel si la obra tiene más de una imagen-->
-                                        @if (listaImagenesObraAnchoAlto.Count > 1)
+                                <!--Sólo se muestra el carrusel si la obra tiene más de una imagen-->
+                                @if (listaImagenesObraAnchoAlto.Count > 1)
                                 {
-                                            <!-- thumbnails -->
-                                            <div class="thumbnails">
-                                                @foreach (Tuple<string, string, string> imagen in listaImagenesObraAnchoAlto)
+                                    <!-- thumbnails -->
+                                    <div class="thumbnails">
+                                        @foreach (Tuple<string, string, string> imagen in listaImagenesObraAnchoAlto)
                                         {
-                                                    <div class="slide">
-                                                        <img src="@Html.ObtenerImagenConTamano(imagen.Item1, 268)">
-                                                    </div>
-                                        }
+                                            <div class="slide">
+                                                <img src="@Html.ObtenerImagenConTamano(imagen.Item1, 268)">
                                             </div>
-                                            <!-- /thumbnails -->
-                                }
+                                        }
                                     </div>
-                                    <!-- section-viewer -->
+                                    <!-- /thumbnails -->
+                                }
+                            </div>
+                            <!-- section-viewer -->
                         }
                         else
                         {
-                                    <div class="no-img">
-                                        <div class="outer">
-                                            <span>@Html.Translate("IMAGENNODISPONIBLE")</span>
-                                        </div>
-                                    </div>
+                            <div class="no-img">
+                                <div class="outer">
+                                    <span>@Html.Translate("IMAGENNODISPONIBLE")</span>
+                                </div>
+                            </div>
                         }
                         if (propMarcoRelacionado != null && propMarcoRelacionado.PropertyValues != null && propMarcoRelacionado.PropertyValues.Count > 0)
                         {
@@ -1393,14 +1390,14 @@
                             {
                                 extraHtmlPagObrasRelacionadas = "aux=\"" + propMarcoRelacionado.EntityParent.SemanticResourceModel.MvcActionsUrl + "/load-more-entities-selector|" + propMarcoRelacionado.EntityParent.Key + "|" + propMarcoRelacionado.Element.Propiedad.Nombre + "|" + propMarcoRelacionado.OntologyPropInfo.NumEntitiesForPage + "|" + propMarcoRelacionado.OntologyPropInfo.TotalEntitiesPagination + "\"";
                             }
-                                    <div class="obras-relacionadas" @Html.Raw(extraHtmlPagObrasRelacionadas)>
-                                        <h2>@titularMarcoRelacionado</h2>
-                                        @Html.PartialView(propMarcoRelacionado.SpecificationProperty.VistaPersonalizadaPaginacion, propMarcoRelacionado)
-                                        @if (propMarcoRelacionado.OntologyPropInfo.NumEntitiesForPage > 0)
+                            <div class="obras-relacionadas" @Html.Raw(extraHtmlPagObrasRelacionadas)>
+                                <h2>@titularMarcoRelacionado</h2>
+                                @Html.PartialView(propMarcoRelacionado.SpecificationProperty.VistaPersonalizadaPaginacion, propMarcoRelacionado)
+                                @if (propMarcoRelacionado.OntologyPropInfo.NumEntitiesForPage > 0)
                                 {
-                                            <div class="ver-mas-general"><a>@Html.Translate("VERMAS")</a></div>
+                                    <div class="ver-mas-general"><a>@Html.Translate("VERMAS")</a></div>
                                 }
-                                    </div>
+                            </div>
                         }
                         if (propObraPrincipalMarco != null && propObraPrincipalMarco.PropertyValues != null && propObraPrincipalMarco.PropertyValues.Count > 0)
                         {
@@ -1409,20 +1406,16 @@
                             {
                                 extraHtmlPagObrasRelacionadas = "aux=\"" + propObraPrincipalMarco.EntityParent.SemanticResourceModel.MvcActionsUrl + "/load-more-entities-selector|" + propObraPrincipalMarco.EntityParent.Key + "|" + propObraPrincipalMarco.Element.Propiedad.Nombre + "|" + propObraPrincipalMarco.OntologyPropInfo.NumEntitiesForPage + "|" + propObraPrincipalMarco.OntologyPropInfo.TotalEntitiesPagination + "\"";
                             }
-                                    <div class="obras-relacionadas" @Html.Raw(extraHtmlPagObrasRelacionadas)>
-                                        <h2>@titularObraPrincipalMarco</h2>
-                                        @foreach (SemanticPropertyModel.PropertyValue propObra in propObraPrincipalMarco.PropertyValues)
-                                {
+                            <div class="obras-relacionadas" @Html.Raw(extraHtmlPagObrasRelacionadas)>
+                                <h2>@titularObraPrincipalMarco</h2>
+                                @Html.PartialView(propObraPrincipalMarco.SpecificationProperty.VistaPersonalizadaPaginacion, propObraPrincipalMarco)
+                                
 
-                                    SemanticPropertyModel obraRelacionada = propObra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#art_work");
-                                            @Html.PartialView(propObraPrincipalMarco.SpecificationProperty.VistaPersonalizadaPaginacion, obraRelacionada)
-                                }
-
-                                        @if (propObraPrincipalMarco.OntologyPropInfo.NumEntitiesForPage > 0)
+                                @if (propObraPrincipalMarco.OntologyPropInfo.NumEntitiesForPage > 0)
                                 {
-                                            <div class="ver-mas-general"><a>@Html.Translate("VERMAS")</a></div>
+                                    <div class="ver-mas-general"><a>@Html.Translate("VERMAS")</a></div>
                                 }
-                                    </div>
+                            </div>
                         }
 
                         if (propObrasRelacionadas != null && propObrasRelacionadas.PropertyValues != null && propObrasRelacionadas.PropertyValues.Count > 0)
@@ -1432,19 +1425,14 @@
                             {
                                 extraHtmlPagObrasRelacionadas = "aux=\"" + propObrasRelacionadas.EntityParent.SemanticResourceModel.MvcActionsUrl + "/load-more-entities-selector|" + propObrasRelacionadas.EntityParent.Key + "|" + propObrasRelacionadas.Element.Propiedad.Nombre + "|" + propObrasRelacionadas.OntologyPropInfo.NumEntitiesForPage + "|" + propObrasRelacionadas.OntologyPropInfo.TotalEntitiesPagination + "\"";
                             }
-                                    <div class="obras-relacionadas" @Html.Raw(extraHtmlPagObrasRelacionadas)>
-                                        <h2>@Html.Translate("OBRASRELACIONADAS")</h2>
-                                        @foreach (SemanticPropertyModel.PropertyValue propObra in propObrasRelacionadas.PropertyValues)
-                                {
-
-                                    SemanticPropertyModel obraRelacionada = propObra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#art_work");
-                                            @Html.PartialView(propObrasRelacionadas.SpecificationProperty.VistaPersonalizadaPaginacion, obraRelacionada)
-                                }
-                                        @if (propObrasRelacionadas.OntologyPropInfo.NumEntitiesForPage > 0)
-                                {
-                                            <div class="ver-mas-general"><a>@Html.Translate("VERMAS")</a></div>
-                                }
-                                    </div>
+                <div class="obras-relacionadas" @Html.Raw(extraHtmlPagObrasRelacionadas)>
+                    <h2>@Html.Translate("OBRASRELACIONADAS")</h2>
+                    @Html.PartialView(propObrasRelacionadas.SpecificationProperty.VistaPersonalizadaPaginacion, propObrasRelacionadas)
+                    @if (propObrasRelacionadas.OntologyPropInfo.NumEntitiesForPage > 0)
+                    {
+                        <div class="ver-mas-general"><a>@Html.Translate("VERMAS")</a></div>
+                    }
+                </div>
                         }
 
                     }
@@ -1461,12 +1449,12 @@
                             }
 
 
-                                    <dt>@titularNumCatalogo</dt>
-                                    <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p48_has_preferred_identifier"))>
-                                        <span @Html.Raw(rdfaEntidadIdentifier)>
-                                            <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p48_has_preferred_identifier@@@http://www.cidoc-crm.org/cidoc-crm#p102_has_title"))>@numeroCatalogo</span>
-                                        </span>
-                                    </dd>
+                            <dt>@titularNumCatalogo</dt>
+                            <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p48_has_preferred_identifier"))>
+                                <span @Html.Raw(rdfaEntidadIdentifier)>
+                                    <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p48_has_preferred_identifier@@@http://www.cidoc-crm.org/cidoc-crm#p102_has_title"))>@numeroCatalogo</span>
+                                </span>
+                            </dd>
                         }
                         @if (!string.IsNullOrEmpty(titularAutor))
                         {
@@ -1484,7 +1472,6 @@
                                 <dt>@titularAutor</dt>
                             }
                             PintarAutorFichaTecnica(listaAutores, semCmsModel);
-
                         }
                         @if (!string.IsNullOrEmpty(titularTitulo) && !string.IsNullOrEmpty(tituloObra))
                         {
@@ -1505,15 +1492,15 @@
 
                             if (!string.IsNullOrEmpty(titularMateria) && !string.IsNullOrEmpty(materias))
                             {
-                                        <dt>@titularMateria</dt>
-                                        <dd>@Html.Raw(materias)</dd>
+                                <dt>@titularMateria</dt>
+                                <dd>@Html.Raw(materias)</dd>
                             }
 
                             if (!string.IsNullOrEmpty(titularSoporte) && !string.IsNullOrEmpty(soportes))
                             {
 
-                                        <dt>@titularSoporte</dt>
-                                        <dd>@Html.Raw(soportes)</dd>
+                                <dt>@titularSoporte</dt>
+                                <dd>@Html.Raw(soportes)</dd>
                             }
 
                         }
@@ -1522,9 +1509,9 @@
 
                             if (propDimensiones != null && propDimensiones.PropertyValues != null && propDimensiones.PropertyValues.Count() > 0)
                             {
-                                        <dt>@titularMedidas</dt>
-                                        <dd>
-                                            @{
+                                <dt>@titularMedidas</dt>
+                                <dd>
+                                    @{
                                         foreach (SemanticPropertyModel.PropertyValue propDimension in propDimensiones.PropertyValues)
                                         {
                                             E54_Dimension dimension = new E54_Dimension(propDimension.RelatedEntity, idiomaUsuario);
@@ -1536,15 +1523,15 @@
 
                                             if (!string.IsNullOrEmpty(textoMedida))
                                             {
-                                                                <span @Html.Raw(semCmsModel.GetRDFAProperty(propDimension.Property))>
-                                                                    <span @Html.Raw(semCmsModel.GetRDFAEntity(propDimension.RelatedEntity))>
-                                                                        <span>@Html.Raw(textoMedida)</span>
-                                                                    </span>
-                                                                </span>
+                                                <span @Html.Raw(semCmsModel.GetRDFAProperty(propDimension.Property))>
+                                                    <span @Html.Raw(semCmsModel.GetRDFAEntity(propDimension.RelatedEntity))>
+                                                        <span>@Html.Raw(textoMedida)</span>
+                                                    </span>
+                                                </span>
                                             }
                                         }
-                                            }
-                                        </dd>
+                                    }
+                                </dd>
 
                                 // #endregion medidas
                             }
@@ -1559,8 +1546,8 @@
                                 {
                                     serie += ", " + numSerie;
                                 }
-                                        <dt>@titularSerie</dt>
-                                        <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p46i_E78_p102_forms_part_of"))>@serie</dd>
+                                <dt>@titularSerie</dt>
+                                <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p46i_E78_p102_forms_part_of"))>@serie</dd>
                             }
                         }
                         @{
@@ -1604,15 +1591,15 @@
 
                             if (!string.IsNullOrEmpty(lugarProduccionCeca) && !string.IsNullOrEmpty(titularLugarProduccionCeca))
                             {
-                                        <dt>@titularLugarProduccionCeca</dt>
-                                        <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p7_took_place_at"))>@lugarProduccionCeca</dd>
+                                <dt>@titularLugarProduccionCeca</dt>
+                                <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p7_took_place_at"))>@lugarProduccionCeca</dd>
                             }
                         }
                         @{
                             if (!string.IsNullOrEmpty(lugarProduccion) && !string.IsNullOrEmpty(titularLugarProduccion))
                             {
-                                        <dt>@titularLugarProduccion</dt>
-                                        <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p7_took_place"))>@lugarProduccion</dd>
+                                <dt>@titularLugarProduccion</dt>
+                                <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p7_took_place"))>@lugarProduccion</dd>
                             }
                         }
                         @{
@@ -1620,8 +1607,8 @@
 
                             if (!string.IsNullOrEmpty(edicionEstado) && !string.IsNullOrEmpty(titularEdicionEstado))
                             {
-                                        <dt>@titularEdicionEstado</dt>
-                                        <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108_edition_state"))>@edicionEstado</dd>
+                                <dt>@titularEdicionEstado</dt>
+                                <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108_edition_state"))>@edicionEstado</dd>
                             }
                         }
                         @{
@@ -1629,8 +1616,8 @@
 
                             if (!string.IsNullOrEmpty(procedencia) && !string.IsNullOrEmpty(titularProcedencia))
                             {
-                                        <dt>@titularProcedencia</dt>
-                                        <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p27_moved_from"))>@procedencia</dd>
+                                <dt>@titularProcedencia</dt>
+                                <dd @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p27_moved_from"))>@procedencia</dd>
                             }
                         }
                         @if (Pm_frame != null && !string.IsNullOrEmpty(Pm_frame.Ecidoc_p15_was_influenced_by))
@@ -1691,63 +1678,63 @@
 
                         if (Pm_frame != null && (Pm_frame.Cidoc_p65_shows_visual_item.Count > 0 || !string.IsNullOrEmpty(Pm_frame.Pm_modelType)))
                         {
-                                    <div class="dsp">
+                            <div class="dsp">
+                                @{
+                                    <h2>@Pm_frame.GetLabel(nameof(Pm_frame.Pm_modelType), idiomaUsuario) <span class='ico'>+</span></h2>
+                                    <p class="mostrable">
                                         @{
-                                                    <h2>@Pm_frame.GetLabel(nameof(Pm_frame.Pm_modelType), idiomaUsuario) <span class='ico'>+</span></h2>
-                                                    <p class="mostrable">
-                                                        @{
 
                                             if (!string.IsNullOrEmpty(Pm_frame.Pm_modelType))
                                             {
-                                                                        <span about="@Pm_frame.GNOSSID" property="@Pm_frame.GetPropertyURI(nameof(Pm_frame.Pm_modelType))">
-                                                                            @Pm_frame.Pm_modelType
-                                                                        </span>
+                                                <span about="@Pm_frame.GNOSSID" property="@Pm_frame.GetPropertyURI(nameof(Pm_frame.Pm_modelType))">
+                                                    @Pm_frame.Pm_modelType
+                                                </span>
                                             }
-                                                        }
-                                                    </p>
+                                        }
+                                    </p>
                                     if (Pm_frame.Cidoc_p65_shows_visual_item.Count > 0)
                                     {
-                                                        <div class="section-viewer-marco mostrable oculto" style="margin-top:-13px;">
-                                                            <div class="thumbnails">
-                                                                @foreach (Tuple<string, string, string> imagenTamagno in listaImagenesObraAnchoAlto)
+                                        <div class="section-viewer-marco mostrable oculto" style="margin-top:-13px;">
+                                            <div class="thumbnails">
+                                                @foreach (Tuple<string, string, string> imagenTamagno in listaImagenesObraAnchoAlto)
                                                 {
                                                     E36_Visual_Item imagen = Pm_frame.Cidoc_p65_shows_visual_item.Where(x => imagenTamagno.Item1 == ViewBag.BaseUrlContent + "/" + x.Ecidoc_p3_has_note).FirstOrDefault();
                                                     if (imagen != null)
                                                     {
-                                                                        <div class="slide">
-                                                                            <a onclick="javascript: muestraImagen(@listaImagenesObraAnchoAlto.IndexOf(imagenTamagno));"><img src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagen.Ecidoc_p3_has_note, 268)" width="@imagenTamagno.Item2" height="@imagenTamagno.Item3" alt=""></a>
-                                                                        </div>
+                                                        <div class="slide">
+                                                            <a onclick="javascript: muestraImagen(@listaImagenesObraAnchoAlto.IndexOf(imagenTamagno));"><img src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagen.Ecidoc_p3_has_note, 268)" width="@imagenTamagno.Item2" height="@imagenTamagno.Item3" alt=""></a>
+                                                        </div>
                                                     }
                                                 }
-                                                            </div>
-                                                        </div>
+                                            </div>
+                                        </div>
                                     }
-                                        }
-                                        <script>
-                                            $(document).ready(function () {
-                                                function filiGalleryInit(e) {
-                                                    var $filithumbs = $(e);
-                                                    $filithumbs.each(function () {
-                                                        this.count = $(this).find('> .slide').length;
-                                                        var limite = ($(this).parent().parent().outerWidth()) / 118;
-                                                        if (this.count >= limite) {
-                                                            $(this).slick({
-                                                                infinite: false,
-                                                                arrows: true,
-                                                                centerMode: false,
-                                                                variableWidth: true,
-                                                                dots: false,
-                                                                focusOnSelect: true,
-                                                                lazyLoad: 'ondemand',
-                                                                swipe: false
-                                                            });
-                                                        }
+                                }
+                                <script>
+                                    $(document).ready(function () {
+                                        function filiGalleryInit(e) {
+                                            var $filithumbs = $(e);
+                                            $filithumbs.each(function () {
+                                                this.count = $(this).find('> .slide').length;
+                                                var limite = ($(this).parent().parent().outerWidth()) / 118;
+                                                if (this.count >= limite) {
+                                                    $(this).slick({
+                                                        infinite: false,
+                                                        arrows: true,
+                                                        centerMode: false,
+                                                        variableWidth: true,
+                                                        dots: false,
+                                                        focusOnSelect: true,
+                                                        lazyLoad: 'ondemand',
+                                                        swipe: false
                                                     });
                                                 }
-                                                filiGalleryInit('.section-viewer-marco .thumbnails');
                                             });
-                                        </script>
-                                    </div>
+                                        }
+                                        filiGalleryInit('.section-viewer-marco .thumbnails');
+                                    });
+                                </script>
+                            </div>
                         }
 
                         // #region Catalogacion marco
@@ -1757,9 +1744,9 @@
 
                         if (propBiblio != null && propBiblio.PropertyValues != null && propBiblio.PropertyValues.Count > 0)
                         {
-                                    <div class="dsp">
-                                        <h2>@titularBibliografia <span class="ico">+</span></h2>
-                                        @{
+                            <div class="dsp">
+                                <h2>@titularBibliografia <span class="ico">+</span></h2>
+                                @{
                                     SortedDictionary<int, List<SemanticPropertyModel.PropertyValue>> listaPropiedadesBibliografia = new SortedDictionary<int, List<SemanticPropertyModel.PropertyValue>>();
 
                                     //Creamos un diccionario ordenado cuya clave es el año (o 3000 si el año no tiene el formato correcto para que se pongan al final)
@@ -1801,14 +1788,14 @@
                                             string htmlTextoDocumento = GetHtmlDocumentosBiblio(documento);
                                             if (!string.IsNullOrEmpty(htmlTextoDocumento))
                                             {
-                                                                <p class="mostrable" @Html.Raw(semCmsModel.GetRDFAProperty(biblio.Property))>
-                                                                    <span @Html.Raw(semCmsModel.GetRDFAEntity(biblio.RelatedEntity))>@Html.Raw(string.Concat(Html.Raw(htmlTextoDocumento), "."))</span>
-                                                                </p>
+                                                <p class="mostrable" @Html.Raw(semCmsModel.GetRDFAProperty(biblio.Property))>
+                                                    <span @Html.Raw(semCmsModel.GetRDFAEntity(biblio.RelatedEntity))>@Html.Raw(string.Concat(Html.Raw(htmlTextoDocumento), "."))</span>
+                                                </p>
                                             }
                                         }
                                     }
-                                        }
-                                    </div>
+                                }
+                            </div>
                         }
 
                         // #region Bibliografía
@@ -1818,46 +1805,46 @@
 
                         if (Pm_hasFiligree != null && Pm_hasFiligree.Count > 0)
                         {
-                                    <div class="dsp">
-                                        @foreach (E37_Mark filigrana in Pm_hasFiligree)
+                            <div class="dsp">
+                                @foreach (E37_Mark filigrana in Pm_hasFiligree)
                                 {
                                     int numFiligrana = Pm_hasFiligree.IndexOf(filigrana) + 1;
-                                            <h2 @Html.Raw(numFiligrana != 1 ? "class='mostrable oculto'" : "")>@titularFiligrana @Html.Raw(numFiligrana != 1 ? $"{numFiligrana}" : "<span class='ico'>+</span>")</h2>
-                                            <p class="mostrable">
-                                                @{
+                                    <h2 @Html.Raw(numFiligrana != 1 ? "class='mostrable oculto'" : "")>@titularFiligrana @Html.Raw(numFiligrana != 1 ? $"{numFiligrana}" : "<span class='ico'>+</span>")</h2>
+                                    <p class="mostrable">
+                                        @{
                                             bool anyadirBr = false;
                                             if (!string.IsNullOrEmpty(filigrana.Cidoc_p3_has_note))
                                             {
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Cidoc_p3_has_note))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Cidoc_p3_has_note), idiomaUsuario) </strong> @filigrana.Cidoc_p3_has_note
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Cidoc_p3_has_note))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Cidoc_p3_has_note), idiomaUsuario) </strong> @filigrana.Cidoc_p3_has_note
+                                                </span>
                                             }
-                                                }
-                                            </p>
+                                        }
+                                    </p>
                                     if (filigrana.Cidoc_p130i_has_representation.Count > 0)
                                     {
                                         anyadirBr = false;
-                                                <div class="section-viewer-filigrana mostrable oculto" style="margin-top:-13px;">
-                                                    <div class="thumbnails">
-                                                        @foreach (E36_Visual_Item imagenTamagno in filigrana.Cidoc_p130i_has_representation)
+                                        <div class="section-viewer-filigrana mostrable oculto" style="margin-top:-13px;">
+                                            <div class="thumbnails">
+                                                @foreach (E36_Visual_Item imagenTamagno in filigrana.Cidoc_p130i_has_representation)
                                                 {
 
-                                                            <div class="slide">
-                                                                <a><img src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagenTamagno.Ecidoc_p3_has_note, 268)"></a>
-                                                            </div>
+                                                    <div class="slide">
+                                                        <a><img src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagenTamagno.Ecidoc_p3_has_note, 268)"></a>
+                                                    </div>
 
                                                 }
-                                                    </div>
-                                                </div>
+                                            </div>
+                                        </div>
                                     }
-                                            <p class="mostrable">
-                                                @{
+                                    <p class="mostrable">
+                                        @{
                                             if (filigrana.Ecidoc_p43_E54_has_dimension.Count > 0)
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 string textoMedida = string.Empty;
                                                 foreach (E54_Dimension dimension in filigrana.Ecidoc_p43_E54_has_dimension)
@@ -1878,9 +1865,9 @@
                                                 }
                                                 if (!string.IsNullOrEmpty(textoMedida))
                                                 {
-                                                                    <span about="@filigrana.GNOSSID" rel="@filigrana.GetPropertyURI(nameof(filigrana.Ecidoc_p43_E54_has_dimension))">
-                                                                        <strong> @filigrana.GetLabel(nameof(filigrana.Ecidoc_p43_E54_has_dimension), idiomaUsuario) </strong><span>@Html.Raw(textoMedida)</span>
-                                                                    </span>
+                                                    <span about="@filigrana.GNOSSID" rel="@filigrana.GetPropertyURI(nameof(filigrana.Ecidoc_p43_E54_has_dimension))">
+                                                        <strong> @filigrana.GetLabel(nameof(filigrana.Ecidoc_p43_E54_has_dimension), idiomaUsuario) </strong><span>@Html.Raw(textoMedida)</span>
+                                                    </span>
                                                 }
                                             }
 
@@ -1888,189 +1875,189 @@
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Ecidoc_p2_E55_has_type))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Ecidoc_p2_E55_has_type), idiomaUsuario) </strong> @Html.Raw(filigrana.Ecidoc_p2_E55_has_type)
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Ecidoc_p2_E55_has_type))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Ecidoc_p2_E55_has_type), idiomaUsuario) </strong> @Html.Raw(filigrana.Ecidoc_p2_E55_has_type)
+                                                </span>
                                             }
                                             if (filigrana.Pm_isFragment.HasValue && filigrana.Pm_isFragment.Value)
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_isFragment))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_isFragment), idiomaUsuario) </strong>@Html.GetText("COMMON", "SI")
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_isFragment))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_isFragment), idiomaUsuario) </strong>@Html.GetText("COMMON", "SI")
+                                                </span>
                                             }
                                             if (filigrana.Pm_corondelesNumber.HasValue || !string.IsNullOrEmpty(filigrana.Pm_corondelesPosition))
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_corondelesNumber))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_corondelesNumber), idiomaUsuario) </strong>
-                                                                    @filigrana.Pm_corondelesNumber
-                                                                    @if (filigrana.Pm_corondelesNumber.HasValue && !string.IsNullOrEmpty(filigrana.Pm_corondelesPosition))
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_corondelesNumber))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_corondelesNumber), idiomaUsuario) </strong>
+                                                    @filigrana.Pm_corondelesNumber
+                                                    @if (filigrana.Pm_corondelesNumber.HasValue && !string.IsNullOrEmpty(filigrana.Pm_corondelesPosition))
                                                     {
-                                                                        @Html.Raw("-")
+                                                        @Html.Raw("-")
                                                     }
-                                                                    @filigrana.Pm_corondelesPosition
-                                                                </span>
+                                                    @filigrana.Pm_corondelesPosition
+                                                </span>
                                             }
                                             if (filigrana.Pm_corondelesTramo.HasValue)
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_corondelesTramo))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_corondelesTramo), idiomaUsuario) </strong>
-                                                                    @Html.Raw(filigrana.Pm_corondelesTramo.Value + " mm.")
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_corondelesTramo))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_corondelesTramo), idiomaUsuario) </strong>
+                                                    @Html.Raw(filigrana.Pm_corondelesTramo.Value + " mm.")
+                                                </span>
                                             }
                                             if (!string.IsNullOrEmpty(filigrana.Pm_corondelesOtherMeasure))
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_corondelesOtherMeasure))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_corondelesOtherMeasure), idiomaUsuario) </strong>
-                                                                    @Html.Raw(filigrana.Pm_corondelesOtherMeasure)
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_corondelesOtherMeasure))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_corondelesOtherMeasure), idiomaUsuario) </strong>
+                                                    @Html.Raw(filigrana.Pm_corondelesOtherMeasure)
+                                                </span>
                                             }
                                             if (!string.IsNullOrEmpty(filigrana.Pm_corondelesLocation))
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_corondelesLocation))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_corondelesLocation), idiomaUsuario) </strong>
-                                                                    @Html.Raw(filigrana.Pm_corondelesLocation)
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_corondelesLocation))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_corondelesLocation), idiomaUsuario) </strong>
+                                                    @Html.Raw(filigrana.Pm_corondelesLocation)
+                                                </span>
                                             }
                                             if (!string.IsNullOrEmpty(filigrana.Pm_caraPapel))
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_caraPapel))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_caraPapel), idiomaUsuario) </strong>
-                                                                    @Html.Raw(filigrana.Pm_caraPapel)
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_caraPapel))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_caraPapel), idiomaUsuario) </strong>
+                                                    @Html.Raw(filigrana.Pm_caraPapel)
+                                                </span>
                                             }
                                             if (!string.IsNullOrEmpty(filigrana.Pm_modelTitle))
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_modelTitle))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_modelTitle), idiomaUsuario) </strong>
-                                                                    @Html.Raw(filigrana.Pm_modelTitle)
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_modelTitle))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_modelTitle), idiomaUsuario) </strong>
+                                                    @Html.Raw(filigrana.Pm_modelTitle)
+                                                </span>
                                             }
                                             if (!string.IsNullOrEmpty(filigrana.Pm_modelDescription))
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
                                                 anyadirBr = true;
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_modelDescription))">
-                                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_modelDescription), idiomaUsuario) </strong>
-                                                                    @Html.Raw(filigrana.Pm_modelDescription)
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Pm_modelDescription))">
+                                                    <strong> @filigrana.GetLabel(nameof(filigrana.Pm_modelDescription), idiomaUsuario) </strong>
+                                                    @Html.Raw(filigrana.Pm_modelDescription)
+                                                </span>
                                             }
                                             if (!string.IsNullOrEmpty(filigrana.Cidoc_p190_has_symbolic_content))
                                             {
                                                 if (anyadirBr)
                                                 {
-                                                                    <br />
+                                                    <br />
                                                 }
-                                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Cidoc_p190_has_symbolic_content))">
-                                                                    @Html.Raw(filigrana.Cidoc_p190_has_symbolic_content)
-                                                                </span>
+                                                <span about="@filigrana.GNOSSID" property="@filigrana.GetPropertyURI(nameof(filigrana.Cidoc_p190_has_symbolic_content))">
+                                                    @Html.Raw(filigrana.Cidoc_p190_has_symbolic_content)
+                                                </span>
                                             }
 
 
-                                                }
-                                            </p>
+                                        }
+                                    </p>
 
                                     if (filigrana.Cidoc_p65_shows_visual_item.Count > 0)
                                     {
-                                                <div class="section-viewer-filigrana mostrable oculto" style="margin-top:-13px;">
-                                                    <div class="thumbnails">
-                                                        @foreach (Tuple<string, string, string> imagenTamagno in listaImagenesObraAnchoAlto)
+                                        <div class="section-viewer-filigrana mostrable oculto" style="margin-top:-13px;">
+                                            <div class="thumbnails">
+                                                @foreach (Tuple<string, string, string> imagenTamagno in listaImagenesObraAnchoAlto)
                                                 {
                                                     E36_Visual_Item imagen = filigrana.Cidoc_p65_shows_visual_item.Where(x => imagenTamagno.Item1 == ViewBag.BaseUrlContent + "/" + x.Ecidoc_p3_has_note).FirstOrDefault();
                                                     if (imagen != null)
                                                     {
-                                                                <div class="slide">
-                                                                    <a onclick="javascript: muestraImagen(@listaImagenesObraAnchoAlto.IndexOf(imagenTamagno));"><img src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagen.Ecidoc_p3_has_note, 268)" width="@imagenTamagno.Item2" height="@imagenTamagno.Item3" alt=""></a>
-                                                                </div>
+                                                        <div class="slide">
+                                                            <a onclick="javascript: muestraImagen(@listaImagenesObraAnchoAlto.IndexOf(imagenTamagno));"><img src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagen.Ecidoc_p3_has_note, 268)" width="@imagenTamagno.Item2" height="@imagenTamagno.Item3" alt=""></a>
+                                                        </div>
                                                     }
                                                 }
-                                                    </div>
-                                                </div>
+                                            </div>
+                                        </div>
                                     }
                                     if (filigrana.Cidoc_p70i_is_documented_in.Count > 0)
                                     {
 
-                                                <p class="mostrable">
-                                                    <strong>@titularBibliografia</strong>
-                                                    @foreach (C1003_Manifestation documento in filigrana.Cidoc_p70i_is_documented_in)
+                                        <p class="mostrable">
+                                            <strong>@titularBibliografia</strong>
+                                            @foreach (C1003_Manifestation documento in filigrana.Cidoc_p70i_is_documented_in)
                                             {
                                                 string htmlTextoDocumento = GetHtmlDocumentosBiblio(documento);
                                                 if (!string.IsNullOrEmpty(htmlTextoDocumento))
                                                 {
-                                                            <br>
-                                                            <span about="@documento.GNOSSID" typeof="efrbrer:C1003_Manifestation">@Html.Raw(string.Concat(Html.Raw(htmlTextoDocumento), "."))</span>
+                                                    <br>
+                                                    <span about="@documento.GNOSSID" typeof="efrbrer:C1003_Manifestation">@Html.Raw(string.Concat(Html.Raw(htmlTextoDocumento), "."))</span>
 
                                                 }
                                             }
 
-                                                </p>
+                                        </p>
                                     }
                                 }
-                                        <script>
-                                            $(document).ready(function () {
-                                                function filiGalleryInit(e) {
-                                                    var $filithumbs = $(e);
-                                                    $filithumbs.each(function () {
-                                                        this.count = $(this).find('> .slide').length;
-                                                        var limite = ($(this).parent().parent().outerWidth()) / 118;
-                                                        if (this.count >= limite) {
-                                                            $(this).slick({
-                                                                infinite: false,
-                                                                arrows: true,
-                                                                centerMode: false,
-                                                                variableWidth: true,
-                                                                dots: false,
-                                                                focusOnSelect: true,
-                                                                lazyLoad: 'ondemand',
-                                                                swipe: false
-                                                            });
-                                                        }
+                                <script>
+                                    $(document).ready(function () {
+                                        function filiGalleryInit(e) {
+                                            var $filithumbs = $(e);
+                                            $filithumbs.each(function () {
+                                                this.count = $(this).find('> .slide').length;
+                                                var limite = ($(this).parent().parent().outerWidth()) / 118;
+                                                if (this.count >= limite) {
+                                                    $(this).slick({
+                                                        infinite: false,
+                                                        arrows: true,
+                                                        centerMode: false,
+                                                        variableWidth: true,
+                                                        dots: false,
+                                                        focusOnSelect: true,
+                                                        lazyLoad: 'ondemand',
+                                                        swipe: false
                                                     });
                                                 }
-                                                filiGalleryInit('.section-viewer-filigrana .thumbnails');
                                             });
-                                        </script>
-                                    </div>
+                                        }
+                                        filiGalleryInit('.section-viewer-filigrana .thumbnails');
+                                    });
+                                </script>
+                            </div>
                         }
 
                         // #region Filigrana
@@ -2132,9 +2119,9 @@
 
                             if (diccionarioIdentifiers != null && diccionarioIdentifiers.Count > 0)
                             {
-                                        <div class="dsp">
-                                            <h2>@titularInventarios <span class="ico">+</span></h2>
-                                            @foreach (KeyValuePair<SemanticPropertyModel.PropertyValue, int> par in diccionarioIdentifiers.OrderBy(p => p.Value))
+                                <div class="dsp">
+                                    <h2>@titularInventarios <span class="ico">+</span></h2>
+                                    @foreach (KeyValuePair<SemanticPropertyModel.PropertyValue, int> par in diccionarioIdentifiers.OrderBy(p => p.Value))
                                     {
                                         SemanticPropertyModel.PropertyValue inventario = par.Key;
 
@@ -2167,26 +2154,26 @@
                                             }
 
 
-                                                    <p class="mostrable" @Html.Raw(semCmsModel.GetRDFAProperty(inventario.Property))>
-                                                        <span @Html.Raw(semCmsModel.GetRDFAEntity(inventario.RelatedEntity))>
-                                                            @if (!string.IsNullOrEmpty(tituloInv))
+                                            <p class="mostrable" @Html.Raw(semCmsModel.GetRDFAProperty(inventario.Property))>
+                                                <span @Html.Raw(semCmsModel.GetRDFAEntity(inventario.RelatedEntity))>
+                                                    @if (!string.IsNullOrEmpty(tituloInv))
                                                     {
-                                                                <strong @Html.Raw(propTituloInv.GetRDFA())>@tituloInv.</strong>
+                                                        <strong @Html.Raw(propTituloInv.GetRDFA())>@tituloInv.</strong>
                                                     }
-                                                            @if (!string.IsNullOrEmpty(numeroInv))
+                                                    @if (!string.IsNullOrEmpty(numeroInv))
                                                     {
-                                                                <span @Html.Raw(propNumeroInv.GetRDFA())>Núm. @numeroInv.</span>
+                                                        <span @Html.Raw(propNumeroInv.GetRDFA())>Núm. @numeroInv.</span>
                                                     }
-                                                            @if (!string.IsNullOrEmpty(textoInv))
+                                                    @if (!string.IsNullOrEmpty(textoInv))
                                                     {
-                                                                <br />
-                                                                <span @Html.Raw(propTextoInv.GetRDFA())>@textoInv</span>
+                                                        <br />
+                                                        <span @Html.Raw(propTextoInv.GetRDFA())>@textoInv</span>
                                                     }
-                                                        </span>
-                                                    </p>
+                                                </span>
+                                            </p>
                                         }
                                     }
-                                        </div>
+                                </div>
                             }
                         }
 
@@ -2197,9 +2184,9 @@
 
                         if (propInscripciones != null && propInscripciones.PropertyValues != null && propInscripciones.PropertyValues.Count > 0)
                         {
-                                    <div class="dsp">
-                                        <h2>@titularInscripciones <span class="ico">+</span></h2>
-                                        @foreach (SemanticPropertyModel.PropertyValue inscripcion in propInscripciones.PropertyValues)
+                            <div class="dsp">
+                                <h2>@titularInscripciones <span class="ico">+</span></h2>
+                                @foreach (SemanticPropertyModel.PropertyValue inscripcion in propInscripciones.PropertyValues)
                                 {
                                     if (inscripcion != null)
                                     {
@@ -2228,28 +2215,28 @@
                                             identificador = propIdentificador.FirstPropertyValue.Value;
                                         }
 
-                                                <p class="mostrable" @Html.Raw(semCmsModel.GetRDFAProperty(inscripcion.Property))>
-                                                    <span @Html.Raw(semCmsModel.GetRDFAEntity(inscripcion.RelatedEntity))>
-                                                        @if (!string.IsNullOrEmpty(descripcion))
+                                        <p class="mostrable" @Html.Raw(semCmsModel.GetRDFAProperty(inscripcion.Property))>
+                                            <span @Html.Raw(semCmsModel.GetRDFAEntity(inscripcion.RelatedEntity))>
+                                                @if (!string.IsNullOrEmpty(descripcion))
                                                 {
                                                     descripcion = descripcion.Replace("<p>", "").Replace("</p>", "<br>");
-                                                            <strong @Html.Raw(propDescripcion.GetRDFA())>@Html.Raw(descripcion)</strong>
+                                                    <strong @Html.Raw(propDescripcion.GetRDFA())>@Html.Raw(descripcion)</strong>
                                                 }
-                                                        @if (!string.IsNullOrEmpty(realizado))
+                                                @if (!string.IsNullOrEmpty(realizado))
                                                 {
-                                                            <span @Html.Raw(propRealizado.GetRDFA())>@realizado.</span>
+                                                    <span @Html.Raw(propRealizado.GetRDFA())>@realizado.</span>
                                                 }
-                                                        @if (!string.IsNullOrEmpty(localizacion))
+                                                @if (!string.IsNullOrEmpty(localizacion))
                                                 {
-                                                            <span @Html.Raw(propLocalizacion.GetRDFA())>@localizacion</span>
+                                                    <span @Html.Raw(propLocalizacion.GetRDFA())>@localizacion</span>
                                                 }
-                                                    </span>
-                                                </p>
+                                            </span>
+                                        </p>
                                     }
 
 
                                 }
-                                    </div>
+                            </div>
                         }
                         // #endregion Inscripciones
                     }
@@ -2264,20 +2251,20 @@
                                 trancripciones = propTranscripciones.FirstPropertyValue.Value;
                             }
 
-                                    <div class="dsp">
-                                        <h2>@titularTranscripciones <span class="ico">+</span></h2>
+                            <div class="dsp">
+                                <h2>@titularTranscripciones <span class="ico">+</span></h2>
 
 
-                                        @if (!string.IsNullOrEmpty(trancripciones))
+                                @if (!string.IsNullOrEmpty(trancripciones))
                                 {
                                     trancripciones = trancripciones.Replace("<p>", "<p class=\"mostrable\">");
-                                            @Html.Raw(trancripciones)
+                                    @Html.Raw(trancripciones)
 
                                 }
 
 
 
-                                    </div>
+                            </div>
                         }
                         // #endregion Transcripciones
                     }
@@ -2290,9 +2277,9 @@
 
                         if (listaExposiciones != null && listaExposiciones.Count > 0)
                         {
-                                    <div class="dsp">
-                                        <h2>@Html.Translate("EXPOSICIONES") <span class="ico">+</span></h2>
-                                        @foreach (Exposicion expo in listaExposiciones)
+                            <div class="dsp">
+                                <h2>@Html.Translate("EXPOSICIONES") <span class="ico">+</span></h2>
+                                @foreach (Exposicion expo in listaExposiciones)
                                 {
 
                                     string lugarExposicion = string.Empty;
@@ -2327,30 +2314,30 @@
                                         }
                                     }
 
-                                            <p class="mostrable">
-                                                @if (!string.IsNullOrEmpty(expo.titulo))
+                                    <p class="mostrable">
+                                        @if (!string.IsNullOrEmpty(expo.titulo))
                                         {
                                             if (!string.IsNullOrEmpty(expo.enlace))
                                             {
-                                                        <a href="@expo.enlace">@expo.titulo</a><br />
+                                                <a href="@expo.enlace">@expo.titulo</a><br />
                                             }
                                             else
                                             {
-                                                        @expo.titulo<br />
+                                                @expo.titulo<br />
                                             }
                                         }
-                                                @if (!string.IsNullOrEmpty(lugarExposicion))
+                                        @if (!string.IsNullOrEmpty(lugarExposicion))
                                         {
-                                                    @lugarExposicion<br />
+                                            @lugarExposicion<br />
                                         }
-                                                @if (!string.IsNullOrEmpty(fechasExposicion))
+                                        @if (!string.IsNullOrEmpty(fechasExposicion))
                                         {
-                                                    @fechasExposicion
+                                            @fechasExposicion
                                         }
-                                            </p>
+                                    </p>
 
                                 }
-                                    </div>
+                            </div>
                         }
 
                         // #endregion Exposiciones
@@ -2407,57 +2394,57 @@
 
                             if (!string.IsNullOrEmpty(ubicacionSala))
                             {
-                                        <div class="dsp">
-                                            <h2>@Html.Translate("UBICACION") <span class="ico">+</span></h2>
-                                            <p class="mostrable">@Html.Raw(ubicacionSala)</p>
-                                            <script>
-                                                var mapaUbik;
-                                            </script>
-                                            @if (!string.IsNullOrEmpty(ubicacionIdObra))
+                                <div class="dsp">
+                                    <h2>@Html.Translate("UBICACION") <span class="ico">+</span></h2>
+                                    <p class="mostrable">@Html.Raw(ubicacionSala)</p>
+                                    <script>
+                                        var mapaUbik;
+                                    </script>
+                                    @if (!string.IsNullOrEmpty(ubicacionIdObra))
                                     {
                                         string urlImagenSala = urlPersonalizacion + "/ElPrado/salas/" + ubicacionIdObra + ".gif";
                                         //Pintamos la sala en caso de que tenga
-                                                <img class="mostrable oculto" alt="@Html.Raw(salaObra)" src="@urlImagenSala?v=@Html.GetVersion()-@Comunidad.VersionCSS">
+                                        <img class="mostrable oculto" alt="@Html.Raw(salaObra)" src="@urlImagenSala?v=@Html.GetVersion()-@Comunidad.VersionCSS">
                                     }
                                     else if (!string.IsNullOrEmpty(ubicacionLatitudObra) && !string.IsNullOrEmpty(ubicacionLongitudbra))
                                     {
                                         //Pintamos la latitud y longitud si no tiene imagen pero si coordenadas
-                                                <div id="map-ubicacion" class="mostrable oculto"></div>
-                                                <script>
-                                                $( document ).ready(function() {
-                                                    if ($('#map-ubicacion').length) {
-                                                        //Aquí van las COORDENADAS
-                                                        var longitud=@ubicacionLatitudObra;
-                                                        var latitud=@ubicacionLongitudbra;
-                                                        var southWestUbik = new L.LatLng(-90,180);
-                                                        var northEastUbik = new L.LatLng(90,-180);
-                                                        L.Icon.Default.imagePath=$('.inpt_baseURLContent').val()+'/imagenes/proyectos/personalizacion/[%%%_PROYECTO_ID_%%%]/ElPrado/js/images/';
-                                                        var bordesMapaUbik = new L.LatLngBounds(southWestUbik, northEastUbik);
-                                                        mapaUbik = L.map('map-ubicacion', {
-                                                            center: [longitud,latitud],
-                                                            zoom: 14,
-                                                            alt:'',
-                                                            zoomControl:false,
-                                                            maxBounds: bordesMapaUbik,
-                                                            dragging:!Boolean(isMobile.any()),
-                                                            tap:false,
-                                                            scrollWheelZoom:false
-                                                        });
-                                                        var osmUrl='https://a.tile.openstreetmap.org/{z}/{x}/{y}.png';
-                                                        var osmAttrib='<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; Colaboradores de OpenStreetMap</a>';
-                                                        var osm = new L.TileLayer(osmUrl,{minZoom:10,maxZoom:17,attribution:osmAttrib});
-                                                        var layerControlFooter = L.control.zoom({position: 'topright'});
-                                                        layerControlFooter.addTo(mapaUbik);
-                                                        var marcador_footer=L.marker([longitud,latitud]).addTo(mapaUbik);
-                                                        mapaUbik.addLayer(osm);
-                                                        $(marcador_footer).click(function(){
-                                                            location.href="https://www.google.com/maps/?q="+longitud+","+latitud+"&ll="+longitud+","+latitud+"&z=15";
-                                                        });
-                                                    }
+                                        <div id="map-ubicacion" class="mostrable oculto"></div>
+                                        <script>
+                                        $( document ).ready(function() {
+                                            if ($('#map-ubicacion').length) {
+                                                //Aquí van las COORDENADAS
+                                                var longitud=@ubicacionLatitudObra;
+                                                var latitud=@ubicacionLongitudbra;
+                                                var southWestUbik = new L.LatLng(-90,180);
+                                                var northEastUbik = new L.LatLng(90,-180);
+                                                L.Icon.Default.imagePath=$('.inpt_baseURLContent').val()+'/imagenes/proyectos/personalizacion/7317a29a-d846-4c54-9034-6a114c3658fe/ElPrado/js/images/';
+                                                var bordesMapaUbik = new L.LatLngBounds(southWestUbik, northEastUbik);
+                                                mapaUbik = L.map('map-ubicacion', {
+                                                    center: [longitud,latitud],
+                                                    zoom: 14,
+                                                    alt:'',
+                                                    zoomControl:false,
+                                                    maxBounds: bordesMapaUbik,
+                                                    dragging:!Boolean(isMobile.any()),
+                                                    tap:false,
+                                                    scrollWheelZoom:false
                                                 });
-                                                </script>
+                                                var osmUrl='https://a.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                                                var osmAttrib='<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; Colaboradores de OpenStreetMap</a>';
+                                                var osm = new L.TileLayer(osmUrl,{minZoom:10,maxZoom:17,attribution:osmAttrib});
+                                                var layerControlFooter = L.control.zoom({position: 'topright'});
+                                                layerControlFooter.addTo(mapaUbik);
+                                                var marcador_footer=L.marker([longitud,latitud]).addTo(mapaUbik);
+                                                mapaUbik.addLayer(osm);
+                                                $(marcador_footer).click(function(){
+                                                    location.href="https://www.google.com/maps/?q="+longitud+","+latitud+"&ll="+longitud+","+latitud+"&z=15";
+                                                });
+                                            }
+                                        });
+                                        </script>
                                     }
-                                        </div>
+                                </div>
                             }
                         }
 
@@ -2466,114 +2453,135 @@
                     @{
                         //#region OBJETOS REPRESENTADOS
 
-                        if (propObjetosRepresentados != null && propObjetosRepresentados.PropertyValues != null && propObjetosRepresentados.PropertyValues.Count() > 0)
+                        if (propObjetosRepresentados != null && propObjetosRepresentados.PropertyValues != null && propObjetosRepresentados.PropertyValues.Count() > 0 && propObjetosRepresentados.PropertyValues.Any(x => x.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#has_object_information") != null && x.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#has_object_information").PropertyValues.Count > 0 && !string.IsNullOrEmpty(x.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#has_object_information").PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note"))))
                         {
-                                    <div class="dsp">
-                                        <h2>@Html.Translate("OBJETOSPRESENTADOS") <span class="ico">+</span></h2>
-                                        @foreach (SemanticPropertyModel.PropertyValue propObjeto in propObjetosRepresentados.PropertyValues)
-                                {
-                                    if (propObjeto != null && propObjeto.Value != null)
-                                    {
-                                        SemanticPropertyModel propNodoObjeto = propObjeto.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#objectNode");
 
-                                        if (propNodoObjeto != null && propNodoObjeto.PropertyValues != null && propNodoObjeto.PropertyValues.Count() > 0)
-                                        {
 
-                                            SemanticPropertyModel propNombreObjeto = propNodoObjeto.PropertyValues.Last().RelatedEntity.GetPropertyByPath("http://www.w3.org/2008/05/skos#prefLabel");
-                                            string nombreObjeto = propNodoObjeto.PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/2008/05/skos#prefLabel");
-
-                                            //string htmlNombreObjeto = " <span " + semCmsModel.GetRDFAProperty(propObjeto.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#objectNode")) + ">" + nombreObjeto + "</span>";
-
-                                            if (!string.IsNullOrEmpty(nombreObjeto))
+                                        <div class="dsp">
+                                            <h2>@Html.Translate("OBJETOSPRESENTADOS") <span class="ico">+</span></h2>
+                                            @foreach (SemanticPropertyModel.PropertyValue propObjeto in propObjetosRepresentados.PropertyValues)
                                             {
-                                                string infoObjRepresentado = string.Empty;
-
-                                                SemanticPropertyModel propInfoObjeto = propObjeto.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#has_object_information");
-
-                                                if (propInfoObjeto != null && propInfoObjeto.PropertyValues != null && propInfoObjeto.PropertyValues.Count() > 0)
+                                                string descripcionObjeto = null;
+                                                if (propObjeto != null && propObjeto.Value != null)
                                                 {
-                                                    string descripcionObjeto = propInfoObjeto.PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note");
-                                                    string particularidadesObjeto = propInfoObjeto.PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#usage_particularities");
-                                                    string datacionObjeto = propInfoObjeto.PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#dating_text");
-                                                    string lugarProduccionObjeto = propInfoObjeto.PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p7_took_place_at");
+                                                    SemanticPropertyModel propNodoObjeto = propObjeto.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#objectNode");
 
-                                                    string rdfaEntidadObjectInformation = propInfoObjeto.FirstPropertyValue.RelatedEntity.GetRDFA();
-
-
-                                                    if (!string.IsNullOrEmpty(descripcionObjeto))
+                                                    if (propNodoObjeto != null && propNodoObjeto.PropertyValues != null && propNodoObjeto.PropertyValues.Count() > 0)
                                                     {
-                                                        //infoObjRepresentado = descripcionObjeto;
 
-                                                        string htmlDescripcion = " <span " + semCmsModel.GetRDFAProperty(propInfoObjeto.FirstPropertyValue.RelatedEntity.GetProperty("http://www.cidoc-crm.org/cidoc-crm#p3_has_note")) + ">" + descripcionObjeto + "</span>";
-                                                        infoObjRepresentado = htmlDescripcion;
-                                                    }
+                                                        SemanticPropertyModel propNombreObjeto = propNodoObjeto.PropertyValues.Last().RelatedEntity.GetPropertyByPath("http://www.w3.org/2008/05/skos#prefLabel");
+                                                        string nombreObjeto = propNodoObjeto.PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/2008/05/skos#prefLabel");
 
-                                                    if (!string.IsNullOrEmpty(particularidadesObjeto))
-                                                    {
-                                                        string htmlParticularidadesObjeto = " <span " + semCmsModel.GetRDFAProperty(propInfoObjeto.FirstPropertyValue.RelatedEntity.GetProperty("http://museodelprado.es/ontologia/pradomuseum.owl#usage_particularities")) + ">" + particularidadesObjeto + "</span></span>";
-
-                                                        if (!string.IsNullOrEmpty(infoObjRepresentado))
+                                                        //string htmlNombreObjeto = " <span " + semCmsModel.GetRDFAProperty(propObjeto.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#objectNode")) + ">" + nombreObjeto + "</span>";
+                                                        List<string> htmlDescripciones = new List<string>();
+                                                        string infoObjRepresentado = string.Empty;
+                                                        SemanticPropertyModel propInfoObjeto = propObjeto.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#has_object_information");
+                                                        if (!string.IsNullOrEmpty(nombreObjeto))
                                                         {
-                                                            infoObjRepresentado = string.Concat(infoObjRepresentado, "<br/>", htmlParticularidadesObjeto);
-                                                        }
-                                                        else
-                                                        {
-                                                            infoObjRepresentado = htmlParticularidadesObjeto;
-                                                        }
-                                                    }
-
-                                                    if (!string.IsNullOrEmpty(datacionObjeto))
-                                                    {
-                                                        string htmlDatacionObjeto = " <span " + semCmsModel.GetRDFAProperty(propInfoObjeto.FirstPropertyValue.RelatedEntity.GetProperty("http://museodelprado.es/ontologia/pradomuseum.owl#dating_text")) + ">" + datacionObjeto + "</span></span>";
-
-                                                        if (!string.IsNullOrEmpty(infoObjRepresentado))
-                                                        {
-                                                            infoObjRepresentado = string.Concat(infoObjRepresentado, "<br/>", htmlDatacionObjeto);
-                                                        }
-                                                        else
-                                                        {
-                                                            infoObjRepresentado = htmlDatacionObjeto;
-                                                        }
-                                                    }
-
-                                                    if (!string.IsNullOrEmpty(lugarProduccionObjeto))
-                                                    {
-                                                        string htmlLugarProduccionObjeto = " <span " + semCmsModel.GetRDFAProperty(propInfoObjeto.FirstPropertyValue.RelatedEntity.GetProperty("http://museodelprado.es/ontologia/ecidoc.owl#p7_took_place_at")) + ">" + lugarProduccionObjeto + "</span></span>";
-
-                                                        if (!string.IsNullOrEmpty(infoObjRepresentado))
-                                                        {
-                                                            infoObjRepresentado = string.Concat(infoObjRepresentado, "<br/>", htmlLugarProduccionObjeto);
-                                                        }
-                                                        else
-                                                        {
-                                                            infoObjRepresentado = htmlLugarProduccionObjeto;
-                                                        }
-                                                    }
-                                                }
-
-                                                if (!string.IsNullOrEmpty(nombreObjeto))
-                                                {
-                                                            <p class="mostrable" @Html.Raw(semCmsModel.GetRDFAProperty(propObjeto.Property))>
-                                                                <!-- Prop Objeto representado: http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_p138_represents_object  -->
-                                                                <span @Html.Raw(semCmsModel.GetRDFAEntity(propObjeto.RelatedEntity))>
-                                                                    <!-- Entidad pm:ObjectPath  -->
-                                                                    @if (!string.IsNullOrEmpty(infoObjRepresentado))
+                                                            if (propInfoObjeto != null && propInfoObjeto.PropertyValues != null && propInfoObjeto.PropertyValues.Count() > 0)
                                                             {
-                                                                        <strong @Html.Raw(semCmsModel.GetRDFAProperty(propNodoObjeto))>
-                                                                            <!-- Prop pm:objectNode -->
-                                                                            <span @Html.Raw(semCmsModel.GetRDFAEntity(propNodoObjeto.PropertyValues.Last().RelatedEntity))>
-                                                                                <!-- Entidad skos:Concept -->
-                                                                                <span @Html.Raw(semCmsModel.GetRDFAProperty(propNombreObjeto))>@nombreObjeto:</span>
-                                                                            </span>
-                                                                        </strong>
+                                                                foreach (SemanticPropertyModel.PropertyValue pValue in propInfoObjeto.PropertyValues)
+                                                                {
+                                                                    descripcionObjeto = pValue.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note");
+                                                                    string particularidadesObjeto = pValue.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#usage_particularities");
+                                                                    string datacionObjeto = pValue.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#dating_text");
+                                                                    string lugarProduccionObjeto = pValue.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p7_took_place_at");
 
-                                                                        <span @Html.Raw(semCmsModel.GetRDFAProperty(propInfoObjeto))>
-                                                                            <!-- Prop pm:has_object_information -->
-                                                                            <span @Html.Raw(semCmsModel.GetRDFAEntity(propInfoObjeto.FirstPropertyValue.RelatedEntity))>@Html.Raw(infoObjRepresentado)</span>
+                                                                    string rdfaEntidadObjectInformation = propInfoObjeto.FirstPropertyValue.RelatedEntity.GetRDFA();
+
+
+                                                                    if (!string.IsNullOrEmpty(descripcionObjeto))
+                                                                    {
+                                                                        //infoObjRepresentado = descripcionObjeto;
+
+                                                                        string htmlDescripcion = " <span " + semCmsModel.GetRDFAProperty(propInfoObjeto.FirstPropertyValue.RelatedEntity.GetProperty("http://www.cidoc-crm.org/cidoc-crm#p3_has_note")) + ">" + descripcionObjeto + "</span>";
+                                                                        infoObjRepresentado = htmlDescripcion;
+                                                                    }
+
+                                                                    if (!string.IsNullOrEmpty(particularidadesObjeto))
+                                                                    {
+                                                                        string htmlParticularidadesObjeto = " <span " + semCmsModel.GetRDFAProperty(propInfoObjeto.FirstPropertyValue.RelatedEntity.GetProperty("http://museodelprado.es/ontologia/pradomuseum.owl#usage_particularities")) + ">" + particularidadesObjeto + "</span></span>";
+
+                                                                        if (!string.IsNullOrEmpty(infoObjRepresentado))
+                                                                        {
+                                                                            infoObjRepresentado = string.Concat(infoObjRepresentado, "<br/>", htmlParticularidadesObjeto);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            infoObjRepresentado = htmlParticularidadesObjeto;
+                                                                        }
+                                                                    }
+
+                                                                    if (!string.IsNullOrEmpty(datacionObjeto))
+                                                                    {
+                                                                        string htmlDatacionObjeto = " <span " + semCmsModel.GetRDFAProperty(propInfoObjeto.FirstPropertyValue.RelatedEntity.GetProperty("http://museodelprado.es/ontologia/pradomuseum.owl#dating_text")) + ">" + datacionObjeto + "</span></span>";
+
+                                                                        if (!string.IsNullOrEmpty(infoObjRepresentado))
+                                                                        {
+                                                                            infoObjRepresentado = string.Concat(infoObjRepresentado, "<br/>", htmlDatacionObjeto);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            infoObjRepresentado = htmlDatacionObjeto;
+                                                                        }
+                                                                    }
+
+                                                                    if (!string.IsNullOrEmpty(lugarProduccionObjeto))
+                                                                    {
+                                                                        string htmlLugarProduccionObjeto = " <span " + semCmsModel.GetRDFAProperty(propInfoObjeto.FirstPropertyValue.RelatedEntity.GetProperty("http://museodelprado.es/ontologia/ecidoc.owl#p7_took_place_at")) + ">" + lugarProduccionObjeto + "</span></span>";
+
+                                                                        if (!string.IsNullOrEmpty(infoObjRepresentado))
+                                                                        {
+                                                                            infoObjRepresentado = string.Concat(infoObjRepresentado, "<br/>", htmlLugarProduccionObjeto);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            infoObjRepresentado = htmlLugarProduccionObjeto;
+                                                                        }
+                                                                    }
+                                                                    if (!string.IsNullOrEmpty(infoObjRepresentado))
+                                                                    {
+                                                                        htmlDescripciones.Add(infoObjRepresentado);
+                                                                    }
+                                                                }
+
+
+                                                            }
+                                                        }
+                                                        if (!string.IsNullOrEmpty(nombreObjeto) && htmlDescripciones.Count > 0)
+                                                        {
+
+                                                            if (htmlDescripciones.Count > 0)
+                                                            {
+                                                                foreach (string descrip in htmlDescripciones)
+                                                                {
+                                                                    <p class="mostrable" @Html.Raw(semCmsModel.GetRDFAProperty(propObjeto.Property))>
+                                                                        <!-- Prop Objeto representado: http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_p138_represents_object  -->
+                                                                        <span @Html.Raw(semCmsModel.GetRDFAEntity(propObjeto.RelatedEntity))>
+                                                                            <!-- Entidad pm:ObjectPath  -->
+                                                                            <strong @Html.Raw(semCmsModel.GetRDFAProperty(propNodoObjeto))>
+                                                                                <!-- Prop pm:objectNode -->
+                                                                                <span @Html.Raw(semCmsModel.GetRDFAEntity(propNodoObjeto.PropertyValues.Last().RelatedEntity))>
+                                                                                    <!-- Entidad skos:Concept -->
+                                                                                    <span @Html.Raw(semCmsModel.GetRDFAProperty(propNombreObjeto))>@nombreObjeto:</span>
+                                                                                </span>
+                                                                            </strong>
+
+                                                                            <span @Html.Raw(semCmsModel.GetRDFAProperty(propInfoObjeto))>
+                                                                                <!-- Prop pm:has_object_information -->
+                                                                                <span @Html.Raw(semCmsModel.GetRDFAEntity(propInfoObjeto.FirstPropertyValue.RelatedEntity))>@Html.Raw(descrip)</span>
+                                                                            </span>
                                                                         </span>
+                                                                    </p>
+                                                                }
+
                                                             }
                                                             else
                                                             {
+                                                                <p class="mostrable" @Html.Raw(semCmsModel.GetRDFAProperty(propObjeto.Property))>
+                                                                    <!-- Prop Objeto representado: http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_p138_represents_object  -->
+                                                                    <span @Html.Raw(semCmsModel.GetRDFAEntity(propObjeto.RelatedEntity))>
+                                                                        <!-- Entidad pm:ObjectPath  -->
                                                                         <strong @Html.Raw(semCmsModel.GetRDFAProperty(propNodoObjeto))>
                                                                             <!-- Prop pm:objectNode -->
                                                                             <span @Html.Raw(semCmsModel.GetRDFAEntity(propNodoObjeto.PropertyValues.Last().RelatedEntity))>
@@ -2581,15 +2589,16 @@
                                                                                 <span @Html.Raw(semCmsModel.GetRDFAProperty(propNombreObjeto))>@nombreObjeto</span>
                                                                             </span>
                                                                         </strong>
+                                                                    </span>
+                                                                </p>
                                                             }
-                                                                </span>
-                                                            </p>
+
+                                                        }
+
+                                                    }
                                                 }
                                             }
-                                        }
-                                    }
-                                }
-                                    </div>
+                                        </div>
                         }
 
                         //#endregion OBJETOS REPRESENTADOS
@@ -2613,8 +2622,8 @@
                 if (propMasObras != null && propMasObras.PropertyValues != null && propMasObras.PropertyValues.Count > 0)
                 {
 
-                            <section id="mas-obras" class="mas-obras selectPagMasObras">
-                                @{
+                    <section id="mas-obras" class="mas-obras selectPagMasObras">
+                        @{
                             //var autoresSinAutoria = obtenerAutoresOrdenadosAlfabeticamente(dTAutoresObra).AsEnumerable().Select(autor => autor.Field<string>("nombreAutor"));
 
                             List<string> autoresSinAutoria = listaAutores.OrderBy(autor => autor.ordenAutor).Select(autor => autor.nombreAutor).ToList();
@@ -2633,20 +2642,20 @@
                                 {
                                     extraHtmlPag = "aux=\"" + propMasObras.EntityParent.SemanticResourceModel.MvcActionsUrl + "/load-more-entities-selector|" + propMasObras.EntityParent.Key + "|" + propMasObras.Element.Propiedad.Nombre + "|" + propMasObras.OntologyPropInfo.EntitySelector.NumEntitiesForPage + "|" + propMasObras.OntologyPropInfo.EntitySelector.TotalEntitiesPagination + "\"";
                                 }
-                                                <h2 class="heading">@Html.Translate("MASOBRASDE") <strong>@listadoAutoresSinAutoria</strong></h2>
-                                                <div class="carousel inactive" @Html.Raw(extraHtmlPag)>
-                                                    @if (!string.IsNullOrEmpty(propMasObras.SpecificationProperty.SelectorEntidad.VistaPersonalizadaPaginacion))
+                                <h2 class="heading">@Html.Translate("MASOBRASDE") <strong>@listadoAutoresSinAutoria</strong></h2>
+                                <div class="carousel inactive" @Html.Raw(extraHtmlPag)>
+                                    @if (!string.IsNullOrEmpty(propMasObras.SpecificationProperty.SelectorEntidad.VistaPersonalizadaPaginacion))
                                     {
-                                                        @Html.PartialView(propMasObras.SpecificationProperty.SelectorEntidad.VistaPersonalizadaPaginacion, propMasObras)
+                                        @Html.PartialView(propMasObras.SpecificationProperty.SelectorEntidad.VistaPersonalizadaPaginacion, propMasObras)
                                     }
                                     else
                                     {
-                                                        @Html.PartialView("SemCms/_PropiedadOntoSelectorEntidadLectura", propMasObras)
+                                        @Html.PartialView("SemCms/_PropiedadOntoSelectorEntidadLectura", propMasObras)
                                     }
-                                                </div>
+                                </div>
                             }
-                                }
-                            </section>
+                        }
+                    </section>
                 }
             }
             else
@@ -2674,34 +2683,34 @@
                             displayNone = "style=\"display:none\"";
                             pag = "1";
                         }
-                                <section id="mas-obras" class="mas-obras" @Html.Raw(displayNone)>
-                                    <h2 class="heading">@Html.Translate("MASOBRASDEANONIMO")</h2>
-                                    <div class="carousel inactive">
-                                        @if (cargado)
+                        <section id="mas-obras" class="mas-obras" @Html.Raw(displayNone)>
+                            <h2 class="heading">@Html.Translate("MASOBRASDEANONIMO")</h2>
+                            <div class="carousel inactive">
+                                @if (cargado)
                                 {
-                                            @Html.PartialView("ControlesMVC/_FichaGadget", gadgetContextoMasObras)
+                                    @Html.PartialView("ControlesMVC/_FichaGadget", gadgetContextoMasObras)
                                 }
-                                        <div class="contenedorGadget swiper-slide" aux="mas-obras" pag="@pag" id="@idGadgetMasObras.ToString().ToLower()"></div>
-                                    </div>
-                                </section>
+                                <div class="contenedorGadget swiper-slide" aux="mas-obras" pag="@pag" id="@idGadgetMasObras.ToString().ToLower()"></div>
+                            </div>
+                        </section>
                     }
                 }
                 else
                 {
-                            <section id="mas-obras" class="mas-obras" style="display: none">
-                            </section>
+                    <section id="mas-obras" class="mas-obras" style="display: none">
+                    </section>
                 }
             }
 
             //TIENDA EL PRADO
 
-                    <section class="tienda-prado" id="tienda-prado">
-                        @{
+            <section class="tienda-prado" id="tienda-prado">
+                @{
                     if (propProductosTienda != null && propProductosTienda.PropertyValues != null && propProductosTienda.PropertyValues.Count > 0)
                     {
-                                        <h2 class="heading">@Html.Translate("TIENDAPRADO")</h2>
-                                        <div class="carousel inactive">
-                                            @foreach (SemanticPropertyModel.PropertyValue productoTienda in propProductosTienda.PropertyValues)
+                        <h2 class="heading">@Html.Translate("TIENDAPRADO")</h2>
+                        <div class="carousel inactive">
+                            @foreach (SemanticPropertyModel.PropertyValue productoTienda in propProductosTienda.PropertyValues)
                             {
                                 string nombreProd = productoTienda.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/goodrelations/v1#name");
                                 string categoria = productoTienda.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/goodrelations/v1#category");
@@ -2709,57 +2718,57 @@
                                 string imagenProd = productoTienda.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/egr.owl#image");
                                 string web = productoTienda.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/egr.owl#web");
 
-                                                <div class="slide">
-                                                    <figure>
-                                                        @if (!string.IsNullOrEmpty(web))
+                                <div class="slide">
+                                    <figure>
+                                        @if (!string.IsNullOrEmpty(web))
                                         {
-                                                            <a href="@web" target="_blank">
-                                                                @if (!string.IsNullOrEmpty(imagenProd) && !string.IsNullOrEmpty(nombreProd))
+                                            <a href="@web" target="_blank">
+                                                @if (!string.IsNullOrEmpty(imagenProd) && !string.IsNullOrEmpty(nombreProd))
                                                 {
-                                                                    <img alt="@nombreProd" src="@ViewBag.BaseUrlContent/@imagenProd">
+                                                    <img alt="@nombreProd" src="@ViewBag.BaseUrlContent/@imagenProd">
                                                 }
-                                                            </a>
+                                            </a>
                                         }
-                                                        <figcaption>
-                                                            @if (!string.IsNullOrEmpty(oferta) && oferta.Equals("true"))
+                                        <figcaption>
+                                            @if (!string.IsNullOrEmpty(oferta) && oferta.Equals("true"))
                                             {
-                                                                <div class="offer">Oferta</div>
+                                                <div class="offer">Oferta</div>
                                             }
-                                                            @if (!string.IsNullOrEmpty(categoria))
+                                            @if (!string.IsNullOrEmpty(categoria))
                                             {
-                                                                <div class="media-type">@categoria</div>
+                                                <div class="media-type">@categoria</div>
                                             }
-                                                            @if (!string.IsNullOrEmpty(nombreProd) && !string.IsNullOrEmpty(web))
+                                            @if (!string.IsNullOrEmpty(nombreProd) && !string.IsNullOrEmpty(web))
                                             {
-                                                                <div class="name"><a href="@web" target="_blank">@nombreProd</a></div>
+                                                <div class="name"><a href="@web" target="_blank">@nombreProd</a></div>
                                             }
-                                                        </figcaption>
-                                                    </figure>
-                                                </div>
+                                        </figcaption>
+                                    </figure>
+                                </div>
 
                             }
-                                        </div>
+                        </div>
                     }
-                        }
-                        <div class="impresion-a-la-carta">
-                            <div>
-                                @if (idiomaNav.Equals("es"))
+                }
+                <div class="impresion-a-la-carta">
+                    <div>
+                        @if (idiomaNav.Equals("es"))
                         {
-                                    <h1><a href="http://www.tiendaprado.com/es/404-impresion-a-la-carta" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h1>
-                                    @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMPRESION"))
+                            <h1><a href="http://www.tiendaprado.com/es/404-impresion-a-la-carta" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h1>
+                            @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMPRESION"))
                         }
                         else
                         {
-                                    <h1><a href="http://www.tiendaprado.com/en/404-print-on-demand" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h1>
-                                    @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMPRESION"))
+                            <h1><a href="http://www.tiendaprado.com/en/404-print-on-demand" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h1>
+                            @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMPRESION"))
                         }
-                            </div>
-                            <div>
-                                <h1><a href="mailto:bimnp@museodelpradodifusion.es" target="_blank">@Html.Translate("BANCODEIMAGENES")</a></h1>
-                                @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMAGENES"))
-                            </div>
-                        </div>
-                    </section>
+                    </div>
+                    <div>
+                        <h1><a href="mailto:bimnp@museodelpradodifusion.es" target="_blank">@Html.Translate("BANCODEIMAGENES")</a></h1>
+                        @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMAGENES"))
+                    </div>
+                </div>
+            </section>
 
         }
     </section>
@@ -2917,11 +2926,9 @@
     }
 
 
-    @Html.PartialView("_scriptJsonLD", propsJsonLD)
-
-        @functions{
-
-    public void  PintarAutorFichaTecnica(List<autorVista> pListaAutores, SemanticResourceModel pSemCmsModel)
+    @Html.PartialView("_scriptJsonLD", propsJsonLD);
+    @functions{
+     public void PintarAutorFichaTecnica(List<autorVista> pListaAutores, SemanticResourceModel pSemCmsModel)
     {
         if (pListaAutores != null && pListaAutores.Count > 0)
         {
@@ -2929,8 +2936,8 @@
 
             if (autoresOrdenados != null && autoresOrdenados.Count > 0)
             {
-    <dd>
-                            @foreach (autorVista autor in autoresOrdenados)
+                <dd>
+                    @foreach (autorVista autor in autoresOrdenados)
                     {
                         string htmlAutor = "";
 
@@ -3078,13 +3085,13 @@
                             htmlAutor += puntoycoma;
                             //@puntoycoma
                         }
-                                @Html.Raw(htmlAutor)
+                        @Html.Raw(htmlAutor)
                     }
-    </dd>
+                </dd>
             }
         }
     }
-      public void   PintarAutorLateral2(List<autorVista> pListaAutores, string pIdiomaNav)
+   public void  PintarAutorLateral2(List<autorVista> pListaAutores, string pIdiomaNav)
     {
 
         if (pListaAutores != null && pListaAutores.Count > 0)
@@ -3104,55 +3111,55 @@
                     string fotoAutor = autor.imagenAutor;
                     List<string> tipoAutor = autor.tipoAutor;
 
-    <div class="autor">
-                                @{
+                    <div class="autor">
+                        @{
                             if (autor.autoria == null || autor.autoria.Count() == 0)
                             {
                                 if (string.IsNullOrEmpty(tipoAutoria))
                                 {
-                                                    <h2 class="borde">@nombreAutor</h2>
+                                    <h2 class="borde">@nombreAutor</h2>
                                 }
                                 else
                                 {
                                     if (AutoriaPrimero(tipoAutoria) && autor.autoria.Count == 0)
                                     {
-                                                        <h2 class="borde">@tipoAutoria @nombreAutor </h2>
+                                        <h2 class="borde">@tipoAutoria @nombreAutor </h2>
                                     }
                                     else
                                     {
-                                                        <h2 class="borde">@nombreAutor  @tipoAutoria</h2>
+                                        <h2 class="borde">@nombreAutor  @tipoAutoria</h2>
                                     }
                                 }
 
                                 if (!string.IsNullOrEmpty(infoAutor))
                                 {
-                                                    <p>@infoAutor</p>
+                                    <p>@infoAutor</p>
                                 }
                                 if (!string.IsNullOrEmpty(fotoAutor))
                                 {
-                                                    <img src="@ViewBag.BaseUrlContent/@fotoAutor" alt="@nombreAutor">
+                                    <img src="@ViewBag.BaseUrlContent/@fotoAutor" alt="@nombreAutor">
                                 }
                                 if (!string.IsNullOrEmpty(nombreAutor) && !nombreAutor.Contains("Anónimo") && !nombreAutor.Contains("Taller"))
                                 {
                                     if (!string.IsNullOrEmpty(descripcionAutor) && !string.IsNullOrEmpty(pIdiomaNav) && pIdiomaNav.Equals("es"))
                                     {
-                                                        <p>@Html.AcortarTexto(descripcionAutor, 300)</p>
-                                                        <p class="pie">@Html.Translate("FUENTE_MUSEO_NACIONAL_DEL_PRADO")</p>
+                                        <p>@Html.AcortarTexto(descripcionAutor, 300)</p>
+                                        <p class="pie">@Html.Translate("FUENTE_MUSEO_NACIONAL_DEL_PRADO")</p>
                                     }
                                 }
                                 if (!string.IsNullOrEmpty(enlaceAutor) && !string.IsNullOrEmpty(pIdiomaNav))
                                 {
-                                                    <a href="@enlaceAutor" class="mas-info">
+                                    <a href="@enlaceAutor" class="mas-info">
 
-                                                        @if (autor.generoAutor == "http://museodelprado.es/items/gender_female")
+                                        @if (autor.generoAutor == "http://museodelprado.es/items/gender_female")
                                         {
-                                                            @Html.Translate("VERFICHADEAUTORA")
+                                            @Html.Translate("VERFICHADEAUTORA")
                                         }
                                         else
                                         {
-                                                            @Html.Translate("VERFICHADEAUTOR")
+                                            @Html.Translate("VERFICHADEAUTOR")
                                         }
-                                                    </a>
+                                    </a>
 
                                 }
 
@@ -3179,13 +3186,13 @@
 
                                             if (nombreAutor.Contains("Anónimo") || nombreAutor.Contains("Taller"))
                                             {
-                                                                <h2 class="borde"> @nombreAutor -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</h2>
+                                                <h2 class="borde"> @nombreAutor -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</h2>
 
                                             }
                                             else
                                             {
 
-                                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</h2>
+                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</h2>
 
                                             }
                                         }
@@ -3194,13 +3201,13 @@
                                             if (nombreAutor.Contains("Anónimo") || nombreAutor.Contains("Taller"))
                                             {
 
-                                                                <h2 class="borde">@nombreAutor (@valorAutorias)</h2>
+                                                <h2 class="borde">@nombreAutor (@valorAutorias)</h2>
 
                                             }
                                             else
                                             {
 
-                                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> (@valorAutorias)</h2>
+                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> (@valorAutorias)</h2>
 
                                             }
                                         }
@@ -3212,13 +3219,13 @@
                                             if (nombreAutor.Contains("Anónimo") || nombreAutor.Contains("Taller"))
                                             {
 
-                                                                <h2 class="borde">@nombreAutor -@String.Join(", ", tipoAutor.ToArray())- @tipoAutoria</h2>
+                                                <h2 class="borde">@nombreAutor -@String.Join(", ", tipoAutor.ToArray())- @tipoAutoria</h2>
 
                                             }
                                             else
                                             {
 
-                                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- @tipoAutoria</h2>
+                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- @tipoAutoria</h2>
 
                                             }
                                         }
@@ -3227,13 +3234,13 @@
                                             if (nombreAutor.Contains("Anónimo") || nombreAutor.Contains("Taller"))
                                             {
 
-                                                                <h2 class="borde">@nombreAutor @tipoAutoria</h2>
+                                                <h2 class="borde">@nombreAutor @tipoAutoria</h2>
 
                                             }
                                             else
                                             {
 
-                                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> @tipoAutoria</h2>
+                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> @tipoAutoria</h2>
 
                                             }
                                         }
@@ -3243,16 +3250,16 @@
                                 else if (!string.IsNullOrEmpty(nombreAutor))
                                 {
 
-                                                    <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a></h2>
+                                    <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a></h2>
                                     if (!string.IsNullOrEmpty(infoAutor))
                                     {
-                                                        <p>@infoAutor</p>
+                                        <p>@infoAutor</p>
                                     }
 
                                 }
                             }
-                                }
-    </div>
+                        }
+                    </div>
                 }
             }
             else if (pListaAutores.Count > 1) // Cuando la obra tiene varios autores sólo muestra los que no tienen autoría
@@ -3261,8 +3268,8 @@
 
                 if (autoresSinAutoria != null && autoresSinAutoria.Count > 0)
                 {
-    <dl class="autor">
-                                @foreach (autorVista autor in autoresSinAutoria)
+                    <dl class="autor">
+                        @foreach (autorVista autor in autoresSinAutoria)
                         {
                             if (autor != null)
                             {
@@ -3274,7 +3281,7 @@
 
                                 if (!string.IsNullOrEmpty(nombreAutor) && nombreAutor.Contains("Anónimo") && nombreAutor.Contains("Taller"))
                                 {
-                                            <dt>@nombreAutor</dt>
+                                    <dt>@nombreAutor</dt>
                                 }
                                 else if (!string.IsNullOrEmpty(nombreAutor) && ((autor.autoria != null && autor.autoria.Any()) || !string.IsNullOrEmpty(tipoAutoria)))
                                 {
@@ -3295,22 +3302,22 @@
                                         {
                                             if (tipoAutor != null && tipoAutor.Any())
                                             {
-                                                        <dt><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</dt>
+                                                <dt><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</dt>
                                             }
                                             else
                                             {
-                                                        <dt><a href="@enlaceAutor">@nombreAutor</a> (@valorAutorias)</dt>
+                                                <dt><a href="@enlaceAutor">@nombreAutor</a> (@valorAutorias)</dt>
                                             }
                                         }
                                         else
                                         {
                                             if (tipoAutor != null && tipoAutor.Any())
                                             {
-                                                        <dt>@nombreAutor -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</dt>
+                                                <dt>@nombreAutor -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</dt>
                                             }
                                             else
                                             {
-                                                        <dt>@nombreAutor (@valorAutorias)</dt>
+                                                <dt>@nombreAutor (@valorAutorias)</dt>
                                             }
                                         }
                                     }
@@ -3320,22 +3327,22 @@
                                         {
                                             if (tipoAutor != null && tipoAutor.Any())
                                             {
-                                                        <dt><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray()) -@tipoAutoria</dt>
+                                                <dt><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray()) -@tipoAutoria</dt>
                                             }
                                             else
                                             {
-                                                        <dt><a href="@enlaceAutor">@nombreAutor</a> @tipoAutoria</dt>
+                                                <dt><a href="@enlaceAutor">@nombreAutor</a> @tipoAutoria</dt>
                                             }
                                         }
                                         else
                                         {
                                             if (tipoAutor != null && tipoAutor.Any())
                                             {
-                                                        <dt>@nombreAutor -@String.Join(", ", tipoAutor.ToArray())-@tipoAutoria</dt>
+                                                <dt>@nombreAutor -@String.Join(", ", tipoAutor.ToArray())-@tipoAutoria</dt>
                                             }
                                             else
                                             {
-                                                        <dt>@nombreAutor @tipoAutoria</dt>
+                                                <dt>@nombreAutor @tipoAutoria</dt>
                                             }
                                         }
                                     }
@@ -3347,10 +3354,11 @@
                                     {
                                         if (tipoAutor.Count > 0)
                                         {
-                                                    <dt><a href="@enlaceAutor">@nombreAutor </a> - @String.Join(", ", tipoAutor.ToArray())</dt>
+                                            <dt><a href="@enlaceAutor">@nombreAutor </a> - @String.Join(", ", tipoAutor.ToArray())</dt>
                                         }
-                                        else { 
-                                                    <dt><a href="@enlaceAutor">@nombreAutor </a></dt>
+                                        else
+                                        {
+                                            <dt><a href="@enlaceAutor">@nombreAutor </a></dt>
                                         }
                                     }
 
@@ -3358,32 +3366,34 @@
                                     {
                                         if (tipoAutor.Count > 0)
                                         {
-                                                    <dt>@nombreAutor - @String.Join(", ", tipoAutor.ToArray())</dt>
+                                            <dt>@nombreAutor - @String.Join(", ", tipoAutor.ToArray())</dt>
                                         }
-                                        else { 
-                                                    <dt>@nombreAutor</dt>
+                                        else
+                                        {
+                                            <dt>@nombreAutor</dt>
                                         }
                                     }
                                     if (!string.IsNullOrEmpty(infoAutor))
                                     {
                                         if (tipoAutor.Count > 0)
                                         {
-                                                    <dd>@infoAutor - @String.Join(", ", tipoAutor.ToArray())</dd>
+                                            <dd>@infoAutor - @String.Join(", ", tipoAutor.ToArray())</dd>
                                         }
-                                        else { 
-                                                    <dd>@infoAutor</dd>
+                                        else
+                                        {
+                                            <dd>@infoAutor</dd>
                                         }
                                     }
                                 }
 
                             }
                         }
-    </dl>
+                    </dl>
                 }
             }
         }
     }
-     public void   PintarAutorImagen(List<autorVista> pListaAutores)
+     public void PintarAutorImagen(List<autorVista> pListaAutores)
     {
         string listadoAutoresObra = string.Empty;
         if (pListaAutores != null && pListaAutores.Count > 0)
@@ -3469,12 +3479,9 @@
         }
 
 
-    <div class="author">@listadoAutoresObra</div>
+        <div class="author">@listadoAutoresObra</div>
     }
-
-    }
-
-
+}
 }
 catch (Exception e)
 {

@@ -155,11 +155,11 @@
                 <div @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note"))>
                     @if (sherlock && !string.IsNullOrEmpty(descripcionAutorAumentado))
                     {
-                        <p class="colapsado normal">@MvcHtmlString.Create(Html.DeleteFirstParagraph(descripcionAutorAumentado))</p>
+                        <p class="colapsado normal">@Html.Raw(Html.DeleteFirstParagraph(descripcionAutorAumentado))</p>
                     }
                     else
                     {
-                        <p class="colapsado normal">@MvcHtmlString.Create(Html.DeleteFirstParagraph(descripcionAutor))</p>
+                        <p class="colapsado normal">@Html.Raw(Html.DeleteFirstParagraph(descripcionAutor))</p>
                     }
                 </div>
                 @{

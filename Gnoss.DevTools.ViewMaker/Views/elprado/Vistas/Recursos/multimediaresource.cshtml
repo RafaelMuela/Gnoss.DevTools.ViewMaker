@@ -615,7 +615,15 @@ else
                             foreach (SemanticPropertyModel.PropertyValue categoriaPath in propCategoriaPath.PropertyValues)
                             {
                                 SemanticPropertyModel propCategoriaNode = categoriaPath.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#categoryNode");
-                                listadoSubCategory.Add("pm:subcategory@@@pm:categoryNode="+propCategoriaNode.FirstPropertyValue.Value.ToLower());
+                              
+                                if (propCategoriaNode.PropertyValues.Count > 1)
+                                {
+                                    listadoSubCategory.Add("pm:subcategory@@@pm:categoryNode=" + propCategoriaNode.PropertyValues[1].Value.ToLower());
+                                }
+                                else
+                                {
+                                     listadoSubCategory.Add("pm:subcategory@@@pm:categoryNode=" + propCategoriaNode.FirstPropertyValue.Value.ToLower());
+                                }
 
                                 if (propCategoriaNode != null && propCategoriaNode.PropertyValues != null && propCategoriaNode.PropertyValues.Count() > 0)
                                 {
@@ -632,6 +640,9 @@ else
                                 }
                             }
                         }
+                        string fechaPub = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#publicationDate");
+                        DateTime? fechaPublicacionGnoss = Html.GetDate(fechaPub);
+                        string fechaPublicacionGnossFormateada = ObtenerFechaFormateadaDadoDate(fechaPublicacionGnoss.Value, "D", idiomaNav);
 
                         categorias = "";
                         string separador = "";
@@ -664,6 +675,10 @@ else
                                 {
                                     <h1 class="noborde">
                                         <span class="titulo"><em @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation"))>@titulo</em></span>
+                                         @if (!string.IsNullOrEmpty(fechaPublicacionGnossFormateada))
+                                        {
+                                            <span class="fecha">@fechaPublicacionGnossFormateada</span>
+                                        }
                                     </h1>}
 
                                 @if (!string.IsNullOrEmpty(descripcion))
@@ -686,7 +701,15 @@ else
                                 if (propCategoriaNode != null && propCategoriaNode.PropertyValues != null && propCategoriaNode.PropertyValues.Count() > 0)
                                 {
                                     string categoriaMultimedia = propCategoriaNode.PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/2008/05/skos#prefLabel");
-                                    listadoSubCategory.Add("pm:subcategory@@@pm:categoryNode="+propCategoriaNode.FirstPropertyValue.Value);
+                                    if (propCategoriaNode.PropertyValues.Count > 1)
+                                    {
+                                        listadoSubCategory.Add("pm:subcategory@@@pm:categoryNode=" + propCategoriaNode.PropertyValues[1].Value.ToLower());
+                                    }
+                                    else
+                                    {
+                                        listadoSubCategory.Add("pm:subcategory@@@pm:categoryNode=" + propCategoriaNode.FirstPropertyValue.Value.ToLower());
+                                    }
+                                    //listadoSubCategory.Add("pm:subcategory@@@pm:categoryNode=" + propCategoriaNode.FirstPropertyValue.Value);
 
                                     if (!string.IsNullOrEmpty(categoriaMultimedia))
                                     {

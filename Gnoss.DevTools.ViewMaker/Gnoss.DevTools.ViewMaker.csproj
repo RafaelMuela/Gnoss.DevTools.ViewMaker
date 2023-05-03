@@ -42,8 +42,6 @@
 
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\elprado\Vistas\Recursos\" />
-    <Folder Include="Views\elprado\Vistas\Views\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -168,22 +168,17 @@
             }
             else
             {
-<div class="item @tipoRedSocial" resourceid="@Model.Key">
-    <a href="@enlace">
-        <div class="time-ago">@fechaPublicacionTexto</div>
-        <div class="icono">@Html.Translate("Twitter")</div>
-        <p>@mensaje</p>
-    </a>
-    <a href="@enlace">
-        <figure class="avatar">
-            <img alt="avatar" src="@avatar">
-            <figcaption>
-                @nombreAutor
-        </figcaption>
-    </figure>
-    </a>
-
-</div>
+                <div class="item @tipoRedSocial" resourceid="@Model.Key">
+                    <a href="@enlace">
+                        <div class="time-ago">@fechaPublicacionTexto</div>
+                        <div class="icono">@Html.Translate("Twitter")</div>
+                        <p>@mensaje</p>
+                        <figure class="avatar">
+                            <img alt="avatar" src="@avatar">
+                            <figcaption><a href="@enlace">@nombreAutor</a></figcaption>
+                        </figure>
+                    </a>
+                </div>
             }
             break;
 	}	

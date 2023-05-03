@@ -2,6 +2,7 @@
 @model ResourceModel    
 @if (Model != null)
 {     
+	CommunityModel Comunidad = Html.GetComunidad();
     string idiomaNav= ViewBag.UtilIdiomas.LanguageCode;    	
 	string imagenClave="ecidoc:p65_E36_shows_visual_item";		
 	string imagenValor="";
@@ -240,7 +241,7 @@
 				}		
 				@if(bicentenarioValor)
 				{
-					<img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/[%%%_PROYECTO_ID_%%%]/ElPrado/img/svg/bicentenario_logo_cuadrado.svg" width="150" height="150" alt="Museo del Prado 200 años" class="logo-200" onclick="location.href='@Html.Translate("URL_BICENTENARIO")'; return false;">
+					<img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/@Comunidad.Key.ToString()/ElPrado/img/svg/bicentenario_logo_cuadrado.svg" width="150" height="150" alt="Museo del Prado 200 años" class="logo-200" onclick="location.href='@Html.Translate("URL_BICENTENARIO")'; return false;">
 				}				
 				<img src="@imagenValor.Replace("imagenes/documentos/","imagenes/Documentos/")" alt="Exposición. @Model.Title">							
 				@if(!string.IsNullOrEmpty(imageManchetaValor))				

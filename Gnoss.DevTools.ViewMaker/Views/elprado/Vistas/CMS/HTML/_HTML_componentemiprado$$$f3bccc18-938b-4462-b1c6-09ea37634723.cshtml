@@ -40,6 +40,7 @@
                     }
                     else
                     {
+                        perfil.Foto = perfil.Foto.Replace("_peque","_grande");
                         <img src="@ViewBag.BaseURLContent/@perfil.Foto">
                     }
                     <figcaption>

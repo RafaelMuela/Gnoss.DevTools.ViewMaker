@@ -1,22 +1,212 @@
-@model ResourceModel    
+@*[security|||shared/_fichaactualidad.cshtml|||elprado]*@
+@model ResourceModel
 @if (Model != null)
-{     
-	string idiomaNav = ViewBag.UtilIdiomas.LanguageCode;
-	switch (Model.RdfType)
+{
+    string idiomaNav = ViewBag.UtilIdiomas.LanguageCode;
+
+    switch (Model.RdfType)
     {
-		case "post":
-			string mensaje=Model.Description;
-			if(mensaje.Length>130)
-			{
-				mensaje=mensaje.Substring(0,130)+"...";
-			}
-			string enlaceKey="sioc:link";
-			string enlace="";
-			string nombreAutorKey="sioc:creator_of";
-			string nombreAutor="";
-			string fechaPublicacionKey="dcterms:created";
-			DateTime? fechaPublicacion=null;
-			string fechaPublicacionTexto="";
+        case "modificationreport":	
+            <div class="item investigacion" resourceid="@Model.Key">
+                <figure>
+                    <div class="thumb">
+                        <a href="@Model.CompletCardLink">
+                            @if (string.IsNullOrEmpty(Model.UrlPreview))
+                            {
+                                <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>}
+                            else
+                            {
+                                <img src="@Model.UrlPreview" alt="@Model.Title">
+							}
+                        </a>
+                    </div>
+                    <figcaption>
+                        <a href="@Model.CompletCardLink">
+                            <strong class="tipo">@Model.RdfTypeName</strong>
+                        </a>
+                        <h3 class="trunca-texto"><a href="@Model.CompletCardLink">@Model.Title</a></h3>
+                    </figcaption>
+                </figure>
+            </div>    
+            break;
+        case "multimediaresource":
+            List<string> listaNombreCategoria = new List<string>();
+            List<string> listadoClavesCategoria = new List<string>();
+            string duracion = "";
+            string tipo = "";
+            string tipoUrl = "";
+            bool esAudio = false;
+            bool esVideo = false;
+            bool esVisitaVirtual = false;
+            bool esInteractivo = false;
+            if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+            {
+                if (Model.ViewSettings.SemanticProperties.ContainsKey("pm:duration"))
+                {
+                    duracion = Model.ViewSettings.SemanticProperties["pm:duration"][0].Name;
+                }
+                if (Model.ViewSettings.SemanticProperties.ContainsKey("gnoss:type"))
+                {
+                    tipo = Model.ViewSettings.SemanticProperties["gnoss:type"][0].Name;
+                    tipoUrl = Model.ViewSettings.SemanticProperties["gnoss:type"][0].Url;
+                    esAudio = Model.ViewSettings.SemanticProperties["gnoss:type"][0].Url.EndsWith("Audioguide") || Model.ViewSettings.SemanticProperties["gnoss:type"][0].Url.EndsWith("Audio");
+                    esVideo = Model.ViewSettings.SemanticProperties["gnoss:type"][0].Url.EndsWith("Video");
+                    esVisitaVirtual = Model.ViewSettings.SemanticProperties["gnoss:type"][0].Url.EndsWith("VirtualVisit");
+                    esInteractivo = Model.ViewSettings.SemanticProperties["gnoss:type"][0].Url.EndsWith("Interactive");
+                }
+            }
+
+            string claveCategoria = "pm:subcategory@@@pm:categoryNode@@@skos2:prefLabel||pm:subcategory@@@pm:categoryNode@@@skos2:broader||pm:subcategory@@@pm:categoryNode@@@dce:identifier";
+            string nombreCategoria = "";
+            if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null && Model.ViewSettings.SemanticProperties.ContainsKey(claveCategoria))
+            {
+                //Nombre, padre, identificador
+                List<string> listaPadres = new List<string>();
+                Dictionary<string, string> categoriaIdentificadorNombre = new Dictionary<string, string>();
+                foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveCategoria])
+                {
+                    string[] propCategoria = propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+                    if (propCategoria.Length == 3)
+                    {
+                        string nombre = propCategoria[0];
+                        string padre = propCategoria[1];
+                        if (padre.Contains("_"))
+                        {
+                            padre = padre.Substring(padre.IndexOf("_") + 1);
+                        }
+                        string identificador = propCategoria[2];
+                        if (!listaPadres.Contains(padre))
+                        {
+                            listaPadres.Add(padre);
+                        }
+                        if (!categoriaIdentificadorNombre.ContainsKey(identificador))
+                        {
+                            categoriaIdentificadorNombre.Add(identificador, nombre);
+                        }
+                    }
+                }
+
+                string separador = "";
+                foreach (string keyCategoria in categoriaIdentificadorNombre.Keys)
+                {
+
+                    if (!listaPadres.Contains(keyCategoria))
+                    {
+
+                        string textoCategoria = Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(categoriaIdentificadorNombre[keyCategoria].ToLower());
+                        listaNombreCategoria.Add(textoCategoria);
+                        listadoClavesCategoria.Add("pm:subcategory@@@pm:categoryNode=http://museodelprado.es/items/multimediasubcategory_"+keyCategoria);
+
+                    }
+                }
+            }
+
+            string classItem = "";
+            if (esAudio)
+            {
+                classItem = "audio";
+            }
+            else if (esVideo)
+            {
+                classItem = "video";
+            }
+            else if (esInteractivo)
+            {
+                classItem = "interactivo";
+            }
+            else if (esVisitaVirtual)
+            {
+                classItem = "programa-actividades";
+            }
+            <div class="item @classItem" resourceid="@Model.Key">
+                <figure>
+                    <div class="thumb">
+                        <a href="@Model.CompletCardLink">
+                            @if (string.IsNullOrEmpty(Model.UrlPreview))
+                            {
+                                <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>}
+                            else
+                            {
+                                <img src="@Model.UrlPreview" alt="@Model.Title">}
+                            @if (!esInteractivo &&!esVisitaVirtual)
+                            {
+                                <div class="flecha-play"></div>}
+                            @if (!string.IsNullOrEmpty(duracion))
+                            {
+                                <span class="duracion">@duracion</span>}
+                        </a>
+                    </div>
+                    <figcaption>
+                        <a href="@Model.CompletCardLink">
+                            @if (!esVideo && !esInteractivo)
+                            {
+                                if (listaNombreCategoria.Count == 0)
+                                {
+                                    string[] tipado = tipoUrl.Split('?');
+                                    string urlPorTipo = "/busqueda-multimedia?" + tipado[1];
+                                    <strong class="tipo"><a href=@urlPorTipo> @tipo </a></strong>
+                                }
+                                else
+                                {
+                                    if (listaNombreCategoria.Count >= 1)
+                                    {
+                                        <strong class="tipo">
+                                            @for (int i = 0; i < listaNombreCategoria.Count; i++)
+                                            {
+                                                if (i == (listaNombreCategoria.Count - 1))
+                                                {
+                                                    string urlDir = "/busqueda-multimedia?" + listadoClavesCategoria[i];
+                                                    <a href=@urlDir>@tipo, @listaNombreCategoria[i]</a>
+                                                }
+                                                else
+                                                {
+                                                    string urlDir = "/busqueda-multimedia?" + listadoClavesCategoria[i];
+                                                    <a href=@urlDir>@tipo,  @listaNombreCategoria[i], </a>
+                                                }
+                                            }
+                                        </strong>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (listaNombreCategoria.Count >= 1)
+                                {
+                                    <strong class="tipo">
+                                        @for (int i = 0; i < listaNombreCategoria.Count; i++)
+                                        {
+                                            if (i == (listaNombreCategoria.Count - 1))
+                                            {
+                                                string urlDir = "/busqueda-multimedia?" + listadoClavesCategoria[i];
+                                                <a href=@urlDir> @listaNombreCategoria[i]</a>
+                                            }
+                                            else
+                                            {
+                                                string urlDir = "/busqueda-multimedia?" + listadoClavesCategoria[i];
+                                                <a href=@urlDir>  @listaNombreCategoria[i], </a>
+                                            }
+                                        }
+                                    </strong>
+                                }
+                            }
+                            <h3 class="trunca-texto">@Model.Title</h3>
+                        </a>
+                    </figcaption>
+                </figure>
+            </div> break;
+        case "post":
+            string mensaje = Model.Description;
+            if (mensaje.Length > 130)
+            {
+                mensaje = mensaje.Substring(0, 130) + "...";
+            }
+            string enlaceKey = "sioc:link";
+            string enlace = "";
+            string nombreAutorKey = "sioc:creator_of";
+            string nombreAutor = "";
+            string fechaPublicacionKey = "dcterms:created";
+            DateTime? fechaPublicacion = null;
+            string fechaPublicacionTexto = "";
             string tipoRedSocialKey = "dce:type";
             string tipoRedSocial = "";
             string imagenKey = "pm:image";
@@ -168,23 +358,559 @@
             }
             else
             {
-<div class="item @tipoRedSocial" resourceid="@Model.Key">
-    <a href="@enlace">
-        <div class="time-ago">@fechaPublicacionTexto</div>
-        <div class="icono">@Html.Translate("Twitter")</div>
-        <p>@mensaje</p>
-    </a>
-    <a href="@enlace">
-        <figure class="avatar">
-            <img alt="avatar" src="@avatar">
-            <figcaption>
-                @nombreAutor
-        </figcaption>
-    </figure>
-    </a>
-
-</div>
+                <div class="item @tipoRedSocial" resourceid="@Model.Key">
+                    <a href="@enlace">
+                        <div class="time-ago">@fechaPublicacionTexto</div>
+                        <div class="icono">@Html.Translate("Twitter")</div>
+                        <p>@mensaje</p>
+                        <figure class="avatar">
+                            <img alt="avatar" src="@avatar">
+                            <figcaption><a href="@enlace">@nombreAutor</a></figcaption>
+                        </figure>
+                    </a>
+                </div>
             }
             break;
-	}	
+        case "museumrnews":
+            <div class="item noticia" resourceid="@Model.Key">
+                <figure>
+                    <div class="thumb">
+                        <a href="@Model.CompletCardLink">
+                            @if (string.IsNullOrEmpty(Model.UrlPreview))
+                            {
+                                <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>}
+                            else
+                            {
+                                <img src="@Model.UrlPreview" alt="@Model.Title">}
+                        </a>
+                    </div>
+                    <figcaption>
+                        @{if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+                            {
+                                if (Model.ViewSettings.SemanticProperties.ContainsKey("rnews:datePublished"))
+                                {
+                                    string fecha = Model.ViewSettings.SemanticProperties["rnews:datePublished"][0].Name;
+                                    DateTime? fechaBuena = Html.GetDate(fecha);
+                                    if (fechaBuena.HasValue)
+                                    {
+                                        <strong class="tipo">@fechaBuena.Value.ToString("d")</strong>
+                                    }
+                                }
+                            }
+                        }
+                        <h3 class="trunca-texto"><a href="@Model.CompletCardLink">@Model.Title</a></h3>
+                        @{string descMuseumrnews = Es.Riam.Util.UtilCadenas.EliminarHtmlDeTexto(Model.Description);
+
+                            if (!string.IsNullOrEmpty(descMuseumrnews))
+                            {
+                                <p class="descripcion trunca-texto">@Html.Raw(descMuseumrnews)</p>
+                            }
+                        }
+                    </figcaption>
+                </figure>
+            </div>   break;
+                            case "activity2":
+                                string imagenClave = "pm:main_image";
+                                string imagenValor = "";
+                                string fechaClave = "pm:textDate";
+                                string fechaValor = "";
+                                string fechaInicioRegistroClave = "pm:registrationDate@@@pm:startDate";
+                                DateTime? fechaInicioRegistroValor = null;
+                                string fechaFinRegistroClave = "pm:registrationDate@@@pm:endDate";
+                                DateTime? fechaFinRegistroValor = null;
+                                string fechaInicioActividadClave = "pm:activityDate@@@pm:startDate";
+                                DateTime? fechaInicioActividadValor = null;
+                                string fechaFinActividadClave = "pm:activityDate@@@pm:endDate";
+                                DateTime? fechaFinActividadValor = null;
+
+                                string activityFormLSEKey = "pm:activityFormLSE";
+                                bool esLSE = false;
+                                string activityFormTypeClave = "pm:activityForm@@@pm:formType";
+                                string activityFormTypeValor = "";
+                                string relatedActivityFormTypeClave = "pm:relatedActivityForm@@@pm:formType";
+                                string relatedActivityFormTypeValor = "";
+
+
+                                string claveTipoPublicoActividad = "cidoc:p2_has_type@@@pm:activityNode@@@skos2:prefLabel||cidoc:p2_has_type@@@pm:activityNode@@@skos2:broader||cidoc:p2_has_type@@@pm:activityNode@@@dce:identifier";
+                                HashSet<string> tipoPublicoActividad = new HashSet<string>();
+
+                                string claveTipoActividad = "ecidoc:p2_has_type_activity@@@multiLan:textValue";
+                                string tipoActividad = "";
+								
+								string bicentenarioClave="pm:bicentenario";
+								string claveTipoPrograma = "ecidoc:p2_has_type_program";
+								bool bicentenarioValor=false;
+								
+								string ticketURLKey="pm:ticketURL";
+								string ticketURLValor="";
+
+                                if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+                                {
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(imagenClave))
+                                    {
+                                        imagenValor = ViewBag.BaseURLContent + "/" + Model.ViewSettings.SemanticProperties[imagenClave][0].Name;
+                                    }
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaClave))
+                                    {
+                                        fechaValor = Model.ViewSettings.SemanticProperties[fechaClave][0].Name;
+                                    }
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaInicioRegistroClave))
+                                    {
+                                        fechaInicioRegistroValor = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaInicioRegistroClave][0].Name.ToLower());
+                                    }
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaFinRegistroClave))
+                                    {
+                                        fechaFinRegistroValor = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaFinRegistroClave][0].Name.ToLower());
+                                    }
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaInicioActividadClave))
+                                    {
+                                        fechaInicioActividadValor = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaInicioActividadClave][0].Name.ToLower());
+                                    }
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaFinActividadClave))
+                                    {
+                                        fechaFinActividadValor = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaFinActividadClave][0].Name.ToLower());
+                                    }
+
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(activityFormTypeClave))
+                                    {
+                                        activityFormTypeValor = Model.ViewSettings.SemanticProperties[activityFormTypeClave][0].Name.ToLower();
+                                    }
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(relatedActivityFormTypeClave))
+                                    {
+                                        relatedActivityFormTypeValor = Model.ViewSettings.SemanticProperties[relatedActivityFormTypeClave][0].Name.ToLower();
+                                    }
+
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(activityFormLSEKey))
+                                    {
+                                        //esLSE
+                                        esLSE = true;
+                                    }
+
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoActividad))
+                                    {
+                                        tipoActividad = Model.ViewSettings.SemanticProperties[claveTipoActividad][0].Name;
+                                    }
+									
+									if (Model.ViewSettings.SemanticProperties.ContainsKey(ticketURLKey))
+                                    {
+                                        ticketURLValor = Model.ViewSettings.SemanticProperties[ticketURLKey][0].Name;
+                                    }
+
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoPublicoActividad))
+                                    {
+                                        //Nombre, padre, identificador
+                                        List<string> listaPadres = new List<string>();
+                                        Dictionary<string, string> actividadIdentificadorNombre = new Dictionary<string, string>();
+                                        foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveTipoPublicoActividad])
+                                        {
+                                            string[] propMateria = propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+                                            if (propMateria.Length == 3)
+                                            {
+                                                string nombre = propMateria[0];
+                                                string padre = propMateria[1];
+                                                if (padre.Contains("_"))
+                                                {
+                                                    padre = padre.Substring(padre.IndexOf("_") + 1);
+                                                }
+                                                if(string.IsNullOrEmpty(padre) && !string.IsNullOrEmpty(nombre))
+                                                {
+                                                    tipoPublicoActividad.Add(Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(nombre));
+                                                }
+                                            }
+                                        }
+                                    }
+									if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoPrograma))
+									{
+										foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveTipoPrograma])
+										{
+											if(propiedadSemantica.Name=="http://museodelprado.es/items/activityprogramtype_7")
+											{
+												bicentenarioValor=true;
+											}
+											if(propiedadSemantica.Name=="http://museodelprado.es/items/activityprogramtype_6")
+											{
+												tipoPublicoActividad.Clear();
+											}
+										}
+									}
+									if (Model.ViewSettings.SemanticProperties.ContainsKey(bicentenarioClave))
+									{
+										bicentenarioValor = bool.Parse(Model.ViewSettings.SemanticProperties[bicentenarioClave][0].Name);
+									}
+                                }
+
+
+
+
+                                @*
+                                    1) Inscripción abierta
+                                    2) Inscripción xx-xx-xxxx
+                                    3) Próxima inscripción ? Va a tener inscripción pero aun no sabemos la fecha (MÁS DE DOS AÑOS)
+                                    4) Inscripción cerrada ? Cuando la actividad no ha empezado pero sí ha terminado la inscripción.
+                                    5) En curso (sin etiqueta de estado).
+                                    6) Futuras sin fecha de inscripción (sin etiqueta de estado).
+                                    7) Actividades sin fecha (sin etiqueta de estado).
+                                    8) Pasadas (Mantener la clase ‘old’).*@
+string clase = "item programa-actividades ";
+string estado = "";
+if (fechaInicioRegistroValor.HasValue && fechaFinRegistroValor.HasValue && fechaInicioRegistroValor.Value < DateTime.Now && fechaFinRegistroValor.Value > DateTime.Now)
+{
+	if (!string.IsNullOrEmpty(ticketURLValor))
+	{
+                    estado = Html.Translate("VENTADEENTRADAS");
+                }
+                else
+                {
+                    estado = Html.Translate("INSCRIPCIONABIERTA");
+                }
+            }
+            else if (fechaInicioRegistroValor.HasValue && fechaInicioRegistroValor.Value > DateTime.Now.AddYears(2))
+            {
+                estado = Html.Translate("PROXIMAINSCRIPCION");
+            }
+            else if (fechaInicioRegistroValor.HasValue && fechaInicioRegistroValor.Value > DateTime.Now)
+            {
+                if (!string.IsNullOrEmpty(ticketURLValor))
+                {
+                    estado = Html.Translate("ENTRADAS") + " " + fechaInicioRegistroValor.Value.ToString("d");
+                }
+                else
+                {
+                    estado = Html.Translate("INSCRIPCION") + " " + fechaInicioRegistroValor.Value.ToString("d");
+                }
 }
+else if (fechaFinRegistroValor.HasValue && fechaInicioActividadValor.HasValue && fechaFinRegistroValor.Value < DateTime.Now && fechaInicioActividadValor.Value > DateTime.Now)
+{
+    estado = Html.Translate("INSCRIPCIONCERRADA");
+}
+else if (fechaInicioActividadValor.HasValue && fechaFinActividadValor.HasValue && fechaInicioActividadValor.Value < DateTime.Now && fechaFinActividadValor.Value > DateTime.Now)
+{
+    estado = "";
+}
+else if (fechaInicioActividadValor.HasValue && !fechaInicioRegistroValor.HasValue && fechaInicioActividadValor.Value > DateTime.Now)
+{
+    estado = "";
+}
+else if (!fechaInicioActividadValor.HasValue)
+{
+    estado = "";
+}
+else if (fechaFinActividadValor.HasValue && fechaFinActividadValor.Value < DateTime.Now)
+{
+    //clase += " old";
+}
+
+                                <div class="@clase" resourceid="@Model.Key">
+                                    <a href="@Model.CompletCardLink">
+                                        <figure>
+                                            @if (esLSE)
+                                            {
+                                                <div class="icono">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0" y="0" width="100%" height="100%" viewBox="0 0 255.8 254.9" xml:space="preserve"><title>Lengua de Signos Española</title><rect width="100%" height="100%" fill="#ccc"></rect><path fill="#000" d="M240.1 62.3l-78.3 79.6c0-0.2-0.1-0.4-0.2-0.5l78.1-79.4c0.2-0.2 3-3.5 3.5-8v2.2C242.3 59.7 240.2 62.2 240.1 62.3zM146.4 116.3c0.1 0.1 0.2 0.3 0.3 0.4l-0.3 0.3c-0.1 0.1-0.3 0.1-0.4 0 -0.1-0.1-0.1-0.3 0-0.4L146.4 116.3zM164.4 194.6C164.4 194.7 164.5 194.7 164.4 194.6 164.5 194.7 164.4 194.7 164.4 194.6zM164.4 194.6c0 0-0.1-0.1-0.1-0.2C164.3 194.5 164.4 194.6 164.4 194.6zM10.6 169.9V11.1c0-0.1 0.1-0.3 0.3-0.3h0.3c2.1 0 4.1 0.2 5.9 0.5h-5.9V170c0 0 0 0.7 0 1.8v6.8c-0.4-2.9-0.5-5.3-0.5-6.8V169.9zM108 164.6c4.7 3.8 9.6 7.8 14 11.9 13.7 13 13.7 22.5 13.6 28.8 0 0.4 0 0.7 0 1.1 0 4.9 0 15-15.4 27 -9.4 7.3-18.9 9.5-27.5 10.1H71.6c-8.8-1-20.6-4.9-37-18.9 -17.3-14.8-22.2-34.8-23.5-46.1v-6.8c0.1 7.2 2.2 34 23.9 52.5 19.8 16.9 32.8 19.1 41.9 19.1 1.2 0 2.2 0 3.2-0.1 1.5 0 2.8 0 4.2 0 0.7 0 1.5 0 2.3 0 9.9 0 21.7-1.2 33.3-10.2 15.1-11.8 15.1-21.8 15.1-26.5 0-0.3 0-0.7 0-1.1 0.1-6.2 0.1-15.6-13.4-28.5 -4.3-4.1-9.2-8.1-13.9-11.9 -10.9-8.9-21.2-17.2-20.6-24.6 0.4-5.2 3.4-8.2 8.3-8.2 6.4 0 14.4 5.1 20.4 13 11 14.4 9.6 24.5 9.3 25.8l26.2 23.5c0.8-1.1 4.3-7.3 4.3-24.4 0-20-9.9-48.3-37.9-62.3 -11-5.5-21.9-8.4-31.8-8.4 -12.8 0-23.2 4.8-28.7 13.3 -3.5 5.4-13.7 24.9 2 46.7 4.3 6 10.8 11.7 16.6 16.7 2.8 2.5 5.5 4.8 7.7 7 0.5 0.4 13.8 11.1 14.6 18.4 0.3 2.7-0.4 4.9-1.9 6.7 -2.4 2.7-6.8 4.2-12.8 4.3 -0.3 0-0.6 0-0.9 0 -9.9 0-19.7-4-27-11.1 -8.2-7.9-13.6-16.7-13.6-33.7V43.7c0-9-5.5-32.2-30.7-32.3H17c20.6 3.4 25.3 24 25.3 32.3V168c0 16.8 5.4 25.5 13.4 33.3 7.2 7 16.9 10.9 26.6 10.9 0.3 0 0.6 0 0.9 0 5.9-0.2 10.2-1.6 12.5-4.2 1.5-1.7 2-3.8 1.8-6.3 -0.7-7.1-14.3-18-14.4-18.1 -2.1-2.2-4.8-4.5-7.7-7 -5.8-5.1-12.3-10.8-16.6-16.8 -15.9-22.1-5.6-41.8-2-47.3C62.4 104 73 99.1 86 99.1c9.9 0 21 2.9 32 8.4 28.1 14.1 38.1 42.6 38.1 62.7 0 19.4-4.4 24.7-4.6 24.9 0 0-0.1 0.1-0.2 0.1 -0.1 0-0.1 0-0.2-0.1l-26.5-23.8c-0.1-0.1-0.1-0.2-0.1-0.3 0-0.1 2.3-10.4-9.2-25.5 -5.9-7.8-13.8-12.8-20-12.8 -4.6 0-7.4 2.8-7.8 7.7C87 147.5 97.2 155.8 108 164.6zM10.6 171.8c0 1.5 0.1 3.9 0.5 6.8v64.9h60.5c1.9 0.2 3.7 0.3 5.3 0.3 1.2 0 2.2 0 3.2-0.1 1.5 0 2.8 0 4.2 0 0.7 0 1.5 0 2.3 0 2 0 4 0 6.1-0.2h34.2c-0.1 0-0.3 0.1-0.3 0.3s0.1 0.3 0.3 0.3h-116c-0.1 0-0.3-0.1-0.3-0.3V171.8zM147.1 116.3l-0.4 0.4c-0.1-0.1-0.2-0.3-0.3-0.4l0.4-0.4C146.9 116 147 116.2 147.1 116.3zM254.8 0.5H0.9v253.9h253.9V0.5zM0.7 0h254.4c0.1 0 0.3 0.1 0.3 0.3v254.4c0 0.1-0.1 0.3-0.3 0.3H0.7c-0.1 0-0.3-0.1-0.3-0.3V0.3C0.4 0.1 0.5 0 0.7 0zM138.8 108.5c-11.8-10.6-24.3-16-35.7-18.6l0.4-0.4c3.8 0.9 7.6 2.1 11.6 3.6 8 3.2 16.2 8 24.1 15L138.8 108.5zM63.7 90.2C63.7 90.3 63.7 90.3 63.7 90.2 63.7 90.3 63.7 90.3 63.7 90.2zM138.8 108.5c0.1 0.1 0.3 0.2 0.4 0.3l-0.1 0.1c0 0-0.1 0.1-0.2 0.1 -0.1 0-0.1 0-0.2-0.1C138.6 108.9 138.6 108.7 138.8 108.5L138.8 108.5zM165.1 153.5c6.1-6.1 49.2-49.8 51.6-52.3 1.6-1.6 5-4.5 9.2-5.8 4.8-1.4 9.3-0.1 13.2 3.8 3.1 3.1 4.1 6.3 4.1 9.1 0 5.5-3.7 9.8-3.7 9.9l-74.7 76.3c0 0 0 0 0-0.1 0 0 0.1-0.3 0.2-0.9l74-75.7c0.3-0.4 8.2-9.8-0.3-18.3 -3.8-3.8-8-5-12.7-3.6 -4.1 1.2-7.4 4-9 5.6 -2.5 2.5-46.8 47.4-51.9 52.5C165.2 154 165.2 153.8 165.1 153.5zM63.7 90.3C63.8 90.3 63.8 90.3 63.7 90.3 63.8 90.3 63.8 90.3 63.7 90.3zM165.2 154.2c-0.2 0.2-0.4 0.3-0.4 0.4 0-0.2-0.1-0.4-0.1-0.6 0.1-0.1 0.3-0.3 0.4-0.4C165.2 153.8 165.2 154 165.2 154.2zM63.8 89.9c0 0 0.4-0.1 0.9-0.3 -0.4 0.4-0.6 0.6-0.7 0.7 0 0-0.1 0.1-0.2 0.1 0 0-0.1 0-0.1 0 0 0-0.1 0-0.1 0 0 0 0-0.1 0-0.1 0 0 0 0 0 0 0 0 0 0 0-0.1 0 0 0-0.1 0-0.1 0 0 0 0 0-0.1C63.7 89.9 63.8 89.9 63.8 89.9 63.8 89.9 63.8 89.9 63.8 89.9zM164.7 154c-0.8-3.9-1.9-8-3.4-12.1l0 0c0 0 0 0.1 0.1 0.1 0 0 0.1 0.1 0.2 0.1 0.1 0 0.1 0 0.2-0.1l0.1-0.1c1.4 4 2.5 7.9 3.3 11.7C164.9 153.7 164.8 153.9 164.7 154zM198.7 13c-3.6 1.1-6.9 3.5-8.6 5.3L115.4 93c-0.1 0.1-0.2 0.1-0.3 0.1 0 0 0 0-0.1-0.1 -0.1-0.1-0.1-0.3 0-0.4l74.7-74.7c0.6-0.6 4.1-3.9 8.8-5.4 1.5-0.5 3-0.7 4.4-0.7 3.4 0 6.5 1.4 9.2 4.1 8.9 8.9 0.4 18.9 0.4 19l-72.9 73.6c-0.1-0.1-0.3-0.2-0.4-0.3l72.9-73.6c0.3-0.4 8.2-9.7-0.3-18.3C208 12.6 203.6 11.5 198.7 13zM164.6 194.7C164.6 194.7 164.6 194.7 164.6 194.7 164.6 194.7 164.6 194.7 164.6 194.7zM243.3 136.7c-3.1 43.5-40.2 101-105.3 106.9h-3.2 -7.9c74.8 0 116.1-66.7 116.1-112.8 0-0.2 0.2-0.2 0.3-0.2V136.7zM11.1 10.9h232.4c0.1 0 0.3 0.1 0.3 0.3v40.3c-0.1-0.8-0.2-1.7-0.5-2.5V11.4h-40.4 -55H17C15.2 11.1 13.2 10.9 11.1 10.9zM139.5 108.5l-0.4 0.4c-0.1-0.1-0.3-0.2-0.4-0.3l0.4-0.4C139.3 108.3 139.4 108.4 139.5 108.5zM146.8 115.9l70.6-70.6c2.9-2.8 12.9-11.4 22.4-2 1.9 1.9 2.9 3.7 3.5 5.6v2.2c-0.3-2.4-1.4-4.9-3.9-7.4 -3.8-3.8-8-5-12.7-3.6 -4.1 1.2-7.4 4-9 5.6l-70.7 70.7C147 116.2 146.9 116 146.8 115.9zM63.8 90.4C63.9 90.4 63.9 90.4 63.8 90.4 63.9 90.4 63.9 90.4 63.8 90.4zM161.8 141.9l78.3-79.6c0.1-0.1 2.2-2.6 3.2-6.1v52.3h-0.1c0-2.9-1-6.1-4.1-9.1 -3.9-3.9-8.3-5.2-13.2-3.8 -4.2 1.2-7.5 4.1-9.2 5.8 -2.5 2.5-45.6 46.1-51.6 52.3C164.3 149.7 163.3 145.8 161.8 141.9zM164.5 194.7C164.5 194.7 164.5 194.7 164.5 194.7c0.1 0 0.1 0 0.2 0 0 0 0.1 0 0.1-0.1l0 0 74.7-76.3c0.1-0.1 3.7-4.4 3.7-9.9h0.1v22.2c-0.1 0-0.3 0.1-0.3 0.2 0 46.1-41.3 112.8-116.1 112.8H92.7c8.6-0.6 18.1-2.8 27.5-10.1 15.4-11.9 15.4-22.1 15.4-27 0-0.3 0-0.7 0-1.1 0.1-6.3 0.2-15.8-13.6-28.8 -4.3-4.1-9.2-8.1-14-11.9 -10.8-8.8-21-17.1-20.5-24.1 0.4-4.9 3.2-7.7 7.8-7.7 6.2 0 14.1 5 20 12.8 11.6 15.1 9.2 25.4 9.2 25.5 0 0.1 0 0.2 0.1 0.3l26.5 23.8c0 0 0.1 0.1 0.2 0.1 0.1 0 0.1 0 0.2-0.1 0.2-0.2 4.6-5.5 4.6-24.9 0-20.1-10-48.6-38.1-62.7 -11-5.5-22.1-8.4-32-8.4 -13 0-23.6 4.9-29.1 13.5 -3.6 5.5-13.9 25.2 2 47.3 4.3 6 10.9 11.7 16.6 16.8 2.8 2.5 5.5 4.8 7.7 7 0.1 0.1 13.7 11 14.4 18.1 0.3 2.5-0.3 4.6-1.8 6.3 -2.3 2.6-6.6 4-12.5 4.2 -0.3 0-0.6 0-0.9 0 -9.8 0-19.5-4-26.6-10.9 -8-7.8-13.4-16.5-13.4-33.3V43.7c0-8.4-4.7-28.9-25.3-32.3h130.9v0.5c-1.4 0-2.9 0.2-4.4 0.7 -4.7 1.5-8.2 4.7-8.8 5.4 -2.6 2.6-69.3 70.2-71 72 0 0 0 0 0 0 0 0 0 0 0 0.1 0 0 0 0.1 0 0.1 0 0 0 0.1 0 0.1 0 0 0 0 0 0 0 0 0 0.1 0 0.1 0 0 0.1 0 0.1 0 0 0 0.1 0 0.1 0 0 0 0 0 0.1 0 0.3-0.1 17.4-5.3 38.7-0.5 0 0 0 0.1 0.1 0.1 0.1 0.1 0.3 0.1 0.4 0l0 0c11.4 2.6 23.9 8.1 35.7 18.6l-0.1 0.1c-0.1 0.1-0.1 0.3 0 0.4 0 0.1 0.1 0.1 0.2 0.1 0.1 0 0.1 0 0.2-0.1l0.1-0.1c1 0.9 1.9 1.8 2.9 2.8 1.5 1.5 3 3.1 4.3 4.6l-0.3 0.3c-0.1 0.1-0.1 0.3 0 0.4 0.1 0.1 0.3 0.1 0.4 0l0.3-0.3c6.9 8.1 11.6 16.8 14.6 25.2 1.5 4.1 2.6 8.2 3.4 12.1 -0.2 0.2-0.3 0.3-0.3 0.3 -0.1 0.1-0.1 0.3 0 0.4 0.1 0.1 0.3 0.1 0.4 0 0 0 0 0 0 0 4.2 21.2-0.2 38.8-0.5 39.8 0 0 0 0.1 0 0.1C164.3 194.5 164.4 194.6 164.5 194.7 164.4 194.7 164.5 194.7 164.5 194.7zM161.6 142c-0.1 0-0.1 0-0.2-0.1 0 0 0 0-0.1-0.1 0-0.1 0-0.2 0.1-0.3l0.3-0.3c0.1 0.2 0.1 0.4 0.2 0.5l-0.1 0.1C161.7 142 161.6 142 161.6 142zM0.9 0.5h253.9v253.9H0.9V0.5zM243.5 10.9H11.1h-0.3c-0.1 0-0.3 0.1-0.3 0.3v158.8c0 0 0 0.7 0 1.9v72c0 0.1 0.1 0.3 0.3 0.3h116 116.6c0.1 0 0.3-0.1 0.3-0.3V53.4c0-0.6 0.1-1.3 0-2 0 0 0 0 0-0.1V11.1C243.8 11 243.7 10.9 243.5 10.9zM164.7 194.7C164.7 194.7 164.7 194.7 164.7 194.7 164.7 194.7 164.7 194.7 164.7 194.7zM11.1 243.5v-64.9c1.4 11.3 6.2 31.3 23.5 46.1 16.4 14 28.2 17.9 37 18.9H11.1zM71.6 243.5h21.1c-2.1 0.1-4.1 0.2-6.1 0.2 -0.8 0-1.6 0-2.3 0 -1.5 0-2.7 0-4.2 0 -1 0-2.1 0.1-3.2 0.1C75.3 243.8 73.5 243.7 71.6 243.5zM243.3 54v-2.9C243.4 52.1 243.4 53 243.3 54zM243.8 53.4v-2C243.8 52.1 243.8 52.8 243.8 53.4zM102.7 90c0 0-0.1-0.1-0.1-0.1 0.1 0 0.3 0.1 0.5 0.1l0 0C103 90.1 102.8 90.1 102.7 90zM243.3 51.1v-2.2c0.3 0.9 0.4 1.7 0.5 2.5 0 0 0 0 0 0.1v2c-0.1 1-0.3 1.9-0.5 2.7V54C243.4 53 243.4 52.1 243.3 51.1zM161.4 141.6c-0.1 0.1-0.1 0.2-0.1 0.3l0 0c-3-8.5-7.7-17.1-14.6-25.2l0.4-0.4c6.9 8.1 11.5 16.6 14.6 25L161.4 141.6zM164.3 194.5c0 0 0-0.1 0-0.1 0 0 0 0 0.1-0.1l0.6-0.7c-0.1 0.6-0.2 0.9-0.2 0.9 0 0 0 0 0 0.1l0 0c0 0-0.1 0-0.1 0.1 0 0-0.1 0-0.1 0s-0.1 0-0.1 0c0 0-0.1 0-0.1-0.1C164.4 194.6 164.3 194.5 164.3 194.5zM126.7 243.8c0-0.1 0.1-0.3 0.3-0.3h7.9 3.2c-3.6 0.3-7.3 0.5-11.1 0.5C126.8 244 126.7 243.9 126.7 243.8zM243.3 136.7v-6.1c0.1 0 0.2 0.1 0.2 0.2C243.5 132.7 243.4 134.7 243.3 136.7zM103.1 89.9c-0.1 0-0.3-0.1-0.5-0.1 0-0.1 0-0.2 0.1-0.2l0.2-0.2c0.2 0 0.4 0.1 0.6 0.1L103.1 89.9zM164.4 154.6c-0.1-0.1-0.1-0.3 0-0.4 0 0 0.1-0.1 0.3-0.3 0 0.2 0.1 0.4 0.1 0.6 0 0 0 0 0 0C164.7 154.7 164.5 154.7 164.4 154.6zM115.1 93.1c-3.9-1.6-7.8-2.8-11.6-3.6l53.9-54.6c0.1-0.1 8.5-10.1-0.4-19 -2.7-2.7-5.8-4.1-9.2-4.1v-0.5h55v0.5c-1.4 0-2.9 0.2-4.4 0.7 -4.7 1.5-8.2 4.7-8.8 5.4l-74.7 74.7c-0.1 0.1-0.1 0.3 0 0.4 0 0 0.1 0 0.1 0.1L115.1 93.1zM243.5 244H126.9c3.8 0 7.5-0.2 11.1-0.5h105.3V136.7c0.1-2 0.2-4 0.2-5.9 0-0.1-0.1-0.2-0.2-0.2v-22.2V56.1c0.2-0.9 0.4-1.8 0.5-2.7v190.4C243.8 243.9 243.7 244 243.5 244zM63.7 90c0 0 0 0.1 0 0.1C63.7 90.1 63.7 90.1 63.7 90zM103 89.4l54.1-54.8c0.3-0.4 8.2-9.7-0.3-18.3 -3.7-3.7-8.1-4.8-13.1-3.3 -3.6 1.1-6.9 3.5-8.6 5.3 -2.5 2.5-63.2 64.1-70.3 71.3 -0.6 0.1-0.9 0.3-0.9 0.3 0 0-0.1 0-0.1 0 1.7-1.7 68.4-69.4 71-72 0.6-0.6 4.1-3.9 8.8-5.4 1.5-0.5 3-0.7 4.4-0.7 3.4 0 6.5 1.4 9.2 4.1 8.9 8.9 0.4 18.9 0.4 19l-53.9 54.6C103.4 89.5 103.1 89.4 103 89.4zM165.2 154.2c3.8 19.3 0.7 35.6-0.2 39.5l-0.6 0.7c0 0 0 0-0.1 0.1 0.3-1 4.6-18.5 0.5-39.8C164.9 154.5 165 154.4 165.2 154.2zM217.4 45.3l-70.6 70.6c-1.3-1.6-2.8-3.1-4.3-4.6 -1-0.9-1.9-1.9-2.9-2.8l72.9-73.6c0.1-0.1 8.5-10.1-0.4-19 -2.7-2.7-5.8-4.1-9.2-4.1v-0.5h40.4v37.5c-0.6-1.9-1.7-3.7-3.5-5.6C230.3 33.8 220.3 42.4 217.4 45.3zM11.1 170v1.8C11.1 170.7 11.1 170 11.1 170zM10.6 169.9v1.9C10.6 170.6 10.6 170 10.6 169.9zM103 89.4l-0.2 0.2c-0.1 0.1-0.1 0.1-0.1 0.2 -21.3-4.8-38.4 0.4-38.7 0.5 0 0-0.1 0-0.1 0 0.1 0 0.1 0 0.2-0.1 0 0 0.3-0.3 0.7-0.7C68.6 88.6 84.2 85.1 103 89.4zM139.5 108.5c1 0.9 1.9 1.8 2.9 2.8 1.5 1.5 3 3.1 4.3 4.6l-0.4 0.4c-1.4-1.6-2.8-3.1-4.3-4.6 -1-1-1.9-1.9-2.9-2.8L139.5 108.5zM63.7 89.9C63.7 90 63.7 90 63.7 89.9 63.7 90 63.7 90 63.7 89.9z"></path></svg>
+                                                </div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(estado))
+                                            {
+                                                <div class="tag">@estado</div>
+                                            }
+											@if(bicentenarioValor)
+											{
+												<img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/7317a29a-d846-4c54-9034-6a114c3658fe/ElPrado/img/svg/bicentenario_logo_cuadrado.svg" width="150" height="150" alt="Museo del Prado 200 años" class="logo-200" onclick="location.href='#bicentenario'; return false;">
+											}			
+                                            @if (string.IsNullOrEmpty(imagenValor))
+                                            {
+                                                <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>
+                                            }
+                                            else
+                                            {
+                                                <img src="@imagenValor.Replace("imagenes/documentos/","imagenes/Documentos/")" alt="@Model.Title">
+                                            }
+
+                                            <figcaption>
+
+                                                @foreach (string tipopublico in tipoPublicoActividad)
+                                                {
+                                                    <strong class="categoria">@tipopublico</strong>
+                                                }
+                                                @if (!string.IsNullOrEmpty(tipoActividad))
+                                                {
+                                                    <strong class="categoria">@tipoActividad</strong>
+                                                }
+												@{
+													string tileAux=Model.Title;
+													if(tileAux.Length>90)
+													{
+														tileAux=tileAux.Substring(0,90)+"...";
+													}
+												
+												}
+                                                <h3>@tileAux</h3>
+                                                <p>@Html.Raw(fechaValor)</p>
+                                            </figcaption>
+                                        </figure>
+                                    </a>
+                                </div>
+                                break;
+                            case "pmexhibition":
+                                string fechaInicioClave = "ecidoc:p4_p79_has_time-span_beginning";
+                                DateTime? fechaInicioExibition = null;
+                                string fechaFinClave = "ecidoc:p4_p80_has_time-span_end";
+                                DateTime? fechaFinExibition = null;
+                                string ciudadClave = "ecidoc:p7_took_place_at_city";
+                                string ciudad = "";
+                                if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+                                {
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaInicioClave))
+                                    {
+                                        fechaInicioExibition = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaInicioClave][0].Name);
+                                    }
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaFinClave))
+                                    {
+                                        fechaFinExibition = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaFinClave][0].Name);
+                                    }
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(ciudadClave))
+                                    {
+                                        ciudad = Model.ViewSettings.SemanticProperties[ciudadClave][0].Name;
+                                    }
+                                }
+                                @*<div class="items">
+                                        <figure>
+                                            @if(!string.IsNullOrEmpty(Model.UrlPreview))
+                                            {
+                                                <div class="thumb">
+                                                    <a href="@Model.CompletCardLink"><img src="@Model.UrlPreview" alt=""></a>
+                                                </div>
+                                            }
+                                            <figcaption>
+                                                @if(string.IsNullOrEmpty(ciudad) || ciudad.ToLower().Equals("madrid"))
+                                                {
+                                                    <strong class="tipo">@Html.Translate("EXPOSICIONENELMUSEO")</strong>
+                                                }else
+                                                {
+                                                    <strong class="tipo">@Html.Translate("EXPOSICIONFUERADELMUSEO")</strong>
+                                                }
+                                                <h2 class="trunca-texto"><a href="@Model.CompletCardLink">@Model.Title</a></h2>
+                                                @if(fechaInicioExibition.HasValue && fechaFinExibition.HasValue)
+                                                {
+                                                    <p class="atributo">@fechaInicioExibition.Value.ToString("d") - @fechaFinExibition.Value.ToString("d")</p>
+                                                }
+                                            </figcaption>
+                                        </figure>
+                                    </div>*@
+
+                                <div class="item expo" resourceid="@Model.Key">
+                                    <figure>
+                                        @if (!string.IsNullOrEmpty(Model.UrlPreview))
+                                        {
+                                            <div class="thumb">
+                                                <a href="@Model.CompletCardLink"><img src="@Model.UrlPreview" alt=""></a>
+                                            </div>
+                                        }
+                                        <figcaption>
+                                            <a href="@Model.CompletCardLink">
+                                                @if (string.IsNullOrEmpty(ciudad) || ciudad.ToLower().Equals("madrid"))
+                                                {
+                                                    <strong class="tipo">@Html.Translate("EXPOSICIONENELMUSEO")</strong>  }
+                                                else
+                                                {
+                                                    <strong class="tipo">@Html.Translate("EXPOSICIONFUERADELMUSEO")</strong>  }
+                                                <h3 class="trunca-texto">@Model.Title</h3>
+           @if (fechaInicioExibition.HasValue && fechaFinExibition.HasValue && fechaFinExibition.Value.ToString("dd/MM/yyyy").Substring(0, 10).Equals(Html.Translate("FECHAEXPOSICIONINDEFINIDA")))
+            {
+                                                    <p class="atributo">@fechaInicioExibition.Value.ToString("d")-@Html.Translate("VALOREXPOSICIONINDEFINIDA")</p>
+                                                }
+
+                                                else if (fechaInicioExibition.HasValue && fechaFinExibition.HasValue)
+                                                {
+                                                    <p class="atributo">@fechaInicioExibition.Value.ToString("d")-@fechaFinExibition.Value.ToString("d")</p>
+                                                }
+                                            </a>
+                                        </figcaption>
+                                    </figure>
+                                </div>
+                                break;
+                            case "grant":
+                                string fechaBecaClave = "jo:job_date";
+                                DateTime? fechaBecaValor = null;
+
+                                if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+                                {
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaBecaClave))
+                                    {
+                                        fechaBecaValor = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaBecaClave][0].Name.ToLower());
+                                    }
+                                }
+
+                                <div class="item programa-actividades " resourceid="@Model.Key">
+                                    <a href="@Model.CompletCardLink">
+                                        <figure>
+                                            @if (string.IsNullOrEmpty(Model.UrlPreview))
+                                            {
+                                                <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>
+                                            }
+                                            else
+                                            {
+                                                <img src="@Model.UrlPreview" alt="@Model.Title">
+                                            }
+                                            <figcaption>
+                                                <strong>@Model.RdfTypeName</strong>
+                                                <h3>@Model.Title</h3>
+                                                @if (fechaBecaValor.HasValue)
+                                                {
+                                                    <p>@fechaBecaValor.Value.ToString("d")</p>
+                                                }
+                                            </figcaption>
+                                        </figure>
+                                    </a>
+                                </div>
+                                break;
+                            case "pmnewsletter":
+                                string fechaClaveNewsletter = "efrbrer:P3055_has_date_of_publication_or_distribution";
+                                string fechaValorNewsletter = null;
+
+                                if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+                                {
+                                    if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaClaveNewsletter))
+                                    {
+                                        fechaValorNewsletter = Model.ViewSettings.SemanticProperties[fechaClaveNewsletter][0].Name.ToLower();
+                                    }
+                                }
+
+                                <div class="item programa-actividades " resourceid="@Model.Key">
+                                    <a href="@Model.CompletCardLink">
+                                        <figure>
+                                            @if (string.IsNullOrEmpty(Model.UrlPreview))
+                                            {
+                                                <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>
+                                            }
+                                            else
+                                            {
+                                                <img src="@Model.UrlPreview" alt="@Model.Title">
+                                            }
+                                            <figcaption>
+                                                <strong>@Model.RdfTypeName</strong>
+                                                <h3>@Model.Title</h3>
+                                                @if (!string.IsNullOrEmpty(fechaValorNewsletter))
+                                                {
+                                                    <p>@fechaValorNewsletter</p>
+                                                }
+                                            </figcaption>
+                                        </figure>
+                                    </a>
+                                </div>
+                                    break;
+
+
+                            }
+                            @functions
+    {
+                                private static int[] ObtenerFechaNormalizada(string pFecha)
+                                {
+                                    int[] fechaNormalizada = null;
+                                    try
+                                    {
+                                        if (!string.IsNullOrEmpty(pFecha) && pFecha.Length >= 10)
+                                        {
+                                            fechaNormalizada = new int[6];
+                                            if (pFecha.Contains("/"))
+                                            {
+                                                //dia
+                                                fechaNormalizada[0] = Int32.Parse(pFecha.Substring(0, 2));
+                                                //mes
+                                                fechaNormalizada[1] = Int32.Parse(pFecha.Substring(3, 2));
+                                                //anio
+                                                fechaNormalizada[2] = Int32.Parse(pFecha.Substring(6, 4));
+                                            }
+                                            else
+                                            {
+                                                //dia
+                                                fechaNormalizada[0] = Int32.Parse(pFecha.Substring(6, 2));
+                                                //mes
+                                                fechaNormalizada[1] = Int32.Parse(pFecha.Substring(4, 2));
+                                                //anio
+                                                fechaNormalizada[2] = Int32.Parse(pFecha.Substring(0, 4));
+
+                                                //hora
+                                                fechaNormalizada[3] = Int32.Parse(pFecha.Substring(8, 2));
+                                                //minuto
+                                                fechaNormalizada[4] = Int32.Parse(pFecha.Substring(10, 2));
+                                                //segundo
+                                                fechaNormalizada[5] = Int32.Parse(pFecha.Substring(12, 2));
+                                            }
+                                        }
+                                    }
+                                    catch (FormatException e)
+                                    {
+                                        fechaNormalizada = null;
+                                    }
+                                    return (fechaNormalizada);
+                                }
+
+                                private static string ObtenerFechaFormateada(string pFecha, string pFormato, string pIdioma = null)
+                                {
+                                    string fechaFormateada = string.Empty;
+                                    int[] fechaNormalizada = ObtenerFechaNormalizada(pFecha);
+
+                                    if (fechaNormalizada != null && fechaNormalizada.Count() == 6)
+                                    {
+                                        int dia = fechaNormalizada[0];
+                                        int mes = fechaNormalizada[1];
+                                        int anio = fechaNormalizada[2];
+
+                                        int hora = 0;
+                                        int minuto = 0;
+                                        int segundo = 0;
+                                        if (fechaNormalizada.Length > 3)
+                                        {
+                                            hora = fechaNormalizada[3];
+                                            minuto = fechaNormalizada[4];
+                                            segundo = fechaNormalizada[5];
+                                        }
+
+                                        if (anio != null && mes != null && dia != null)
+                                        {
+                                            DateTime fecha = new DateTime(anio, mes, dia, hora, minuto, segundo);
+                                            if (!string.IsNullOrEmpty(pIdioma))
+                                            {
+                                                System.Globalization.CultureInfo cu = new System.Globalization.CultureInfo(pIdioma);
+                                                fechaFormateada = fecha.ToString(pFormato, cu);
+                                            }
+                                            else
+                                            {
+                                                fechaFormateada = fecha.ToString(pFormato);
+                                            }
+                                        }
+                                    }
+                                    if (string.IsNullOrEmpty(fechaFormateada))
+                                    {
+                                        fechaFormateada = pFecha;
+                                    }
+
+                                    return (fechaFormateada);
+                                }
+                            }
+                            }
+
+@functions
+{
+    public string EliminarCaracteresEspeciales(string pTexto)
+    {
+        pTexto = pTexto.Replace(" ", "-").Replace(".", "-").Replace("(", "-").Replace(")", "-").Replace(":", "-").Replace(",", "-").Replace("\"", "-").Replace("'", "-");
+
+        var normalizedString = pTexto.Normalize(System.Text.NormalizationForm.FormD);
+        var stringBuilder = new System.Text.StringBuilder();
+
+        foreach (var c in normalizedString)
+        {
+            var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                stringBuilder.Append(c);
+            }
+        }
+        return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
+    }
+}
+
+
+

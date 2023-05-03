@@ -47,7 +47,7 @@
 <div class="imageDesc">@Html.Raw(actividad.caption)</div>}
                 @if (actividad.bicentenario)
                 {
-<img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/[%%%_PROYECTO_ID_%%%]/ElPrado/img/svg/bicentenario_logo_cuadrado.svg" width="150" height="150" alt="Museo del Prado 200 años" class="logo-200" onclick="location.href='@Html.Translate("URL_BICENTENARIO")'; return false;">}
+<img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/@ViewBag.Comunidad.Key.ToString()/ElPrado/img/svg/bicentenario_logo_cuadrado.svg" width="150" height="150" alt="Museo del Prado 200 años" class="logo-200" onclick="location.href='@Html.Translate("URL_BICENTENARIO")'; return false;">}
                 <img src="@ViewBag.BaseURLContent/@actividad.image" alt="@actividad.title">
                 <figcaption>
                     @if (actividad.activityType != null)
@@ -138,7 +138,7 @@ else
                     <option value="menu-ficha-actividad">@Html.Translate("INICIO")</option>
                     @if (actividad.relatedChildrenActivity != null && actividad.relatedChildrenActivity.Count > 0)
                     {
-    <option value="menu-actividades">Html.Translate("ACTIVIDADES")</option>
+    <option value="menu-actividades">@Html.Translate("ACTIVIDADES")</option>
 }
                     @if (actividad.showMultimedia && ((actividad.relatedMultimedia != null && actividad.relatedMultimedia.Count > 0) || (actividad.relatedVideo != null && actividad.relatedVideo.Count > 0) || mostrarInteractivosCarrusel))
                     {
