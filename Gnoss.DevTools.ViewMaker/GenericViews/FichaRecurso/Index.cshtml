@@ -161,7 +161,7 @@ string privado = "";
             @* Mostrar Comentarios de un recurso *@
             @if (FichaDocumento.Comments != null)
             {
-                @Html.PartialView("_partial-views/_comments",Model);
+                @*@Html.PartialView("_partial-views/_comments",Model);*@
                 @* Aviso Legal - No mostrar el aviso legal por defecto
                 <p class="text-muted text-center font-weight-light">@Html.GetText("FREEBASE", "AVISOLEGAL")</p>
                 *@

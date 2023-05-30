@@ -1,0 +1,329 @@
+@*[security|||professionalaccessrequest|||elprado]*@
+@model ResourceViewModel
+@{
+    ResourceModel FichaDocumento = Model.Resource;
+    SemanticResourceModel semCmsModel = Model.SemanticFrom;
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+
+
+    string Nombre = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#given-name");
+    string Apellido = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#family-name");
+    string Puesto = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#title");
+    string Medio = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#organization-name");
+    string Direccion = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#street-address");
+    string Ciudad = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#locality");
+    string Provincia = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#region");
+    string Pais = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#country-name");
+    string CodigoPostal = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#postal-code");
+    string Correo = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasEmail");
+    string Idioma = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#language");
+    string Contrasenya = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/evcard.owl#password");
+    string Estado = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/evcard.owl#status");
+    string Usuario = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasUID");
+    Guid identidadUsuarioID = Guid.Empty;
+}
+<section class="res-basica no-nav">
+    <div class="res-cont">
+        <div class="cabecera">
+            <h1>
+                <span class="titulo">@FichaDocumento.RdfTypeName</span>
+            </h1>
+        </div>
+        <form class="form-general formularioAceptarSolicitudProfesional">
+            <fieldset>
+                <legend>Datos de la solicitud de @FichaDocumento.Title</legend>
+                <p>@Html.Translate("ESTADODELASOLICITUD"): @Estado.ToUpper()</p>
+                @if (!string.IsNullOrEmpty(Usuario))
+                {
+                    List<Guid> lista = new List<Guid>();
+                    Usuario = Usuario.Substring(Usuario.LastIndexOf("/") + 1);
+                    Guid usuarioID = new Guid(Usuario);
+                    lista.Add(usuarioID);
+                    Dictionary<Guid, ProfileModel> listaUsuarios = Html.GetIdentitiesByUserID(lista);
+                    if (listaUsuarios != null && listaUsuarios.Count > 0)
+                    {
+                        identidadUsuarioID = listaUsuarios.First().Key;
+                        <p>Ficha del perfil: <a class="urlficha" href="@listaUsuarios.First().Value.UrlPerson">@listaUsuarios.First().Value.NamePerson</a></p>
+                    }
+                }
+                <p>@Html.Translate("NOMBRE"): @Nombre</p>
+                <p>@Html.Translate("APELLIDO"): @Apellido</p>
+                <p>@Html.Translate("PUESTOCARGOPROFESIONAL"): @Puesto</p>
+                <p>@Html.Translate("MEDIO"): @Medio</p>
+                <p>@Html.Translate("DIRECCION"): @Direccion</p>
+                <p>@Html.Translate("CIUDAD"): @Ciudad</p>
+                <p>@Html.Translate("ESTADOPROVINCIA"): @Provincia</p>
+                <p>@Html.Translate("PAIS"): @Pais</p>
+                <p>@Html.Translate("CODIGOPOSTAL"): @CodigoPostal</p>
+                <p>@Html.Translate("CORREOELECTRONICO"): <span class="correo">@Correo</span></p>
+                <p>@Html.Translate("IDIOMA"): @Idioma</p>
+            </fieldset>
+
+            @if (Estado.ToLower() == "pendiente")
+            {
+                <fieldset class="edicionSolicitudAcceso oculto">
+                    <legend>Selecciona los grupos a los que añadir al usuario</legend>
+                    <div class="cargarGruposComunidad">
+                    </div>
+                    <div class="datosUsuario">
+                        <input id="Nombre" type="hidden" value="@Nombre" name="Nombre">
+                        <input id="Apellido" type="hidden" value="@Apellido" name="Apellido">
+                        <input id="Puesto" type="hidden" value="@Puesto" name="Puesto">
+                        <input id="Medio" type="hidden" value="@Medio" name="Medio">
+                        <input id="Direccion" type="hidden" value="@Direccion" name="Direccion">
+                        <input id="Ciudad" type="hidden" value="@Ciudad" name="Ciudad">
+                        <input id="Provincia" type="hidden" value="@Provincia" name="Provincia">
+                        <input id="Pais" type="hidden" value="@Pais" name="Pais">
+                        <input id="CodigoPostal" type="hidden" value="@CodigoPostal" name="CodigoPostal">
+                        <input id="Correo" type="hidden" value="@Correo" name="Correo">
+                        <input id="Idioma" type="hidden" value="@Idioma" name="Idioma">
+                        <input id="Contrasenya" type="hidden" value="@Contrasenya" name="Contrasenya">
+                        <input id="Estado" type="hidden" value="@Estado" name="Estado">
+
+                        <a href="#" idSolicitud="@FichaDocumento.Key" class="botones-centrados bc-estandar hv-estandar aceptarSolicitud">@Html.Translate("ACEPTARSOLICITUD")</a>
+                        <a href="#" idSolicitud="@FichaDocumento.Key" estado="@Estado" class="botones-centrados bc-estandar hv-estandar eliminarSolicitud">@Html.Translate("ELIMINARSOLICITUD")</a>
+                    </div>
+                </fieldset>
+            }
+
+            @if (Estado.ToLower() == "aceptada" || Estado.ToLower() == "eliminada")
+            {
+                <fieldset class="edicionSolicitudAcceso oculto">
+                    <legend>Selecciona los grupos a los que pertenece el usuario</legend>
+                    <div class="cargarGruposComunidad" identidadID="@identidadUsuarioID" usuarioID="@Usuario">
+                    </div>
+                    <div class="datosUsuario">
+                        <a href="#" idSolicitud="@FichaDocumento.Key" class="botones-centrados bc-estandar hv-estandar editarSolicitud">@Html.GetText("COMMON", "GUARDAR")</a>
+                    </div>
+                </fieldset>
+            }
+        </form>
+        <a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a>
+    </div>
+</section>
+
+@{
+    ResourceModel fichaRecurso = Model.Resource;
+    ResourceModel.ActionsModel acciones = fichaRecurso.Actions;
+
+    if (acciones.Edit && (string.IsNullOrEmpty(@Estado) || @Estado.ToUpper() != "ACEPTADA"))
+    {
+        <a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
+            <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")</span>
+        </a>
+        <div class="confirmarBorrar oculto">
+            @Html.Translate("PREGUNTAESTASSEGURO")
+            <a onclick="AccionRecurso_Eliminar_Aceptar('@fichaRecurso.ListActions.UrlDelete', '@fichaRecurso.Key')">@Html.GetText("COMMON", "SI")</a>
+            <a onclick="$('.preguntarBorrar').show();$('.confirmarBorrar').hide();">@Html.GetText("COMMON", "NO")</a>
+        </div>
+    }
+}
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //Cargar grupos de comunidad
+        if ($(".cargarGruposComunidad").length) {
+            var arg = {};
+            arg.pNombreServicio = 'servicioPradoProfesionales';
+            arg.pNombreAccion = 'ObtenerGruposComunidad';
+            if ($(".cargarGruposComunidad").attr('identidadID') != null) {
+                arg.pIdentidadUsuarioEditadoID = $(".cargarGruposComunidad").attr('identidadID');
+                arg.pUsuarioEditadoID = $(".cargarGruposComunidad").attr('usuarioID');
+            }
+            MostrarUpdateProgress();
+            var urlAction = urlComunidadConIdioma + '/ExternalService';
+            GnossPeticionAjax(urlAction, arg, true)
+			.done(function (data) {
+			    var email = data.Key;
+			    var emailSolicitud = $('.formularioAceptarSolicitudProfesional .correo').html();
+			    if (email != null && email != '') {
+			        if (email == 'eliminado') {
+			            $('.formularioAceptarSolicitudProfesional .urlficha').html('<del>' + $('.formularioAceptarSolicitudProfesional .urlficha').html() + '</del>')
+			            $('.formularioAceptarSolicitudProfesional .urlficha').after('<span> (Usuario eliminado)</span>')
+			            OcultarUpdateProgress();
+			            return;
+			        } else if (email != emailSolicitud) {
+			            $('.formularioAceptarSolicitudProfesional .correo').html('<del>' + emailSolicitud + '</del> (' + email + ')');
+			        }
+			    }
+
+			    var listaGrupos = data.Value;
+			    var grupos = new Array();
+			    var indice = 0;
+			    for (i in listaGrupos) {
+			        if (listaGrupos[i].NombreCorto.indexOf("p1-") == 0 || listaGrupos[i].NombreCorto.indexOf("p2-") == 0) {
+			            var checked = "";
+			            if (listaGrupos[i].Pertenece) {
+			                checked = 'checked="checked"';
+			            }
+			            grupos[indice] = new Array(listaGrupos[i].Nombre, '<input type="checkbox" name="nombreCortoGrupo" ' + checked + ' value="' + listaGrupos[i].NombreCorto + '">' + listaGrupos[i].Nombre + '<br>');
+			            indice++;
+			        }
+					if (listaGrupos[i].NombreCorto == "prensa-gral") {
+			            var checked =  'checked="checked"';
+			            grupos[indice] = new Array(listaGrupos[i].Nombre, '<input type="checkbox" class="oculto" pertenece="'+listaGrupos[i].Pertenece+'" name="nombreCortoGrupo" ' + checked + ' value="' + listaGrupos[i].NombreCorto + '">');
+			            indice++;
+			        }
+			    }
+
+			    var htmlGrupos = "";
+			    grupos.sort(function (a, b) {
+			        if (a[0].toLowerCase() < b[0].toLowerCase()) return -1;
+			        if (a[0].toLowerCase() > b[0].toLowerCase()) return 1;
+			        return 0;
+			    });
+			    for (i = 0; i < grupos.length; i++) {
+			        htmlGrupos += grupos[i][1];
+			    }
+			    $('.cargarGruposComunidad').html(htmlGrupos);
+			    $('.edicionSolicitudAcceso').show();
+				
+				//Si el usuario está aceptado procedemos con expulsión/readmisión de sala de prensa
+				if($(".cargarGruposComunidad").attr('usuarioID') != null)
+				{				
+					if($('input[value=prensa-gral]').attr('pertenece')=='true')
+					{
+						//Si pertenece al grupo de prensa mostramos la expulsión						
+						var htmlBorrar='';
+						htmlBorrar+='<a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$(\'.preguntarBorrar\').hide();$(\'.confirmarBorrar\').show();" style="display: inline-block;">';
+						htmlBorrar+='	<span class="txt">Eliminar el usuario de Sala de prensa</span>';
+						htmlBorrar+='</a>';					
+						htmlBorrar+='<div class="confirmarBorrar oculto" style="display: none;">Se eliminará al usuario de TODOS los grupos de prensa, incluido Prensa general ¿Estás seguro? <a class=\'eliminarDePrensa\' idSolicitud=\'@FichaDocumento.Key\'">Sí</a> <a onclick="$(\'.preguntarBorrar\').show();$(\'.confirmarBorrar\').hide();">No</a></div>';					
+						$('.edicionSolicitudAcceso .datosUsuario').append($(htmlBorrar));
+						
+						//Eliminar de prensa
+						$("form.formularioAceptarSolicitudProfesional .eliminarDePrensa").click(function (event) {
+							event.preventDefault();
+							var arg = {};
+							arg.pNombreServicio = 'servicioPradoProfesionales';
+							arg.pNombreAccion = 'EliminarUsuarioDePrensaDeSolicitud';
+							arg.pIdSolicitud = $(this).attr('idSolicitud');
+
+							if ($(".cargarGruposComunidad").attr('usuarioID') != null) {
+								arg.pUsuarioEditadoID = $(".cargarGruposComunidad").attr('usuarioID');
+							}
+
+
+							MostrarUpdateProgress();
+							var urlAction = urlComunidadConIdioma + '/ExternalService';
+							GnossPeticionAjax(urlAction, arg, true)
+							.done(function (data) {
+								if (data.status == 1) {
+									$('.edicionSolicitudAcceso').html("<p>" + data.message.replace("\n", "</br>") + "</p>");
+								} else {
+									parent.showInfoBar(data.message, true, true);
+								}
+								OcultarUpdateProgress();
+							});
+						});			
+					}else{
+						//Si no pertenece al grupo de prensa general mostramos la readmisión
+						$("form.formularioAceptarSolicitudProfesional a.editarSolicitud").parent().prepend($('<p>El usuario ha sido eliminado previamente de la sala de prensa</p>'));
+						$("form.formularioAceptarSolicitudProfesional a.editarSolicitud").html('Readmitir en la sala de prensa');
+					}
+				}
+				
+			    OcultarUpdateProgress();
+			});
+        }
+		
+		
+		
+
+        //Aceptar Solicitud acceso profesionales
+        $("form.formularioAceptarSolicitudProfesional .aceptarSolicitud").click(function (event) {
+            event.preventDefault();
+            var arg = {};
+            arg.pNombreServicio = 'servicioPradoProfesionales';
+            arg.pNombreAccion = 'AceptarSolicitud';
+            arg.pIdSolicitud = $(this).attr('idSolicitud');
+
+            $('.formularioAceptarSolicitudProfesional .datosUsuario input').each(function () {
+                var nombre = $(this).attr("name");
+                var valor = $(this).val();
+                arg[nombre] = valor;
+            });
+
+            var numGrupo = 0;
+            $('.cargarGruposComunidad input:checked').each(function () {
+                arg['pNombreCortoGrupos[' + numGrupo + ']'] = $(this).val();
+                numGrupo++;
+            });
+
+            MostrarUpdateProgress();
+            var urlAction = urlComunidadConIdioma + '/ExternalService';
+            GnossPeticionAjax(urlAction, arg, true)
+			.done(function (data) {
+			    if (data.status == 1) {
+			        $('.edicionSolicitudAcceso').html("<p>" + data.message.replace("\n", "</br>") + "</p>");
+			    } else {
+			        parent.showInfoBar(data.message, true, true);
+			    }
+			    OcultarUpdateProgress(); 
+			});
+        });
+
+        //Eliminar Solicitud acceso profesionales
+        $("form.formularioAceptarSolicitudProfesional .eliminarSolicitud").click(function (event) {
+            event.preventDefault();
+            var arg = {};
+            arg.pNombreServicio = 'servicioPradoProfesionales';
+            arg.pNombreAccion = 'RechazarSolicitud';
+            arg.pIdSolicitud = $(this).attr('idSolicitud');
+            arg.pEstadoAntiguo = $(this).attr('estado');
+			arg.pEmailUsuario = $('.edicionSolicitudAcceso input[id="Correo"]').val();
+			arg.pIdioma = $('.edicionSolicitudAcceso input[id="Idioma"]').val();
+
+            MostrarUpdateProgress();
+            var urlAction = urlComunidadConIdioma + '/ExternalService';
+            GnossPeticionAjax(urlAction, arg, true)
+			.done(function (data) {
+			    if (data.status == 1) {
+			        parent.showInfoBar(data.message, true, true);
+			        $('.cargarGruposComunidad').hide();
+			        $('.formularioAceptarSolicitudProfesional').hide();
+			    } else {
+			        parent.showInfoBar(data.message, true, true);
+			    }
+			    OcultarUpdateProgress();
+			});
+        });
+
+        //Editar Solicitud acceso profesionales
+        $("form.formularioAceptarSolicitudProfesional .editarSolicitud").click(function (event) {
+            event.preventDefault();
+            var arg = {};
+            arg.pNombreServicio = 'servicioPradoProfesionales';
+            arg.pNombreAccion = 'EditarSolicitud';
+            arg.pIdSolicitud = $(this).attr('idSolicitud');
+            if ($(".cargarGruposComunidad").attr('identidadID') != null) {
+                arg.pIdentidadUsuarioEditadoID = $(".cargarGruposComunidad").attr('identidadID');
+            }
+
+            if ($(".cargarGruposComunidad").attr('usuarioID') != null) {
+                arg.pUsuarioEditadoID = $(".cargarGruposComunidad").attr('usuarioID');
+            }
+
+
+            var numGrupo = 0;
+            $('.cargarGruposComunidad input:checked').each(function () {
+                arg['pNombreCortoGrupos[' + numGrupo + ']'] = $(this).val();
+                numGrupo++;
+            });
+
+            MostrarUpdateProgress();
+            var urlAction = urlComunidadConIdioma + '/ExternalService';
+            GnossPeticionAjax(urlAction, arg, true)
+			.done(function (data) {
+			    if (data.status == 1) {
+			        $('.edicionSolicitudAcceso').html("<p>" + data.message.replace("\n", "</br>") + "</p>");
+			    } else {
+			        parent.showInfoBar(data.message, true, true);
+			    }
+			    OcultarUpdateProgress();
+			});
+        });
+    });
+</script>
