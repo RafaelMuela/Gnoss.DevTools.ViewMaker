@@ -1,0 +1,24 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{
+	<div class="res-cont">
+		<strong class="rastro">@Model.Title</strong>	
+		<div class="res-normal">
+			@foreach (CMSComponent fichaComponente in Model.ComponentList)
+			{	
+				if(fichaComponente is CMSComponentHTML)
+				{
+					@Html.PartialView(fichaComponente.ViewName, fichaComponente)
+				}
+			}            
+			@foreach (CMSComponent fichaComponente in Model.ComponentList)
+			{	
+				if(fichaComponente is CMSComponentSearch)
+				{
+					@Html.PartialView(fichaComponente.ViewName, fichaComponente)
+				}
+			}
+		</div>
+
+	</div>
+}

@@ -1,0 +1,79 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{
+	string descripcion="";
+	if(ViewBag.UtilIdiomas.LanguageCode=="es")
+	{
+		descripcion = "Visita el Museo del Prado y descubre las obras maestras de Velázquez, Rubens, Goya, El Bosco, El Greco, etc.";
+	
+	}else
+	{		
+		descripcion = "Visit the Museo del Prado and discover masterpieces by Velázquez, Rubens, Goya, El Bosco, El Greco, etc.";
+	}
+			
+	KeyValuePair<string, string> metaDescripcion = new KeyValuePair<string, string>("description",descripcion);
+	Html.GetListaMetas().Add(metaDescripcion);	
+	
+	
+	KeyValuePair<string, string> metaTwitterTitle = new KeyValuePair<string, string>("twitter:title", Html.GetTituloPagina());
+	Html.GetListaMetas().Add(metaTwitterTitle);	
+	
+	KeyValuePair<string, string> metaTwitterDescripcion = new KeyValuePair<string, string>("twitter:description",descripcion);
+	Html.GetListaMetas().Add(metaTwitterDescripcion);	
+	
+	KeyValuePair<string, string> metaTwitterImage = new KeyValuePair<string, string>("twitter:image",ViewBag.BaseURLContent+"/imagenes/proyectos/personalizacion/[%%%_PROYECTO_ID_%%%]/cms/1hora.jpg");
+	Html.GetListaMetas().Add(metaTwitterImage);
+	
+	KeyValuePair<string, string> metaTwitterUrl = new KeyValuePair<string, string>("twitter:url", Html.GetUrlPagina());
+	Html.GetListaMetas().Add(metaTwitterUrl);	
+	
+	KeyValuePair<string, string> metaTwitterCard = new KeyValuePair<string, string>("twitter:card", "summary_large_image");
+	Html.GetListaMetas().Add(metaTwitterCard);	
+	
+	KeyValuePair<string, string> metaTwitterDomain = new KeyValuePair<string, string>("twitter:domain", "[%%%_URL_PROJECT_ES_%%%]");
+	Html.GetListaMetas().Add(metaTwitterDomain);		
+	
+	KeyValuePair<string, string> metaTwitterSite = new KeyValuePair<string, string>("twitter:site", "@museodelprado");
+	Html.GetListaMetas().Add(metaTwitterSite);		
+	
+	
+	
+	KeyValuePair<string, string> metaOGTitle = new KeyValuePair<string, string>("og:title", Html.GetTituloPagina());
+	Html.GetListaMetas().Add(metaOGTitle);	
+	
+	KeyValuePair<string, string> metaOGDescripcion = new KeyValuePair<string, string>("og:description",descripcion);
+	Html.GetListaMetas().Add(metaOGDescripcion);
+	
+	KeyValuePair<string, string> metaOGImage = new KeyValuePair<string, string>("og:image",ViewBag.BaseURLContent+"/imagenes/proyectos/personalizacion/[%%%_PROYECTO_ID_%%%]/cms/1hora.jpg");	
+	Html.GetListaMetas().Add(metaOGImage);
+	
+	KeyValuePair<string, string> metaOGUrl = new KeyValuePair<string, string>("og:url", Html.GetUrlPagina());
+	Html.GetListaMetas().Add(metaOGUrl);		
+	
+	KeyValuePair<string, string> metaOGSiteName = new KeyValuePair<string, string>("og:site_name", "Museo Nacional del Prado");
+	Html.GetListaMetas().Add(metaOGSiteName);	
+	
+	
+	
+	
+	<h1><span>@Model.Title</span></h1>
+	<div class="fechas">
+		<p>Pienso visitar el museo entre:</p>		
+		<p class="seleccion form-general">El 
+		<span class="input-fecha">
+			<input type="text" readonly="true" name="fecha" id="datepickerDesdees"  title="fecha desde" class="datepicker txt actual">
+		</span> y el 
+		<span class="input-fecha">
+			<input type="text" readonly="true" name="fecha" id="datepickerHastaes" title="fecha hasta" class="datepicker txt actual">
+		</span>
+		<a class="boton" lang="es" href="#">Continuar</a>
+	</p></div>
+	<div class="resultados" lang="es">
+		<div>
+			@foreach (CMSComponent fichaComponente in Model.ComponentList)
+			{	
+				@Html.PartialView(fichaComponente.ViewName, fichaComponente)
+			}	
+		</div>
+	</div>   
+}

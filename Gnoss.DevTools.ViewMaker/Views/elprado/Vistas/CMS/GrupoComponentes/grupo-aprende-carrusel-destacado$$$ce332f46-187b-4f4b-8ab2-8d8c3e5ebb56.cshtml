@@ -1,0 +1,12 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{    
+	<div class="ficha-expo-carrusel small" >			
+		<div class="tresitems-carousel">	
+		@foreach (CMSComponent fichaComponente in Model.ComponentList)
+		{
+			@Html.PartialView(fichaComponente.ViewName, fichaComponente) 
+		}
+		</div>			
+	</div>
+}

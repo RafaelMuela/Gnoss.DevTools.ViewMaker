@@ -1,0 +1,32 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{
+	<div class="contenido">
+		<div class="nums">
+		@foreach (CMSComponent fichaComponente in Model.ComponentList)
+		{
+			if(fichaComponente is CMSComponentSearch)
+			{		
+				@Html.PartialView(fichaComponente.ViewName, fichaComponente) 			
+			}
+		}
+		</div>
+    
+		@foreach (CMSComponent fichaComponente in Model.ComponentList)
+		{
+			if(!(fichaComponente is CMSComponentSearchBox) && !(fichaComponente is CMSComponentSearch))
+			{
+				@Html.PartialView(fichaComponente.ViewName, fichaComponente) 			
+			}
+		}
+	</div>
+    foreach (CMSComponent fichaComponente in Model.ComponentList)
+    {
+		if(fichaComponente is CMSComponentSearchBox)
+		{
+			<div class="busq-inf">
+				@Html.PartialView(fichaComponente.ViewName, fichaComponente) 
+			</div>
+		}
+    }
+}

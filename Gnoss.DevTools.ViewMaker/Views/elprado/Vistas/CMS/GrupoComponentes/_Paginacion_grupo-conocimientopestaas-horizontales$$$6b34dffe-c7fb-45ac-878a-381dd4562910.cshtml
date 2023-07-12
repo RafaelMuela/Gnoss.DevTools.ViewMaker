@@ -1,0 +1,45 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{
+	string urlPersonalizacion=ViewBag.BaseUrlContent+"/imagenes/proyectos/personalizacion/[%%%_PROYECTO_ID_%%%]/cms/";
+    <h1><span id="menu_@Model.Title.Replace(" ","_").Replace(",","_").Replace(".","_").ToLower()">@Model.Title</span></h1>	
+	foreach (CMSComponent fichaComponente in Model.ComponentList)
+	{
+		if(!string.IsNullOrEmpty(fichaComponente.Styles))
+		{
+			string urlImg=urlPersonalizacion+fichaComponente.Styles;
+			<figure data-img="@urlImg" class="imagen-cabecera"></figure>
+			break;
+		}
+	}	
+	<ul class="hor">
+        @{
+            int i=0;
+            foreach (CMSComponent fichaComponente in Model.ComponentList)
+            {
+                string activo = "";
+                if (i == 0)
+                {
+                    activo = "activo";
+                }								
+                <li class="@activo" img="@urlPersonalizacion@fichaComponente.Styles">@fichaComponente.Title</li>            
+                i++;
+            }
+        }			
+	</ul>	
+    int j=0;
+    foreach (CMSComponent fichaComponente in Model.ComponentList)
+    {
+        string oculto = "";
+        if (j > 0)
+        {
+            oculto = "display: none;";
+        }   
+        
+        <div style="@oculto" class="contenidoInt">
+            @Html.PartialView(fichaComponente.ViewName, fichaComponente)
+        </div>
+        j++;
+    }	
+    <div class="busq-inf"></div>       
+}

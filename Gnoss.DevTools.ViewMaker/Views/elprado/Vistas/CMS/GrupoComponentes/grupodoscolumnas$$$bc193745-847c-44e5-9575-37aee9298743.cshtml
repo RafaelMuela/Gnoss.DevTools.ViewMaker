@@ -1,0 +1,26 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{
+	<div class="wrap">
+		@{
+			int col=0;
+			foreach (CMSComponent fichaComponente in Model.ComponentList)
+			{
+				col++;
+				if(col==1)
+				{
+					<div class="col-izq">
+						@Html.PartialView(fichaComponente.ViewName, fichaComponente)
+					</div>
+				}else
+				{
+					<div class="col-der">
+						@Html.PartialView(fichaComponente.ViewName, fichaComponente)
+					</div>
+				}
+			}
+		}
+	</div>
+}
+
+

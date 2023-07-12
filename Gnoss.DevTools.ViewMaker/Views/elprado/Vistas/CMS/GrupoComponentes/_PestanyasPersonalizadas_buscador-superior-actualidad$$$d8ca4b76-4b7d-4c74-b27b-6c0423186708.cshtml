@@ -1,0 +1,14 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{
+	<h1>@Model.Title</h1>
+	<form>
+		<div>			
+			@foreach (CMSComponent fichaComponente in Model.ComponentList)
+			{
+				@Html.PartialView(fichaComponente.ViewName, fichaComponente) 
+			}					
+		</div>
+	</form>	
+}
+ 

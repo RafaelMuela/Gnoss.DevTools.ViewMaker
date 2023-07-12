@@ -1,0 +1,16 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{
+	string urlComunidad=Html.GetComunidad().Url;
+	urlComunidad+="/"+Html.Translate("URLEMPLEOS");
+	
+	<div class="mu-img-70">      
+		@foreach (CMSComponent fichaComponente in Model.ComponentList)
+		{
+			@Html.PartialView(fichaComponente.ViewName, fichaComponente)
+		}
+		<a href="@urlComunidad"><span class="mas-info">[<span>+</span>]</span></a>   
+	</div>
+}
+
+

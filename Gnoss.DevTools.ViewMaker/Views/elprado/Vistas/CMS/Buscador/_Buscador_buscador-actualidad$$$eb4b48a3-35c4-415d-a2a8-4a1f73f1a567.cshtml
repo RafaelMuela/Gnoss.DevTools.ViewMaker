@@ -1,0 +1,30 @@
+@model CMSComponentSearch  
+@if (Model != null)   
+{
+    <div id="@Model.Key" url="@Model.UrlSearcherCMS" class="buscadorActualidad"> 	
+		@{
+			if(Model.Resultado.ListaResultados.Count==0 && Model.Resultado.NumeroPaginaActual==1)
+			{
+				<p class="txt-no-results">@Html.Translate("NOSEENCONTRARONRESULTADOS")</p>
+			}
+			foreach (ResourceModel fichaModel in Model.Resultado.ListaResultados)       
+			{     	
+				@Html.PartialView(Model.ViewNameResources, fichaModel)    
+			}   
+			int numTotal = Model.Resultado.NumeroResultadosTotal;                  
+			int numResultadosPagina = Model.Resultado.NumeroResultadosPagina;                  
+			int PaginaActual = Model.Resultado.NumeroPaginaActual;                  
+			int PaginaSiguiente = PaginaActual+1;
+			int numPaginas = (int)Math.Ceiling((double)numTotal / (double)numResultadosPagina);      
+			if(numPaginas>PaginaActual)      
+			{       
+				<div class="ver-mas-general" pag="@PaginaSiguiente" total="@numTotal"><a>@Html.Translate("VERMAS")</a></div>      
+            }else
+            {
+				<div class="ver-mas-general" style="display:none" pag="@PaginaSiguiente" total="@numTotal"><a>@Html.Translate("VERMAS")</a></div>      
+            } 
+		}
+    </div>   
+}    
+  
+   

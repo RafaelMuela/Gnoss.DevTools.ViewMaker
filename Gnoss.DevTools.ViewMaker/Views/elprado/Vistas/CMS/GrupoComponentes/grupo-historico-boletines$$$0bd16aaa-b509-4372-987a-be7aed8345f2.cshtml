@@ -1,0 +1,44 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{
+	<div class="res-cont" id="buscador-historico-boletines">
+		<strong class="rastro">@Html.Translate("BOLETINDELMUSEODELPRADO")</strong>				
+		<h1 class="res-tit-plus">@Html.Translate("HISTORICO")</h1>
+		<div class="res-normal cronologia">			
+			<div class="historico">		
+				<section class="buscador-coleccion">
+					<form>
+						<span class="filtro tiny">
+							@foreach (CMSComponent fichaComponente in Model.ComponentList)
+							{	
+								if(fichaComponente is CMSComponentFacet)
+								{
+									@Html.PartialView(fichaComponente.ViewName, fichaComponente)
+								}
+							}
+						</span>	
+						<span class="buscar tiny">
+							<input type="text" placeholder="@Html.Translate("TITULO")"  title="@Html.Translate("TITULO")" name="titulo" id="titulo">       
+						</span>	
+						<span class="buscar tiny">
+							<input type="text" placeholder="@Html.Translate("AUTOR")"  titulo="@Html.Translate("AUTOR")" name="autor" id="autor">	
+						</span>	
+						<span class="lupa">
+							<a href="#">@Html.Translate("BUSCAR")</a>	
+						</span>						
+					</form>							
+				</section>	
+				@foreach (CMSComponent fichaComponente in Model.ComponentList)
+				{	
+					if(fichaComponente is CMSComponentSearch)
+					{
+						@Html.PartialView(fichaComponente.ViewName, fichaComponente)
+					}
+				}
+			</div>			
+
+		</div>
+	</div>
+}
+
+

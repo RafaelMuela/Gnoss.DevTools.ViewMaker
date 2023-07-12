@@ -1,0 +1,24 @@
+@model CMSComponentGroupComponents
+@if (Model != null)
+{
+	<h1><span>@Model.Title</span></h1>
+	<div class="fechas">
+		<p>I will visit the museum between:</p>		
+		<p class="seleccion form-general"> 
+		<span class="input-fecha">
+			<input type="text" readonly="true" name="fecha" title="fecha desde" id="datepickerDesdeen" class="datepicker txt actual">
+		</span> and 
+		<span class="input-fecha">
+			<input type="text" readonly="true" name="fecha" id="datepickerHastaen" title="fecha hasta" class="datepicker txt actual">
+		</span>
+		<a class="boton" lang="en" href="#">Continue</a>
+	</p></div>
+	<div class="resultados" lang="en">
+		<div>
+			@foreach (CMSComponent fichaComponente in Model.ComponentList)
+			{	
+				@Html.PartialView(fichaComponente.ViewName, fichaComponente)
+			}	
+		</div>
+	</div>   
+}
