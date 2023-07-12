@@ -1,0 +1,37 @@
+
+@using Es.Riam.Gnoss.Web.MVC.Models;
+@model CMSComponentFacet
+@if (Model != null)
+{
+    <form class="seleccion small">       
+		<form class="seleccion small">
+			<select class="select-custom form-control" title="Faceta selección">
+				@if (Model.FacetModel != null && Model.FacetModel.FacetItemList != null)
+				{
+					int i = 0;
+					foreach (FacetItemModel faceta in Model.FacetModel.FacetItemList)
+					{
+						if (i == 0)
+						{
+					<option selected="selected" value="@faceta.Tittle">@faceta.Tittle</option>
+						}
+						else
+						{
+					<option value="@faceta.Tittle">@faceta.Tittle</option>
+						}
+
+						i++;
+					}
+				}
+			</select>
+		</form>
+		<div class="anno">
+			<div class="seleccionado">
+				<a class="flecha-menos off">@Html.GetText("COMUN", "ANTERIOR")</a>
+				<span>1785</span>
+				<a class="flecha-mas" href="#">@Html.GetText("COMUN", "SIGUIENTE")</a>
+			</div>
+        </div>
+        
+    </form>	
+}

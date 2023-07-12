@@ -1,0 +1,79 @@
+@model CMSComponentHTML
+@if(Model != null)
+{
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+    string urlComunidad=Html.GetComunidad().Url;
+    CommunityModel Comunidad = ViewBag.Comunidad;
+    string versionJS = "";
+    if (Comunidad.VersionJS.HasValue)
+    {
+        versionJS = Comunidad.VersionJS.Value.ToString();
+    }
+
+<html lang="es">
+	<head>  
+		<meta charset="utf-8" />	
+		<meta name="apple-mobile-web-app-capable" content="yes" />	
+		<meta name="viewport" content="initial-scale=1,minimum-scale=1,maximum-scale=1,width=device-width,user-scalable=yes" />
+		<title>@Html.Translate("MUSEONACIONALPRADO")</title>
+		<link href="@urlPersonalizacion/ElPrado/css/prado.css" media="all" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="//cloud.typography.com/7751072/662984/css/fonts.css" />		   
+		<script src="@urlPersonalizacion/ElPrado/js/jquery-1.10.2.min.js?v=@ViewBag.Version-@versionJS"></script>
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.hcsticky-min.js?v=@ViewBag.Version-@versionJS"></script> <!-- elementos semi-fixed, como barras o menús sticky -->
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.backstretch.min.js?v=@ViewBag.Version-@versionJS"></script> <!-- centra y escala backgrounds -->	
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.magnific-popup.min.js?v=@ViewBag.Version-@versionJS"></script>	<!-- Modal popups -->
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.expander.min.js?v=@ViewBag.Version-@versionJS"></script> <!-- Ampliar textos (leer más) -->
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.heapbox-0.9.3.min.js?v=@ViewBag.Version-@versionJS"></script> <!-- Para dar estilos a los selects -->	
+		<script src="@urlPersonalizacion/ElPrado/js/leaflet.js?v=@ViewBag.Version-@versionJS"></script>
+		<script src="@urlPersonalizacion/ElPrado/js/verge.min.js?v=@ViewBag.Version-@versionJS"></script> 
+		<script src="@urlPersonalizacion/ElPrado/js/idangerous.swiper-2.4.min.js?v=@ViewBag.Version-@versionJS"></script>	<!-- Carruseles -->	
+		<script src="@urlPersonalizacion/ElPrado/js/iscroll.js?v=@ViewBag.Version-@versionJS"></script>	
+		<script src="@Html.GetBaseUrlStatic()/jsUnificar/MVC.Comun.js?v=@ViewBag.Version-@versionJS"  type="text/javascript"></script>
+		<script src="@urlPersonalizacion/community.js?v=@ViewBag.Version-@versionJS"  type="text/javascript"></script>
+		<script src="@Html.GetBaseUrlStatic()/lang/@ViewBag.UtilIdiomas.LanguageCode/text.js"  type="text/javascript"></script>
+		<script src="@Html.GetBaseUrlStatic()/jsUnificar/busquedas.js?v=@ViewBag.Version-@versionJS"  type="text/javascript"></script>
+		<script src="@urlPersonalizacion/ElPrado/js/jquery-ui.min.js?v=@ViewBag.Version-@versionJS"  type="text/javascript"></script>	
+		<script defer src="@urlPersonalizacion/ElPrado/js/templates/common.js?v=@ViewBag.Version-@versionJS"></script>	
+	</head>
+	<body class="mi-prado-pop-up">	
+		<section class="usuario corazon">
+			<div class="logueado">
+				<h1><em>Mi</em> Prado</h1>			
+			</div>
+		</section>
+		<section class="ini-sesion">
+			<div class="crea-recorrido">
+				<h1>@Html.Translate("CREAYCOMPARTETUSPROPIOSRECORRIDOS")</h1>
+				<figure>	
+					<img src="@urlPersonalizacion/cms/miprado_small_intro.jpg"/>
+					<figcaption>
+					<a class="botones-centrados bc-estandar hv-estandar" onclick="top.location.href = '@(urlComunidad+"/"+Html.Translate("URLMIPRADO"))'">@Html.Translate("CONOCEMAS")</a>
+					</figcaption>				
+				</figure>
+			</div>
+			<div class="login-sesion">
+				<form class="form-general">			
+					<h1>@Html.Translate("INICIARSESIONENMIPRADO")</h1>
+					<fieldset class="ppal">
+					<div class="row">
+						<input type="text" id="usuario" name="usuario" placeholder="@Html.Translate("USUARIO")" />
+						<label for="usuario">@Html.Translate("USUARIO")</label>				               
+					</div>	
+					<div class="row">
+						<input type="password" id="password" name="password" placeholder="@Html.Translate("CONTRASENA")" />
+						<label for="password">@Html.Translate("CONTRASENA")</label>				               
+					</div>
+					<div class="row">
+					<a class="botones-centrados bc-estandar hv-estandar btLogin" href="#">Acceder</a>
+					<a class="fg-pass" onclick="top.location.href = '@(urlComunidad+"/"+Html.GetText("URLSEM","OLVIDEPASSWORD"))'">@Html.Translate("OLVIDASTELACONTRASENA")</a>
+					</div>					
+					<div class="crear-cuenta">
+						<a href="@(urlComunidad+"/cmspagina?ComponentName=operativaRegistro")">@Html.Translate("CREARCUENTAAHORA")</a>
+					</div>			
+					</fieldset>
+				</form>
+			</div>
+		</section>
+	</body>
+</html>
+}                               

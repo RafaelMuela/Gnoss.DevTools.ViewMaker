@@ -1,0 +1,27 @@
+@model FacetedModel
+@if (Model.FacetList!=null)
+{
+    foreach (FacetModel faceta in Model.FacetList)
+    {
+        @Html.PartialView("_Faceta", faceta)
+    }
+
+    <div style="display: none" class="etiquetas">
+        @if (Model.FilterList.Count>0)
+        {
+            <ul>
+                @foreach (FacetItemModel filtro in Model.FilterList)
+                {
+                    <li>@filtro.Tittle <a rel="nofollow" name="@filtro.Name" class="remove faceta" href="@filtro.Filter">@Html.GetText("COMMON", "ELIMINAR")</a></li>
+
+                }
+            </ul>
+            if (Model.FilterList.Count>1)
+            {
+                <div class="descargas">
+                    <a href="#" class="boton-descarga limpiarfiltros">@Html.Translate("BORRARTODOS")</a>
+                </div>
+            }
+        }
+    </div>
+}

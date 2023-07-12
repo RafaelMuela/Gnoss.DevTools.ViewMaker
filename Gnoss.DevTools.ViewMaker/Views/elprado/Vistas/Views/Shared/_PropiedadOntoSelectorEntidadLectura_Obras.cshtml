@@ -1,0 +1,362 @@
+@model SemanticPropertyModel
+
+@{
+    Es.Riam.Semantica.OWL.Propiedad mPropiedad = Model.Element.Propiedad;
+}
+
+@foreach (SemanticPropertyModel.PropertyValue obra in Model.PropertyValues)
+{
+    if (obra != null && obra.Value != null)
+    {
+
+        string tituloObra = string.Empty;
+        string enlaceObra = string.Empty;
+
+        SemanticPropertyModel proptituloObra = obra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p102_E35_p3_has_title");
+
+        if (proptituloObra != null && proptituloObra.PropertyValues.Count > 0)
+        {
+            tituloObra = proptituloObra.FirstPropertyValue.Value;
+            enlaceObra = proptituloObra.FirstPropertyValue.DownloadUrl;
+        }
+
+
+        string urlImagenObra = obra.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image")+"?aaa";
+
+
+        if (string.IsNullOrEmpty(urlImagenObra))
+        {
+            urlImagenObra = obra.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p65_shows_visual_item@@@http://museodelprado.es/ontologia/ecidoc.owl#p3_has_note");
+        }
+
+        // Técnica de la obra
+
+        // infoObra contiene la técnica y la fecha de la obra.
+        string infoObra = string.Empty;
+
+        string numeroCatalogoObraRelacionada = obra.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p48_has_preferred_identifier@@@http://www.cidoc-crm.org/cidoc-crm#p102_has_title");
+        string soporteObraRelacionada = "";//obra.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p126_employed_support@@@http://museodelprado.es/ontologia/pradomuseum.owl#supportNode@@@http://www.w3.org/2008/05/skos#prefLabel");
+        string materiaObraRelacionada = "";// obra.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p126_employed_medium@@@http://museodelprado.es/ontologia/pradomuseum.owl#mediumNode@@@http://www.w3.org/2008/05/skos#prefLabel");
+
+        string separador = "";
+
+        if (obra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p126_employed_support") != null)
+        {
+            foreach (Es.Riam.Gnoss.Web.MVC.Models.SemanticPropertyModel.PropertyValue valorPropiedad in obra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p126_employed_support").PropertyValues)
+            {
+                string orden = valorPropiedad.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#order");
+                if (string.IsNullOrEmpty(orden))
+                {
+                    orden = "1";
+                }
+                if (orden == "1")
+                {
+                    //Cada una de las ramas
+                    string textoSoporte = valorPropiedad.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#supportNode").PropertyValues.Last().RelatedEntity.GetPropertyByPath("http://www.w3.org/2008/05/skos#prefLabel").FirstPropertyValue.Value;
+                    textoSoporte = Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(textoSoporte.ToLower());
+                    soporteObraRelacionada += separador + textoSoporte;
+                    if (separador == "")
+                    {
+                        separador = ", ";
+                    }
+                }
+            }
+        }
+
+        separador = "";
+        if (obra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p126_employed_medium") != null)
+        {
+            foreach (Es.Riam.Gnoss.Web.MVC.Models.SemanticPropertyModel.PropertyValue valorPropiedad in obra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p126_employed_medium").PropertyValues)
+            {
+                //Cada una de las ramas
+                string textoMateria = valorPropiedad.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#mediumNode").PropertyValues.Last().RelatedEntity.GetPropertyByPath("http://www.w3.org/2008/05/skos#prefLabel").FirstPropertyValue.Value;
+                //string orden = valorPropiedad.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#mediumNode").PropertyValues.Last().RelatedEntity.GetPropertyByPath("http://purl.org/dc/elements/1.1/identifier").FirstPropertyValue.Value;
+                textoMateria = Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(textoMateria.ToLower());
+                materiaObraRelacionada += separador + textoMateria;
+                if (separador == "")
+                {
+                    separador = ", ";
+                }
+            }
+        }
+
+        string letraObraRelacionada = string.Empty;
+        if (!string.IsNullOrEmpty(numeroCatalogoObraRelacionada))
+        {
+            System.Text.RegularExpressions.Regex re = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z]+");
+            System.Text.RegularExpressions.MatchCollection mc = re.Matches(numeroCatalogoObraRelacionada);
+
+            if (mc != null)
+            {
+                letraObraRelacionada = mc[0].Groups[0].Value;
+            }
+        }
+        SemanticPropertyModel propTechniquePath = obra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p32_used_general_technique");
+        string tecnicaObraRelacionada = String.Empty;
+        if (propTechniquePath != null && propTechniquePath.PropertyValues != null && propTechniquePath.PropertyValues.Count() > 0)
+        {
+            foreach (SemanticPropertyModel.PropertyValue techniquePath in propTechniquePath.PropertyValues)
+            {
+                SemanticPropertyModel propTechniqueNode = techniquePath.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#techniqueNode");
+
+                if (propTechniqueNode != null && propTechniqueNode.PropertyValues != null && propTechniqueNode.PropertyValues.Count() > 0)
+                {
+                    string tecnicaObra = propTechniqueNode.PropertyValues.Last().RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/2008/05/skos#prefLabel");
+
+                    if (!string.IsNullOrEmpty(tecnicaObra))
+                    {
+                        if (!techniquePath.Equals(propTechniquePath.PropertyValues.Last()))
+                        {
+                            tecnicaObraRelacionada = string.Concat(tecnicaObraRelacionada, tecnicaObra, ", ");
+                        }
+                        else
+                        {
+                            tecnicaObraRelacionada = string.Concat(tecnicaObraRelacionada, tecnicaObra);
+                        }
+
+                    }
+                }
+            }
+        }
+
+        SemanticPropertyModel tesauroTecnicaObraRelacionada = obra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p108i_E12_p32_used_general_technique@@@http://museodelprado.es/ontologia/pradomuseum.owl#techniqueNode");
+
+        if (tesauroTecnicaObraRelacionada != null && tesauroTecnicaObraRelacionada.PropertyValues.Count > 0)
+        {
+            //infoObra = string.Concat(tecnicaObraRelacionada,". ");
+
+            if (letraObraRelacionada.Equals("E") || letraObraRelacionada.Equals("O"))
+            {
+                if (!string.IsNullOrEmpty(materiaObraRelacionada))
+                {
+                    infoObra = infoObra + materiaObraRelacionada + ", ";
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(tecnicaObraRelacionada))
+                {
+                    infoObra = infoObra + tecnicaObraRelacionada;
+                }
+                if (!string.IsNullOrEmpty(soporteObraRelacionada))
+                {
+                    infoObra = infoObra + " " + Html.Translate("SOBRE") + " " + soporteObraRelacionada.ToLower();
+                }
+                if (!string.IsNullOrEmpty(tecnicaObraRelacionada) || !string.IsNullOrEmpty(soporteObraRelacionada))
+                {
+                    infoObra = infoObra + ", ";
+                }
+
+            }
+        }
+
+        // Fecha
+        string fechaTextualObraRelacionada = obra.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/edate.owl#textDate");
+        if (!string.IsNullOrEmpty(fechaTextualObraRelacionada))
+        {
+            infoObra = string.Concat(infoObra, fechaTextualObraRelacionada);
+        }
+
+        @functions
+                {
+            public class autorObra
+            {
+                public autorObra(string pEnlaceAutor, string pNombreAutor, string pTipoAutor, string pNombreAutorAutoria, string pTipoAutoria)
+                {
+                    this.enlaceAutor = pEnlaceAutor;
+                    this.nombreAutor = pNombreAutor;
+                    this.tipoAutor = pTipoAutor;
+                    this.nombreAutorAutoria = pNombreAutorAutoria;
+                    this.tipoAutoria = pTipoAutoria;
+                }
+
+                public string enlaceAutor { get; set; }
+                public string nombreAutor { get; set; }
+                public string tipoAutor { get; set; }
+                public string nombreAutorAutoria { get; set; }
+                public string tipoAutoria { get; set; }
+            }
+        }
+
+        List<autorObra> listaAutores = new List<autorObra>();    
+    
+        SemanticPropertyModel propObraAutores = obra.RelatedEntity.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p14_carried_out_by");
+
+        if (propObraAutores != null && propObraAutores.PropertyValues != null && propObraAutores.PropertyValues.Count > 0)
+        {
+            // Recorre todos los autores de la obra comprobando si es un autor o una autoría y los añade a dTAutoresObra 
+            foreach (SemanticPropertyModel.PropertyValue propObraAutor in propObraAutores.PropertyValues)
+            {
+                if (propObraAutor != null && propObraAutor.Value != null)
+                {
+                    // Tipo de autor  
+                    string tipoAutor = propObraAutor.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p2_has_author_type");
+                    SemanticPropertyModel propDeObraAutor = propObraAutor.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#author");
+                    if (propDeObraAutor != null && propDeObraAutor.PropertyValues != null && propDeObraAutor.PropertyValues.Count > 0)
+                    {
+                        // Nombre autor
+                        SemanticPropertyModel.PropertyValue propAutor = propDeObraAutor.FirstPropertyValue;
+                        SemanticPropertyModel propNombreAutor = propAutor.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title");
+
+                        string nombreAutor = string.Empty;
+                        string enlaceAutor = string.Empty;
+
+                        if (propNombreAutor != null && propNombreAutor.PropertyValues != null && propNombreAutor.PropertyValues.Count > 0)
+                        {
+                            nombreAutor = propNombreAutor.FirstPropertyValue.Value;
+                            enlaceAutor = propNombreAutor.FirstPropertyValue.DownloadUrl;
+                        }
+
+                        //Autoría
+                        SemanticPropertyModel propAutoria = propObraAutor.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#authorship");
+                        string nombreAutorAutoria = string.Empty;
+                        string tipoAutoria = string.Empty;
+
+                        if (propAutoria != null && propAutoria.PropertyValues != null && propAutoria.PropertyValues.Count > 0)
+                        {
+                            nombreAutorAutoria = propAutoria.FirstPropertyValue.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#author@@@http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title");
+                            tipoAutoria = propAutoria.FirstPropertyValue.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p2_has_type_authorship");
+                        }
+
+                        listaAutores.Add(new autorObra(enlaceAutor, nombreAutor, tipoAutor, nombreAutorAutoria, tipoAutoria));
+                    }
+                }
+            }
+        }
+
+        string infoAutor = "";
+        int numAutores = 0;
+        foreach (autorObra autor in listaAutores)
+        {
+            if (numAutores > 0)
+            {
+                infoAutor += "; ";
+            }
+
+            string enlaceAutor = autor.enlaceAutor;
+            string nombreAutor = autor.nombreAutor;
+            string tipoAutor = autor.tipoAutor;
+            string nombreAutorAutoria = autor.nombreAutorAutoria;
+            string tipoAutoria = autor.tipoAutoria;
+
+            if (!string.IsNullOrEmpty(nombreAutor) && !string.IsNullOrEmpty(tipoAutoria))
+            {
+                if (!string.IsNullOrEmpty(nombreAutorAutoria))
+                {
+                    if (!string.IsNullOrEmpty(tipoAutor))
+                    {
+                        infoAutor += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> -" + autor.tipoAutor + "- (" + autor.tipoAutoria + " " + autor.nombreAutorAutoria + ")";
+                    }
+                    else
+                    {
+                        infoAutor += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> (" + autor.tipoAutoria + " " + autor.nombreAutorAutoria + ")";
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(tipoAutor))
+                    {
+                        infoAutor += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> -" + autor.tipoAutor + "- (" + autor.tipoAutoria + ")";
+                    }
+                    else
+                    {
+                        infoAutor += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> (" + autor.tipoAutoria + ")";
+                    }
+                }
+
+            }
+            else if (!string.IsNullOrEmpty(nombreAutor))
+            {
+                infoAutor += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a>";
+            }
+            numAutores++;
+        } 
+            
+        <figure> 
+            <div class="imgwrap">
+                @if (!string.IsNullOrEmpty(urlImagenObra))
+                {
+                    string urlImagenObraCompleta = ViewBag.BaseUrlContent + "/" + urlImagenObra;
+                                    
+				    <a href="@enlaceObra"><img alt="" src="@Html.ObtenerImagenConTamano(urlImagenObraCompleta, 268)" /></a>		
+                }
+                else
+                {
+				    <a href="@enlaceObra"><div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div></a>				
+                }
+            </div>
+                                
+		    <figcaption>										
+			    <dl>	             
+                    @if (!string.IsNullOrEmpty(tituloObra))
+                    {
+                        <dt class="trunca-texto"><a href="@enlaceObra">@tituloObra</a></dt>
+                    }
+
+                    @if (!string.IsNullOrEmpty(infoObra))
+                    {
+					    <dd class="trunca-texto soporte">@infoObra</dd> 
+                    }
+
+                    @if (!string.IsNullOrEmpty(infoAutor))
+                    {
+					    <dd class="autor">@Html.Raw(infoAutor)</dd>
+                    }
+			    </dl>
+		    </figcaption>					
+	    </figure>
+    }
+}
+
+@if (Model.OntologyPropInfo.EntitySelector.NumEntitiesForPage > 0)
+{
+    string srcImagenEspera = ViewBag.BaseUrlStatic + "/images/espera.gif";
+    string onclick = "PaginarSelectorEntAutor('" + Model.EntityParent.SemanticResourceModel.MvcActionsUrl + "/load-more-entities-selector', '" + Model.EntityParent.Key + "', '" + Model.Element.Propiedad.Nombre + "', " + Model.OntologyPropInfo.EntitySelector.NumEntitiesForPage + ", " + Model.OntologyPropInfo.EntitySelector.TotalEntitiesPagination + ");";
+    
+    <div class="ver-mas-general"><a>@Html.Translate("VERMAS")</a></div>
+    
+    <script type="text/javascript">
+        function PaginarSelectorEntAutor(urlAccion, entidad, propiedad, elemsPag, totalElem) {
+            var divPadre = $('.obras .ver-mas-general');
+
+            if (divPadre.data('pag') == null) {
+                divPadre.data('pag', 0);
+                divPadre.data('elemsCarg', 1);
+            }
+
+            var pagActual = divPadre.data('pag');
+            var elemsCarg = divPadre.data('elemsCarg');
+
+            if (totalElem <= (elemsPag * (pagActual + 1))) {
+                return;
+            }
+
+            divPadre.css('display', 'none');
+
+            pagActual++;
+
+            var dataPost = { entidad: entidad, propiedad: propiedad, inicioPag: (elemsPag * pagActual) };
+            GnossPeticionAjax(urlAccion, dataPost, true).done(function (data) {
+                divPadre.before(data);
+                elemsCarg++;
+                divPadre.data('elemsCarg', elemsCarg);
+                if (totalElem > (elemsPag * (pagActual + 1))) {
+                    divPadre.css('display', '');
+                }
+
+                truncarTexto();
+            }).fail(function () {
+                pagActual--;
+                divPadre.data('pag', pagActual);
+                divPadre.css('display', '');
+            });
+
+            divPadre.data('pag', pagActual);
+        }
+
+        $(function () {
+            truncarTexto();
+            $('.obras .ver-mas-general').click(function () {@Html.Raw(onclick) });
+		});
+    </script>
+}

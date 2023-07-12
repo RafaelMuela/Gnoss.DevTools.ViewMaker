@@ -1,0 +1,42 @@
+@using Es.Riam.Gnoss.Web.MVC.Models;
+@model CMSComponentFacet
+@if (Model != null)
+{
+
+	<span class="filtro small">					
+		<select class="filtro-video select-custom form-control" title="Filtro de video" selected="selected">
+			<option value="">@Html.Translate("Todo")</option>
+			@if (Model.FacetModel != null && Model.FacetModel.FacetItemList != null)
+			{
+				foreach (FacetItemModel faceta in Model.FacetModel.FacetItemList)
+				{		
+					PintarFaceta(faceta,0);
+				}
+			}	
+		</select>
+	</span>		
+}
+
+
+@functions{ 
+	
+	public void PintarFaceta(FacetItemModel pFaceta,int pNivel)
+{
+	string title="";
+	for(int i=0;i<pNivel;i++)
+	{	
+		title+="&nbsp;&nbsp;&nbsp;&nbsp;";
+	}
+	title+=pFaceta.Tittle;
+
+	<option value="@pFaceta.Name">
+		@Html.Raw(title)
+	</option>			
+	if(pFaceta.FacetItemlist!=null && pFaceta.FacetItemlist.Count > 0)
+	{		
+		foreach (FacetItemModel faceta in pFaceta.FacetItemlist)
+		{
+			PintarFaceta( faceta,pNivel+1);
+		}
+	}
+}}

@@ -1,0 +1,1341 @@
+@model ResourceModel
+@if (Model != null)
+{
+   
+    if (Model.RdfType == "pmentity")
+    {
+
+        string claveTipo = "dbo:type@@@multiLan:textValue";
+        string tipo = "";
+        string claveSubtipo = "pm:subType@@@multiLan:textValue";
+        HashSet<string> subtipo = new HashSet<string>();
+        if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+        {
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipo))
+            {
+                tipo = Model.ViewSettings.SemanticProperties[claveTipo][0].Name;
+            }
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveSubtipo))
+            {
+                foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveSubtipo])
+                {
+                    subtipo.Add(propiedadSemantica.Name);
+                }
+            }
+        }
+        string tipotexto = tipo;
+        if (subtipo.Count > 0)
+        {
+            tipotexto += " (";
+            string coma = "";
+            foreach (string subtype in subtipo)
+            {
+                tipotexto += coma + subtype;
+                coma = ", ";
+            }
+            tipotexto += ")";
+        }
+<figure>
+    <div class="imgwrap">
+        <a href="@Model.CompletCardLink">
+            <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>
+        </a>
+    </div>
+    <figcaption>
+        <div>
+            <p class="trunca-texto"><a href="@Model.CompletCardLink">@Model.Title</a></p>
+            <p class="tipo">@tipotexto</p>
+        </div>
+    </figcaption>
+</figure> }
+else if (Model.RdfType == "voz")
+{
+string claveDuracion = "dcterms:SizeOrDuration";
+string claveEntrevistado = "pm:interviewedName";
+string claveCargo = "pm:interviewedCharge";
+string claveAnios = "pm:workingDate";
+
+string duracionString = "";
+string entrevistado = "";
+string cargo = "";
+string anios = "";
+
+
+<figure>
+    @if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+    {
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(claveDuracion))
+        {
+            int duracion = int.Parse(Model.ViewSettings.SemanticProperties[claveDuracion][0].Name);
+            int min = duracion / 60;
+            int sec = duracion % 60;
+            if (min < 10)
+            {
+                duracionString += "0";
+            }
+            duracionString += min.ToString();
+            duracionString += ":";
+            if (sec < 10)
+            {
+                duracionString += "0";
+            }
+            duracionString += sec.ToString();
+        }
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(claveEntrevistado))
+        {
+            entrevistado = Model.ViewSettings.SemanticProperties[claveEntrevistado][0].Name;
+        }
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(claveCargo))
+        {
+            cargo = Model.ViewSettings.SemanticProperties[claveCargo][0].Name;
+        }
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(claveAnios))
+        {
+            anios = Model.ViewSettings.SemanticProperties[claveAnios][0].Name;
+            anios = anios.ToLower().Replace("actualidad", Html.Translate("ACTUALIDAD"));
+        }
+    }
+
+    @if (!string.IsNullOrEmpty(Model.UrlPreview))
+    {
+<div class="imgwrap">
+    <a href="@Model.CompletCardLink">
+        <img src="@Model.UrlPreview" alt="@Html.Raw(Model.Title)">
+        <div class="flecha-play"></div>
+        <span class="duracion">@duracionString</span>
+    </a>
+</div>}
+else
+{
+<div class="imgwrap">
+    <a href="@Model.CompletCardLink">
+        <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>
+        <div class="flecha-play"></div>
+        <span class="duracion">@duracionString</span>
+    </a>
+</div>}
+    <figcaption>
+        <div>
+            <p class="trunca-texto"><a href="@Model.CompletCardLink">@Html.Raw(Model.Title)</a></p>
+            <p class="autor">@entrevistado</p>
+            <p class="soporte trunca-texto">@cargo, @anios</p>
+        </div>
+    </figcaption>
+</figure> }
+else if (Model.RdfType == "memoriaaudiovisual")
+{
+string claveDuracion = "dcterms:SizeOrDuration";
+string duracionString = "";
+string claveAnios = "dce:date";
+string aniosString = "";
+string claveDireccion = "pm:direction";
+string direccionString = "";
+string claveGenero = "pm:genre@@@pm:genreNode@@@skos2:prefLabel||pm:genre@@@pm:genreNode@@@dce:identifier";
+string generoString = "";
+string subgeneroString = "";
+
+<figure>
+    @if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+    {
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(claveDuracion))
+        {
+            int duracion = int.Parse(Model.ViewSettings.SemanticProperties[claveDuracion][0].Name);
+            int min = duracion / 60;
+            int sec = duracion % 60;
+            if (min < 10)
+            {
+                duracionString += "0";
+            }
+            duracionString += min.ToString();
+            duracionString += ":";
+            if (sec < 10)
+            {
+                duracionString += "0";
+            }
+            duracionString += sec.ToString();
+        }
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(claveAnios))
+        {
+            aniosString = Model.ViewSettings.SemanticProperties[claveAnios][0].Name;
+        }
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(claveDireccion))
+        {
+            int i = 0;
+            foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveDireccion])
+            {
+                i++;
+                if (i == Model.ViewSettings.SemanticProperties[claveDireccion].Count && i > 1)
+                {
+                    direccionString += " y ";
+                }
+                else if (i < Model.ViewSettings.SemanticProperties[claveDireccion].Count && i > 1)
+                {
+                    direccionString += ", ";
+                }
+                direccionString += propiedadSemantica.Name;
+            }
+        }
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(claveGenero))
+        {
+            generoString = Model.ViewSettings.SemanticProperties[claveGenero][0].Name;
+
+            foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveGenero])
+            {
+                string[] propGenero = propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+                if (propGenero.Length == 2)
+                {
+                    string nombre = propGenero[0];
+                    string id = propGenero[1];
+                    if (!string.IsNullOrEmpty(nombre) && !string.IsNullOrEmpty(id))
+                    {
+                        if (id.Contains("_"))
+                        {
+                            subgeneroString = nombre;
+                            subgeneroString = subgeneroString.Substring(0, 1).ToUpper() + subgeneroString.Substring(1);
+                        }
+                        else
+                        {
+                            generoString = nombre;
+                            generoString = generoString.Substring(0, 1).ToUpper() + generoString.Substring(1);
+                        }
+                    }
+                }
+            }
+
+
+        }
+    }
+
+    @if (!string.IsNullOrEmpty(Model.UrlPreview))
+    {
+<div class="imgwrap">
+    <a href="@Model.CompletCardLink">
+        <img src="@Model.UrlPreview" alt="Imagen">
+        <div class="flecha-play"></div>
+        <span class="duracion">@duracionString</span>
+    </a>
+</div>}
+else
+{
+<div class="imgwrap">
+    <a href="@Model.CompletCardLink">
+        <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>
+        <div class="flecha-play"></div>
+        <span class="duracion">@duracionString</span>
+    </a>
+</div>}
+    <figcaption>
+        <div>
+            <p class="trunca-texto"><a href="@Model.CompletCardLink">@Html.Raw(Model.Title)</a></p>
+            @if (!string.IsNullOrEmpty(direccionString))
+            {
+<p class="autor">@direccionString</p>}
+            @{string pie = "";
+                if (!string.IsNullOrEmpty(generoString))
+                {
+                    pie += generoString + ", ";
+                }
+                if (!string.IsNullOrEmpty(subgeneroString))
+                {
+                    pie += subgeneroString + ", ";
+                }
+                if (!string.IsNullOrEmpty(aniosString))
+                {
+                    pie += aniosString;
+                } }
+            @if (!string.IsNullOrEmpty(pie))
+            {
+<p class="soporte trunca-texto">@pie</p>}
+        </div>
+    </figcaption>
+</figure> }
+else if (Model.RdfType == "pmephemeralwork")
+{
+string claveTipo = "pm:type@@@multiLan:textValue";
+string tipoString = "";
+string claveAnio = "date:year";
+string anioString = "";
+string desc = Es.Riam.Util.UtilCadenas.EliminarHtmlDeTexto(Model.Description);
+int longDesc = 200;
+if (desc.Length <= longDesc)
+{
+    longDesc = desc.Length;
+}
+if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipo))
+{
+    tipoString = Model.ViewSettings.SemanticProperties[claveTipo][0].Name;
+}
+if (Model.ViewSettings.SemanticProperties.ContainsKey(claveAnio))
+{
+    anioString = Model.ViewSettings.SemanticProperties[claveAnio][0].Name;
+}
+<figure>
+
+    @if (!string.IsNullOrEmpty(Model.UrlPreview))
+    {
+<div class="imgwrap">
+    <a href="@Model.CompletCardLink">
+        <img src="@Model.UrlPreview" alt="@Html.Raw(Model.Title)">
+
+    </a>
+</div> }
+else
+{
+<div class="imgwrap">
+    <a href="@Model.CompletCardLink">
+        <div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div>
+    </a>
+</div>}
+
+
+    <figcaption class="presentacion-mosaico">
+        <div>
+            <p class="trunca-texto" data-toggle="tooltip" title="@Html.Raw(Model.Title)"><a href="@Model.CompletCardLink">@Html.Raw(Model.Title)</a></p>
+
+            @{ if (!string.IsNullOrEmpty(tipoString))
+                {
+<p class="tipo">@tipoString</p> }
+                    if (!string.IsNullOrEmpty(anioString))
+                    {
+<p class="anio">@anioString</p> } }
+        </div>
+    </figcaption>
+    <figcaption class="presentacion-listado">
+        <div>
+            <p class="trunca-texto"><a href="@Model.CompletCardLink">@Html.Raw(Model.Title)</a></p>
+
+            @{ if (!string.IsNullOrEmpty(tipoString))
+                {
+<p class="tipo">@tipoString</p> }
+                    if (!string.IsNullOrEmpty(anioString))
+                    {
+<p class="anio">@anioString</p> }
+       
+            <p>
+                @Html.Raw(desc.Substring(0, longDesc))
+                <span class="mas-info">[<span><a href="@Model.CompletCardLink">+</a></span>]</span>
+            </p>
+        }
+
+        </div>
+    </figcaption>
+</figure> }
+else if (Model.RdfType == "pmtour")
+{
+string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+
+Guid idUsuario = Guid.Empty;
+
+if (ViewBag.IdentidadActual.KeyUser != null)
+{
+    idUsuario = ViewBag.IdentidadActual.KeyUser;
+}
+
+<figure>
+    @{ int numObras = 0;
+        int numFavoritos = 0;
+        string urlPrimeraObra = "";
+        bool esFavorito = false;
+
+        if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+        {
+            if (Model.ViewSettings.SemanticProperties.ContainsKey("pm:tour_artwork"))
+            {
+                numObras = Model.ViewSettings.SemanticProperties["pm:tour_artwork"].Count;
+            }
+            if (Model.ViewSettings.SemanticProperties.ContainsKey("pm:isFavouriteTo"))
+            {
+                List<SemanticPropertieModel> listaFavoritos = Model.ViewSettings.SemanticProperties["pm:isFavouriteTo"];
+                numFavoritos = listaFavoritos.Count;
+
+                if (listaFavoritos.Where(favorito =>
+                 favorito.Name.ToLower().Contains(idUsuario.ToString().ToLower())).Count() > 0)
+                {
+                    esFavorito = true;
+                }
+            }
+
+            if (Model.ViewSettings.SemanticProperties.ContainsKey("pm:tour_artwork@@@pm:artwork@@@pm:main_image||pm:tour_artwork@@@pm:order"))
+            {
+                List<SemanticPropertieModel> listaFotoOrden = Model.ViewSettings.SemanticProperties["pm:tour_artwork@@@pm:artwork@@@pm:main_image||pm:tour_artwork@@@pm:order"];
+                SortedDictionary<int, string> listaFotos = new SortedDictionary<int, string>();
+                foreach (SemanticPropertieModel fotoOrden in listaFotoOrden)
+                {
+                    string[] fotOrden = fotoOrden.Name.Split(new string[] { "||" }, StringSplitOptions.RemoveEmptyEntries);
+                    if (fotOrden.Length == 2)
+                    {
+                        string foto = fotOrden[0];
+                        int orden = 0;
+                        if (int.TryParse(fotOrden[1], out orden))
+                        {
+                            if (!listaFotos.ContainsKey(orden))
+                            {
+                                listaFotos.Add(orden, foto);
+                            }
+                        }
+                    }
+                }
+
+                if (listaFotos.Count > 0)
+                {
+                    urlPrimeraObra = ViewBag.BaseUrlContent + "/" + listaFotos.First().Value.Replace("/documentos", "/Documentos").Replace(".jpg", "_268.jpg");
+                }
+            }
+        } }
+
+    <div>
+        <a href="@Model.CompletCardLink">
+            @if (!string.IsNullOrEmpty(urlPrimeraObra))
+            {
+<img src="@urlPrimeraObra" alt="Imagen de @Model.Title">}
+        </a>
+    </div>
+    <figcaption>
+        <span class="num">@numObras</span>
+        <p class="favs">&hearts; @numFavoritos</p>
+        <h2 class="trunca-texto" style="word-wrap: break-word;"><a href="@Model.CompletCardLink">@Model.Title</a></h2>
+        <a href="@Model.Publisher.UrlPerson">
+            @if (string.IsNullOrEmpty(Model.Publisher.UrlFoto))
+            {
+<h3><div class="no-avatar">@Model.Publisher.NamePerson.Substring(0, 1)</div>@Model.Publisher.NamePerson</h3> }
+else
+{
+<h3><img  alt="Imagen de @Model.Publisher.NamePerson" src="@ViewBag.BaseURLContent@Model.Publisher.UrlFoto">@Model.Publisher.NamePerson</h3>}
+        </a>
+
+        @{ string clavedescripcion = "Descripción@es|||Description@en";
+            string clavemedio = "Medio@es|||Company@en";
+            string descripcion = "";
+            string medio = "";
+            if (Model.Publisher.ExtraInfo != null && Model.Publisher.ExtraInfo.ExtraData != null && Model.Publisher.ExtraInfo.ExtraData.ContainsKey(clavedescripcion))
+            {
+                descripcion = Model.Publisher.ExtraInfo.ExtraData[clavedescripcion];
+            }
+            if (Model.Publisher.ExtraInfo != null && Model.Publisher.ExtraInfo.ExtraData != null && Model.Publisher.ExtraInfo.ExtraData.ContainsKey(clavemedio))
+            {
+                medio = Model.Publisher.ExtraInfo.ExtraData[clavemedio];
+            } }
+
+        @if (!string.IsNullOrEmpty(descripcion) || !string.IsNullOrEmpty(medio))
+        {
+<p>
+    @if (!string.IsNullOrEmpty(descripcion))
+    {
+@Html.Raw(descripcion + ".")}
+    @if (!string.IsNullOrEmpty(medio))
+    {
+@Html.Raw(" " + medio + ".")}
+</p>}
+        <ul>
+            <li class="compartir popmenu">
+                <a>@Html.Translate("COMPARTIR")</a>
+                <ul class="rs-icons social" urlShare="@Model.CompletCardLink" titleShare="@Model.Title">
+                    <li><img src="@urlPersonalizacion/ElPrado/img/svg/twitter.svg" class="rrss-ico"><a href="#" alt="Twitter">Twitter</a></li>
+                    <li><img src="@urlPersonalizacion/ElPrado/img/svg/facebook.svg" class="rrss-ico"><a href="#" alt="Facebook">Facebook</a></li>
+                    <li class="rrss-ico whatsapp"><a href="#"><img src="@urlPersonalizacion/ElPrado/img/svg/whatsapp.svg" alt="Whatsapp" title="Whatsapp"></a></li>
+                    <li><img src="@urlPersonalizacion/ElPrado/img/svg/email.svg" class="rrss-ico"><a href="#" alt="E-Mail">@Html.Translate("ENVIARPORMAIL")</a></li>
+                </ul>
+            </li>
+            @if (esFavorito)
+            {
+<li class="guardar guardado agregarFavorito"><a idrecorrido="@Model.Key" href="#">@Html.Translate("GUARDADO")</a></li> }
+                    else
+                    {
+<li class="guardar agregarFavorito"><a idrecorrido="@Model.Key" href="#">@Html.Translate("GUARDAR")</a></li>}
+        </ul>
+    </figcaption>
+</figure> }
+else
+{
+<figure>
+    @{ UserIdentityModel IdentidadActual = Html.GetIdentidadActual();
+        string urlAgnadirRecorrido = ViewBag.Comunidad.Url + "/cmspagina?ComponentName=operativaRecorridoListado";
+        if (IdentidadActual.IsGuestUser)
+        {
+            urlAgnadirRecorrido = ViewBag.Comunidad.Url + "/cmspagina?ComponentName=operativaLogin";
+        }
+        urlAgnadirRecorrido += "&titulo=" + System.Net.WebUtility.UrlEncode(Model.Title) + "&imagen=" + System.Net.WebUtility.UrlEncode(Model.UrlPreview) + "&idobra=" + Model.Key;
+
+
+        if (Model.RdfType == "activity")
+        {
+            string claveTipoActividad = "cidoc:p2_has_type@@@multiLan:textValue";
+            string tipoActividad = "";
+
+            if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+            {
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoActividad))
+                {
+                    tipoActividad = Model.ViewSettings.SemanticProperties[claveTipoActividad][0].Name;
+                }
+            }
+            if (!string.IsNullOrEmpty(tipoActividad))
+            {
+                string nombreImagenActividad = "ico-th-" + EliminarCaracteresEspeciales(tipoActividad.ToLower()) + ".gif";
+
+<div class="imgwrap">
+    <a href="@Model.CompletCardLink">
+        <img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/@ViewBag.Comunidad.Key.ToString()/resources/iconos-facetado-actividades/@nombreImagenActividad" alt="Imagen">
+    </a>
+</div> }
+}
+else if (!string.IsNullOrEmpty(Model.UrlPreview))
+{
+<div class="imgwrap">
+    <a href="@Model.CompletCardLink">
+        <img src="@Model.UrlPreview" alt="Imagen">
+    </a>
+    @if (Model.RdfType == "pmartwork")
+    {
+<a href="@urlAgnadirRecorrido" class="mi-prado modal-popup" href="#">@Html.Translate("ANADIRAMIPRADO")</a>}
+</div> }
+else
+{
+<div class="imgwrap">
+    <a href="@Model.CompletCardLink"><div class="no-img"><div class="outer"><span>@Html.Translate("IMAGENNODISPONIBLE")</span></div></div></a>
+    @if (Model.RdfType == "pmartwork")
+    {
+<a href="@urlAgnadirRecorrido" class="mi-prado modal-popup" href="#">@Html.Translate("ANADIRAMIPRADO")</a>}
+</div> } }
+
+    @{string htmlListado = "";
+        string htmlMosaico = "";
+        string htmlDescripcion = "";
+        string htmlSuperiorTitulo = "";
+        string htmlEtiquetas = "";
+
+
+@functions
+                { public class autorObra
+    {
+        public autorObra(string pEnlaceAutor, string pNombreAutor, string pTipoAutor, Dictionary<string, List<string>> pAutoria, string pTipoAutoria)
+        {
+            this.enlaceAutor = pEnlaceAutor;
+            this.nombreAutor = pNombreAutor;
+            this.tipoAutor = pTipoAutor;
+            this.autoria = pAutoria;
+            //this.nombreAutorAutoria = pNombreAutorAutoria;
+            this.tipoAutoria = pTipoAutoria;
+        }
+
+        public string enlaceAutor { get; set; }
+        public string nombreAutor { get; set; }
+        public string tipoAutor { get; set; }
+        public Dictionary<string, List<string>> autoria { get; set; }
+        //public string nombreAutorAutoria { get; set; }
+        public string tipoAutoria { get; set; }
+    } } switch (Model.RdfType)
+        {
+            case "pmartwork":
+                string claveFecha = "date:textDate";
+                string claveAutor = "cidoc:p14_carried_out_by@@@pm:author@@@ecidoc:p131_E82_p102_has_title||cidoc:p14_carried_out_by@@@ecidoc:p2_has_author_type||cidoc:p14_carried_out_by@@@pm:authorship@@@pm:author@@@ecidoc:p131_E82_p102_has_title||cidoc:p14_carried_out_by@@@pm:authorship@@@ecidoc:p2_has_type_authorship";//"cidoc:p14_carried_out_by@@@pm:author@@@ecidoc:p131_E82_p102_has_title";
+                string claveSoporte = "ecidoc:p108i_E12_p126_employed_support@@@pm:supportNode@@@skos2:prefLabel||ecidoc:p108i_E12_p126_employed_support@@@pm:supportNode@@@skos2:broader||ecidoc:p108i_E12_p126_employed_support@@@pm:supportNode@@@dce:identifier";
+                string claveTecnica = "ecidoc:p108i_E12_p32_used_general_technique@@@pm:techniqueNode@@@skos2:prefLabel||ecidoc:p108i_E12_p32_used_general_technique@@@pm:techniqueNode@@@skos2:broader||ecidoc:p108i_E12_p32_used_general_technique@@@pm:techniqueNode@@@dce:identifier";
+                string claveMateria = "ecidoc:p108i_E12_p126_employed_medium@@@pm:mediumNode@@@skos2:prefLabel||ecidoc:p108i_E12_p126_employed_medium@@@pm:mediumNode@@@skos2:broader||ecidoc:p108i_E12_p126_employed_medium@@@pm:mediumNode@@@dce:identifier";
+
+                string claveIdentificador = "cidoc:p48_has_preferred_identifier@@@cidoc:p102_has_title";
+
+                string nombreFecha = "";
+
+                List<autorObra> listaAutores = new List<autorObra>();
+                string nombreSoporte = "";
+                string nombreTecnica = "";
+                string nombreMateria = "";
+                string nombreIdentificador = "";
+
+                if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+                {
+                    if (Model.ViewSettings.SemanticProperties.ContainsKey(claveAutor))
+                    {
+                        foreach (SemanticPropertieModel propiedadSemanticaAutor in Model.ViewSettings.SemanticProperties[claveAutor])
+                        {
+                            //0:Nombre autor
+                            //1:Tipo autor
+                            //2:Nombre autor autoría
+                            //3:Tipo autoría
+                            string[] autorArrayNombre = propiedadSemanticaAutor.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+                            string[] autorArrayEnlace = propiedadSemanticaAutor.Url.Split(new string[] { "||" }, StringSplitOptions.None);
+
+                            if (autorArrayNombre.Length == 4 && !string.IsNullOrEmpty(autorArrayNombre[0]))
+                            {
+                                string enlace = "";
+                                if (autorArrayEnlace.Length >= 4 && !string.IsNullOrEmpty(autorArrayEnlace[3]))
+                                {
+                                    enlace = autorArrayEnlace[0] + autorArrayEnlace[3].Substring(autorArrayEnlace[3].IndexOf("=")) + "@" + ViewBag.UtilIdiomas.LanguageCode;
+                                }
+                                autorObra autor = new autorObra(enlace, autorArrayNombre[0], autorArrayNombre[1], new Dictionary<string, List<string>>(), String.Empty);
+                                if (!listaAutores.Any(x => x.nombreAutor == autor.nombreAutor))
+                                {
+                                    listaAutores.Add(autor);
+                                }
+                                autor = listaAutores.Where(x => x.nombreAutor == autor.nombreAutor).First();
+                                string tipoAutoria = autorArrayNombre[3];
+                                if (!string.IsNullOrEmpty(autorArrayNombre[2]))
+                                {
+                                    if (!autor.autoria.ContainsKey(tipoAutoria))
+                                    {
+                                        autor.autoria.Add(tipoAutoria, new List<string>());
+                                    }
+                                    autor.autoria[tipoAutoria].Add(autorArrayNombre[2]);
+                                }
+                                else
+                                {
+                                    autor.tipoAutoria = tipoAutoria;
+                                }
+                            }
+                        }
+                    }
+
+                    if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFecha))
+                    {
+                nombreFecha = Model.ViewSettings.SemanticProperties[claveFecha][0].Name;
+            }
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveSoporte))
+            {
+                //Nombre, padre, identificador
+                List<string> listaPadres = new List<string>();
+                Dictionary<string, string> soporteIdentificadorNombre = new Dictionary<string, string>();
+                foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveSoporte])
+                {
+                    string[] propSoporte = propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+                    if (propSoporte.Length == 3)
+                    {
+                        string nombre = propSoporte[0];
+                        string padre = propSoporte[1];
+                        if (padre.Contains("_"))
+                        {
+                            padre = padre.Substring(padre.IndexOf("_") + 1);
+                        }
+                        string identificador = propSoporte[2];
+                        if (!listaPadres.Contains(padre))
+                        {
+                            listaPadres.Add(padre);
+                        }
+                        if (!soporteIdentificadorNombre.ContainsKey(identificador))
+                        {
+                            soporteIdentificadorNombre.Add(identificador, nombre);
+                                }
+                            }
+                        }
+
+                        string separador = "";
+                        foreach (string keySoporte in soporteIdentificadorNombre.Keys)
+                        {
+                            if (!listaPadres.Contains(keySoporte))
+                            {
+                                string textoSoporte = Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(soporteIdentificadorNombre[keySoporte].ToLower());
+                                nombreSoporte += separador + textoSoporte;
+                                if (separador == "")
+                                {
+                                    separador = ", ";
+                                }
+                            }
+                        }
+                    }
+                    if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTecnica))
+                    {
+                        //Nombre, padre, identificador
+                        List<string> listaPadres = new List<string>();
+                        Dictionary<string, string> tecnicaIdentificadorNombre = new Dictionary<string, string>();
+                        foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveTecnica])
+                        {
+                            string[] propTecnica = propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+                            if (propTecnica.Length == 3)
+                            {
+                                string nombre = propTecnica[0];
+                                string padre = propTecnica[1];
+                                if (padre.Contains("_"))
+                                {
+                                    padre = padre.Substring(padre.IndexOf("_") + 1);
+                                }
+                                string identificador = propTecnica[2];
+                                if (!listaPadres.Contains(padre))
+                                {
+                                    listaPadres.Add(padre);
+                                }
+                                if (!tecnicaIdentificadorNombre.ContainsKey(identificador))
+                                {
+                                    tecnicaIdentificadorNombre.Add(identificador, nombre);
+                                }
+                            }
+                        }
+
+                        string separador = "";
+                        foreach (string keyTecnica in tecnicaIdentificadorNombre.Keys)
+                        {
+                            if (!listaPadres.Contains(keyTecnica))
+                            {
+                                string textoTecnica = Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(tecnicaIdentificadorNombre[keyTecnica].ToLower());
+                                nombreTecnica += separador + textoTecnica;
+                                if (separador == "")
+                                {
+                                    separador = ", ";
+                                }
+                            }
+                        }
+                    }
+                    if (Model.ViewSettings.SemanticProperties.ContainsKey(claveMateria))
+                    {
+                        //Nombre, padre, identificador
+                        List<string> listaPadres = new List<string>();
+                        Dictionary<string, string> materiaIdentificadorNombre = new Dictionary<string, string>();
+                        foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveMateria])
+                        {
+                            string[] propMateria = propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+                            if (propMateria.Length == 3)
+                            {
+                                string nombre = propMateria[0];
+                                string padre = propMateria[1];
+                                if (padre.Contains("_"))
+                                {
+                                    padre = padre.Substring(padre.IndexOf("_") + 1);
+                                }
+                                string identificador = propMateria[2];
+                                if (!listaPadres.Contains(padre))
+                                {
+                                    listaPadres.Add(padre);
+                                }
+                                if (!materiaIdentificadorNombre.ContainsKey(identificador))
+                                {
+                                    materiaIdentificadorNombre.Add(identificador, nombre);
+                                }
+                            }
+                        }
+
+                        string separador = "";
+                        foreach (string keyMateria in materiaIdentificadorNombre.Keys)
+                        {
+                            if (!listaPadres.Contains(keyMateria))
+                            {
+                                string textoMateria = Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(materiaIdentificadorNombre[keyMateria].ToLower());
+                                nombreMateria += separador + textoMateria;
+                                if (separador == "")
+                                {
+                                    separador = ", ";
+                                }
+                            }
+                        }
+                    }
+                    if (Model.ViewSettings.SemanticProperties.ContainsKey(claveIdentificador))
+                    {
+                        nombreIdentificador = Model.ViewSettings.SemanticProperties[claveIdentificador][0].Name;
+                    }
+                }
+
+                System.Text.RegularExpressions.Regex re = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z]+");
+                System.Text.RegularExpressions.MatchCollection mc = re.Matches(nombreIdentificador);
+                string letra = string.Empty;
+                if (!string.IsNullOrEmpty(nombreIdentificador) && mc != null)
+                {
+                    letra = mc[0].Groups[0].Value;
+                }
+
+                string texto = "";
+                if (letra.Equals("E") || letra.Equals("O"))
+                {
+                    if (!string.IsNullOrEmpty(nombreMateria))
+                    {
+                        texto = nombreMateria;
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(nombreTecnica))
+                    {
+                        texto = nombreTecnica;
+                    }
+                    if (!string.IsNullOrEmpty(nombreSoporte))
+                    {
+                        texto += " " + Html.Translate("SOBRE") + " " + nombreSoporte.ToLower();
+                    }
+                }
+                if (!string.IsNullOrEmpty(texto))
+                {
+                    texto += ". ";
+                }
+                if (!string.IsNullOrEmpty(nombreFecha))
+                {
+                    texto += nombreFecha;
+                }
+                texto = Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(texto);
+                if (!string.IsNullOrEmpty(texto))
+                {
+                    htmlListado += "<p class=\"soporte\">" + texto + "</p>";
+                    htmlMosaico += "<p class=\"trunca-texto soporte\">" + texto + "</p>";
+                }
+
+                if (listaAutores.Count > 0)
+                {
+                    htmlListado += "<p class=\"autor\">";
+                    htmlMosaico += "<p class=\"trunca-texto autor\">";
+
+                    int numAutores = 0;
+                    foreach (autorObra autor in listaAutores)
+                    {
+                        if (numAutores > 0)
+                        {
+                            htmlListado += "; ";
+                            htmlMosaico += "; ";
+                        }
+
+                        string enlaceAutor = autor.enlaceAutor;
+                        string nombreAutor = autor.nombreAutor;
+                        string tipoAutor = autor.tipoAutor;
+                        string tipoAutoria = autor.tipoAutoria;
+
+                        if (!string.IsNullOrEmpty(nombreAutor) && !string.IsNullOrEmpty(tipoAutoria))
+                        {
+                            if (autor.autoria.Any())
+                            {
+                                string valorAutorias = "";
+
+                                foreach (KeyValuePair<string, List<string>> autorias in autor.autoria)
+                                {
+                                    valorAutorias += autorias.Key + ": " + String.Join("; ", autorias.Value.ToArray());
+                                    if (!autor.autoria.Last().Equals(autorias))
+                                    {
+                                        valorAutorias += "; ";
+                                    }
+                                    //NOMBRE AUTOR - TIPOAUTOR1, TIPOAUTOR2 – (TIPOAUTORIA1 AUTORIA1A, AUTORIA1B; TIPOAUTORIA2 AUTORIA2A, AUTORIA2B)
+                                }
+                                if (!string.IsNullOrEmpty(tipoAutor))
+                                {
+                                    //<dt><a href="@enlaceAutor">@nombreAutor</a> -@tipoAutor- (@tipoAutoria @nombreAutorAutoria)</dt>
+                                    htmlListado += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> -" + autor.tipoAutor + "- (" + valorAutorias + ")";
+                                    htmlMosaico += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> -" + autor.tipoAutor + "- (" + valorAutorias + ")";
+                                }
+                                else
+                                {
+                                    //<dt><a href="@enlaceAutor">@nombreAutor</a> (@tipoAutoria @nombreAutorAutoria)</dt>
+                                    htmlListado += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> (" + autor.tipoAutoria + " " + valorAutorias + ")";
+                                    htmlMosaico += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> (" + autor.tipoAutoria + " " + valorAutorias + ")";
+                                }
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrEmpty(tipoAutor))
+                                {
+                                    //<dt><a href="@enlaceAutor">@nombreAutor</a> -@tipoAutor- (@tipoAutoria)</dt>
+                                    htmlListado += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> -" + autor.tipoAutor + "- (" + autor.tipoAutoria + ")";
+                                    htmlMosaico += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> -" + autor.tipoAutor + "- (" + autor.tipoAutoria + ")";
+                                }
+                                else
+                                {
+                                    //<dt><a href="@enlaceAutor">@nombreAutor</a> (@tipoAutoria)</dt>
+                                    htmlListado += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> (" + autor.tipoAutoria + ")";
+                                    htmlMosaico += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a> (" + autor.tipoAutoria + ")";
+                                }
+                            }
+
+                        }
+                        else if (!string.IsNullOrEmpty(nombreAutor))
+                        {
+                            //<dt><a href="@enlaceAutor">@nombreAutor</a></dt>
+                            htmlListado += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a>";
+                            htmlMosaico += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a>";
+                        }
+                        numAutores++;
+                    } @*
+                int numAutores=0;
+                foreach (autorObra autor in listaAutores)
+                {
+                    if(numAutores>0)
+                    {
+                        htmlListado +="; ";
+                        htmlMosaico +="; ";
+                    }
+                    htmlListado += "<a href=\"" + autor.enlaceAutor + "\">" + autor.nombreAutor + "</a>";
+                    htmlMosaico += "<a href=\"" + autor.enlaceAutor+ "\">" + autor.nombreAutor + "</a>";
+                    numAutores++;
+                } *@ htmlListado += "</p>";
+            htmlMosaico += "</p>";
+        }
+        break;
+    case "pmauthor":
+        string claveLugarNacimiento = "ecidoc:p96_E67_p7_gave_birth_place";
+        string claveFechaNacimiento = "ecidoc:p96_E67_p4_gave_birth_date";
+        string claveLugarDefuncion = "ecidoc:p100i_E69_p7_death_place";
+        string claveFechaDefuncion = "ecidoc:p100i_E69_p4_death_date";
+
+        string lugarNacimiento = "";
+        string fechaNacimiento = "";
+        string lugarDefuncion = "";
+        string fechaDefuncion = "";
+
+        if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+        {
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveLugarNacimiento))
+            {
+                lugarNacimiento = Model.ViewSettings.SemanticProperties[claveLugarNacimiento][0].Name;
+            }
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFechaNacimiento))
+            {
+                fechaNacimiento = Model.ViewSettings.SemanticProperties[claveFechaNacimiento][0].Name;
+            }
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveLugarDefuncion))
+            {
+                lugarDefuncion = Model.ViewSettings.SemanticProperties[claveLugarDefuncion][0].Name;
+            }
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFechaDefuncion))
+            {
+                fechaDefuncion = Model.ViewSettings.SemanticProperties[claveFechaDefuncion][0].Name;
+            }
+        }
+        if (!string.IsNullOrEmpty(lugarNacimiento) || !string.IsNullOrEmpty(fechaNacimiento) || !string.IsNullOrEmpty(lugarDefuncion) || !string.IsNullOrEmpty(fechaDefuncion))
+        {
+            htmlListado += "<p>";
+            htmlMosaico += "<p class=\"trunca-texto\">";
+
+            string nacimiento = lugarNacimiento;
+            if (string.IsNullOrEmpty(nacimiento))
+            {
+                nacimiento = fechaNacimiento;
+            }
+            else
+            {
+                nacimiento += ", " + fechaNacimiento;
+            }
+
+            string defuncion = lugarDefuncion;
+            if (string.IsNullOrEmpty(defuncion))
+            {
+                defuncion = fechaDefuncion;
+            }
+            else
+            {
+                defuncion += ", " + fechaDefuncion;
+            }
+
+            htmlListado += nacimiento;
+            htmlMosaico += nacimiento;
+
+            if (string.IsNullOrEmpty(nacimiento))
+            {
+                htmlListado += defuncion;
+                htmlMosaico += defuncion;
+            }
+            else
+            {
+                htmlListado += " - " + defuncion;
+                htmlMosaico += " - " + defuncion;
+            }
+            htmlListado += "</p>";
+            htmlMosaico += "</p>";
+        }
+        break;
+    case "encyclopedia":
+        string claveFirma = "pm:encyclopediaSignature";
+        string claveDescripcion = "pm:encyclopediaText";
+        string firma = "";
+        string descripcion = "";
+
+        if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+        {
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFirma))
+            {
+                firma = Model.ViewSettings.SemanticProperties[claveFirma][0].Name;
+            }
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveDescripcion))
+            {
+                descripcion = Model.ViewSettings.SemanticProperties[claveDescripcion][0].Name;
+            }
+        }
+        if (!string.IsNullOrEmpty(firma))
+        {
+            htmlListado += "<p class=\"autor\">";
+            htmlMosaico += "<p class=\" trunca-texto autor\">";
+            htmlListado += firma;
+            htmlMosaico += firma;
+            htmlListado += "</p>";
+            htmlMosaico += "</p>";
+        }
+        if (!string.IsNullOrEmpty(descripcion))
+        {
+            htmlDescripcion += descripcion;
+        }
+        break;
+    case "professionalaccessrequest":
+        string claveEstado = "evcard:status";
+        string claveMedio = "vcard:organization-name";
+        string estado = "";
+        string medio = "";
+
+        if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+        {
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveEstado))
+            {
+                estado = Model.ViewSettings.SemanticProperties[claveEstado][0].Name;
+            }
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveMedio))
+            {
+                medio = Model.ViewSettings.SemanticProperties[claveMedio][0].Name;
+            }
+        }
+        if (!string.IsNullOrEmpty(medio))
+        {
+            htmlListado += "<p>";
+            htmlListado += Html.Translate("MEDIO") + ": " + medio;
+            htmlListado += "</p>";
+            htmlMosaico += "<p>";
+            htmlMosaico += Html.Translate("MEDIO") + ": " + @medio;
+            htmlMosaico += "</p>";
+        }
+        if (!string.IsNullOrEmpty(estado))
+        {
+            htmlListado += "<p>";
+            htmlListado += Html.Translate("ESTADODELASOLICITUD") + ": " + @estado;
+            htmlListado += "</p>";
+            htmlMosaico += "<p>";
+            htmlMosaico += Html.Translate("ESTADODELASOLICITUD") + ": " + @estado;
+            htmlMosaico += "</p>";
+        }
+        htmlDescripcion = "";
+        break;
+    case "pmnewsletter":
+    case "museumrnews":
+    case "offering":
+    case "grant":
+    case "job":
+    case "datingmedia":
+        if (!string.IsNullOrEmpty(Model.RdfTypeName))
+        {
+            htmlEtiquetas += "<p class=\"etiquetas\">";
+            htmlEtiquetas += "<ul>";
+            htmlEtiquetas += "<li>";
+            htmlEtiquetas += Model.RdfTypeName;
+            htmlEtiquetas += "</li>";
+            htmlEtiquetas += "</ul>";
+            htmlEtiquetas += "</p>";
+        }
+        break;
+    case "multimediaresource":
+        if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+        {
+            if (Model.ViewSettings.SemanticProperties.ContainsKey("gnoss:type"))
+            {
+                string subtipoMultimedia = Model.ViewSettings.SemanticProperties["gnoss:type"][0].Name; if (!string.IsNullOrEmpty(subtipoMultimedia))
+                {
+                    htmlEtiquetas += "<p class=\"etiquetas\">";
+                    htmlEtiquetas += "<ul>";
+                    htmlEtiquetas += "<li>";
+                    htmlEtiquetas += subtipoMultimedia;
+                    htmlEtiquetas += "</li>";
+                    htmlEtiquetas += "</ul>";
+                    htmlEtiquetas += "</p>";
+                }
+            }
+        }
+        break; @*case "activity":
+        string claveFechaActividad = "ecidoc:p62_E52_p80_has_time-span";
+        DateTime? fechaActividad = null;
+
+        string claveTipoActividad = "cidoc:p2_has_type@@@multiLan:textValue";
+        string tipoActividad = "";
+
+        if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+        {
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFechaActividad))
+            {
+                fechaActividad = Html.GetDate(Model.ViewSettings.SemanticProperties[claveFechaActividad][0].Name);
+            }
+            if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoActividad))
+            {
+                tipoActividad = Model.ViewSettings.SemanticProperties[claveTipoActividad][0].Name;
+            }
+        }
+        if (!string.IsNullOrEmpty(tipoActividad))
+        {
+            htmlEtiquetas += "<p class=\"etiquetas\">";
+            htmlEtiquetas += "<ul>";
+            htmlEtiquetas += "<li>";
+            htmlEtiquetas += tipoActividad;
+            htmlEtiquetas += "</li>";
+            htmlEtiquetas += "</ul>";
+            htmlEtiquetas += "</p>";
+            if (fechaActividad.HasValue)
+            {
+                htmlSuperiorTitulo += "<p class='fechaActividad'>";
+                htmlSuperiorTitulo += fechaActividad.Value.ToString("g");
+                htmlSuperiorTitulo += "</p>";
+            }
+        }
+        break;*@ case "activity2":
+            string claveFechaActividad = "pm:activityDate@@@pm:startDate";
+            DateTime? fechaActividad = null;
+
+            string claveTipoPublicoActividad = "cidoc:p2_has_type@@@pm:activityNode@@@skos2:prefLabel||cidoc:p2_has_type@@@pm:activityNode@@@skos2:broader||cidoc:p2_has_type@@@pm:activityNode@@@dce:identifier";
+            //HashSet<string> tipoPublicoActividad = new HashSet<string>();
+            Dictionary<string, string> actividadIdentificadorNombre = new Dictionary<string, string>();
+
+            string claveTipoActividad = "ecidoc:p2_has_type_activity@@@multiLan:textValue";
+            string tipoActividad = "";
+
+            string claveTipoPrograma = "ecidoc:p2_has_type_program@@@multiLan:textValue";
+            HashSet<string> tipoPrograma = new HashSet<string>();
+
+
+
+            if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+            {
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFechaActividad))
+                {
+                    fechaActividad = Html.GetDate(Model.ViewSettings.SemanticProperties[claveFechaActividad][0].Name);
+                }
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoPublicoActividad))
+                {
+                    //Nombre, padre, identificador
+                    //List<string> listaPadres = new List<string>();
+                    //Dictionary<string, string> actividadIdentificadorNombre = new Dictionary<string, string>();
+                    foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveTipoPublicoActividad])
+                    {
+                        string[] propMateria = propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+                        if (propMateria.Length == 3)
+                        {
+                            string nombre = propMateria[0];
+                            string padre = propMateria[1];
+                            if (padre.Contains("_"))
+                            {
+                                padre = padre.Substring(padre.IndexOf("_") + 1);
+                            }
+                            string identificador = propMateria[2];
+                            //if (!listaPadres.Contains(padre))
+                            //{
+                            //	listaPadres.Add(padre);
+                            //}
+                            if (!string.IsNullOrEmpty(identificador))
+                            {
+                                if (!actividadIdentificadorNombre.ContainsKey(identificador))
+                                {
+                                    actividadIdentificadorNombre.Add(identificador, nombre);
+                                }
+                            }
+                        }
+                    }
+
+                    //string separador = "";
+                    //foreach (string keyActividad in actividadIdentificadorNombre.Keys)
+                    //{
+                    //	if (!listaPadres.Contains(keyActividad))
+                    //	{
+                    //		string textoActividad = Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(actividadIdentificadorNombre[keyActividad].ToLower());
+                    //		tipoPublicoActividad.Add(textoActividad);
+                    //	}
+                    //}
+                }
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoActividad))
+                {
+                    tipoActividad = Model.ViewSettings.SemanticProperties[claveTipoActividad][0].Name;
+                }
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(claveTipoPrograma))
+                {
+                    foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveTipoPrograma])
+                    {
+                        tipoPrograma.Add(propiedadSemantica.Name);
+                    }
+                }
+            }
+            if (fechaActividad.HasValue)
+            {
+                htmlSuperiorTitulo += "<p class='fechaActividad'>";
+                htmlSuperiorTitulo += fechaActividad.Value.ToString("g");
+                htmlSuperiorTitulo += "</p>";
+            }
+            if (actividadIdentificadorNombre.Count() > 0 || tipoPrograma.Count() > 0 || !string.IsNullOrEmpty(tipoActividad))
+            {
+                htmlEtiquetas += "<p class=\"etiquetas\">";
+                htmlEtiquetas += "<ul>";
+                foreach (string tipoProgramaInt in tipoPrograma)
+                {
+                    htmlEtiquetas += "<li>";
+                    htmlEtiquetas += "<a href=\"" + Model.UrlSearch + "?" + claveTipoPrograma + "=" + tipoProgramaInt.ToLower() + "@" + ViewBag.UtilIdiomas.LanguageCode + "\">" + tipoProgramaInt + "</a>";
+                    htmlEtiquetas += "</li>";
+                }
+                foreach (string keyActividad in actividadIdentificadorNombre.Keys)
+                {
+                    htmlEtiquetas += "<li>";
+                    htmlEtiquetas += "<a href=\"" + Model.UrlSearch + "?cidoc:p2_has_type@@@pm:activityNode=http://museodelprado.es/items/activity_" + keyActividad + "\">" + actividadIdentificadorNombre[keyActividad].ToLower() + "</a>";
+                    htmlEtiquetas += "</li>";
+                }
+                //foreach(string tipoPublico in tipoPublicoActividad)
+                //{
+                //	htmlEtiquetas += "<li>";
+                //	htmlEtiquetas += "<a href=\"\">"+tipoPublico+"</a>";
+                //	htmlEtiquetas += "</li>";
+                //}
+                if (!string.IsNullOrEmpty(tipoActividad))
+                {
+                    htmlEtiquetas += "<li>";
+                    htmlEtiquetas += "<a href=\"" + Model.UrlSearch + "?" + claveTipoActividad + "=" + tipoActividad.ToLower() + "@" + ViewBag.UtilIdiomas.LanguageCode + "\">" + tipoActividad + "</a>";
+                    htmlEtiquetas += "</li>";
+                }
+                htmlEtiquetas += "</ul>";
+                htmlEtiquetas += "</p>";
+            }
+            break;
+        case "pmexhibition":
+            string claveFechaInicio = "ecidoc:p4_p79_has_time-span_beginning";
+            string claveFechaFin = "ecidoc:p4_p80_has_time-span_end";
+            DateTime? fechaInicio = null;
+            DateTime? fechaFin = null;
+
+            if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+            {
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFechaInicio))
+                {
+                    fechaInicio = Html.GetDate(Model.ViewSettings.SemanticProperties[claveFechaInicio][0].Name);
+                }
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFechaFin))
+                {
+                    fechaFin = Html.GetDate(Model.ViewSettings.SemanticProperties[claveFechaFin][0].Name);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(Model.RdfTypeName))
+            {
+                htmlEtiquetas += "<p class=\"etiquetas\">";
+                htmlEtiquetas += "<ul>";
+                htmlEtiquetas += "<li>";
+                htmlEtiquetas += Model.RdfTypeName;
+                htmlEtiquetas += "</li>";
+                htmlEtiquetas += "</ul>";
+                htmlEtiquetas += "</p>";
+                if (fechaInicio.HasValue && fechaFin.HasValue && fechaFin.Value.ToString("dd/MM/yyyy").Substring(0, 10).Equals(Html.Translate("FECHAEXPOSICIONINDEFINIDA")))
+                {
+                    htmlSuperiorTitulo += "<p class='fechaActividad'>";
+                    htmlSuperiorTitulo += @Html.Translate("DELXALX", fechaInicio.Value.ToString("d"), @Html.Translate("VALOREXPOSICIONINDEFINIDA"));
+                    htmlSuperiorTitulo += "</p>";
+                }
+                else if (fechaInicio.HasValue && fechaFin.HasValue)
+                {
+                    htmlSuperiorTitulo += "<p class='fechaActividad'>";
+                    htmlSuperiorTitulo += @Html.Translate("DELXALX", fechaInicio.Value.ToString("d"), fechaFin.Value.ToString("d"));
+                    htmlSuperiorTitulo += "</p>";
+                }
+            }
+            break;
+        case "modificationreport":
+            if (!string.IsNullOrEmpty(Model.RdfTypeName))
+            {
+                htmlEtiquetas += "<p class=\"etiquetas\">";
+                htmlEtiquetas += "<ul>";
+                htmlEtiquetas += "<li>";
+                htmlEtiquetas += Model.RdfTypeName;
+                htmlEtiquetas += "</li>";
+                htmlEtiquetas += "</ul>";
+                htmlEtiquetas += "</p>";
+            }
+            break;
+        case "pmdigitallibrary":
+            string claveAnio = "efrbrer:p3055_has_date_of_publication_or_distribution";
+            string anio = "";
+
+            if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+            {
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(claveAnio))
+                {
+                    anio = Model.ViewSettings.SemanticProperties[claveAnio][0].Name;
+                }
+            }
+            if (!string.IsNullOrEmpty(anio))
+            {
+                htmlEtiquetas += "<p>";
+                htmlEtiquetas += anio;
+                htmlEtiquetas += "</p>";
+            }
+            break;
+    } }
+    @{ string titulo = Model.Title.Trim();
+        if (Model.RdfType == "encyclopediaEntry")
+        {
+            if (titulo.Contains("[exposición") && titulo.EndsWith("]"))
+            {
+                titulo = titulo.Substring(0, titulo.IndexOf("[exposición"));
+            }
+            string claveAnio = "pm:encyclopediaYear";
+
+            if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+            {
+                if (Model.ViewSettings.SemanticProperties.ContainsKey(claveAnio))
+                {
+                    titulo += " [exposición " + Model.ViewSettings.SemanticProperties[claveAnio][0].Name + "]";
+                }
+            }
+        }
+
+        string desc = Es.Riam.Util.UtilCadenas.EliminarHtmlDeTexto(Model.Description);
+        int longDesc = 400;
+        if (desc.Length <= longDesc)
+        {
+            longDesc = desc.Length;
+        } }
+
+    <figcaption class="presentacion-mosaico">
+        <div>
+            @if (!string.IsNullOrEmpty(htmlSuperiorTitulo))
+            {
+@Html.Raw(htmlSuperiorTitulo);
+}
+
+
+            <p class="trunca-texto"><a href="@Model.CompletCardLink">@titulo</a></p>
+            @if (!string.IsNullOrEmpty(htmlMosaico))
+            {
+@Html.Raw(htmlMosaico);
+}
+            @if (Model.ViewSettings != null && Model.ViewSettings.DescriptionOnMosaic)
+            {
+<p>
+    @Html.Raw(desc.Substring(0, longDesc))
+    <span class="mas-info">[<span>+</span>]</span>
+</p>}
+            @if (!string.IsNullOrEmpty(htmlEtiquetas))
+            {
+@Html.Raw(htmlEtiquetas);
+}
+        </div>
+    </figcaption>
+    <figcaption class="presentacion-listado">
+        @if (!string.IsNullOrEmpty(htmlSuperiorTitulo))
+        {
+@Html.Raw(htmlSuperiorTitulo);
+}
+        <div>
+            <p><a href="@Model.CompletCardLink">@titulo</a></p>
+            @if (!string.IsNullOrEmpty(htmlListado))
+            {
+                @Html.Raw(htmlListado);
+            }
+            @{
+                <p class="trunca-texto">
+                    @Html.Raw(desc.Substring(0, longDesc))
+                    @*<span class="mas-info">[<span><a href="@Model.CompletCardLink">+</a></span>]</span>*@
+                </p> }
+            @if (!string.IsNullOrEmpty(htmlEtiquetas))
+            {
+                @Html.Raw(htmlEtiquetas);
+            }
+        </div>
+    </figcaption>
+
+</figure>}
+}
+
+
+@functions
+{ public string EliminarCaracteresEspeciales(string pTexto)
+    {
+        pTexto = pTexto.Replace(" ", "-").Replace(".", "-").Replace("(", "-").Replace(")", "-").Replace(":", "-").Replace(",", "-").Replace("\"", "-").Replace("'", "-");
+
+        var normalizedString = pTexto.Normalize(System.Text.NormalizationForm.FormD);
+        var stringBuilder = new System.Text.StringBuilder();
+
+        foreach (var c in normalizedString)
+        {
+            var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                stringBuilder.Append(c);
+            }
+        }
+        return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
+    } }

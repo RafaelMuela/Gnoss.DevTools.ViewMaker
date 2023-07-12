@@ -1,0 +1,51 @@
+@model SemanticPropertyModel
+
+@foreach (SemanticPropertyModel.PropertyValue propObra in Model.PropertyValues)
+{
+    if (propObra != null && propObra.Value != null)
+    {
+        SemanticPropertyModel propTituloObraRelacionada = propObra.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p102_E35_p3_has_title");
+
+        string tituloObraRelacionada = string.Empty;
+        string enlaceObraRelacionada = string.Empty;
+
+        if (propTituloObraRelacionada != null && propTituloObraRelacionada.FirstPropertyValue != null)
+        {
+            tituloObraRelacionada = propTituloObraRelacionada.FirstPropertyValue.Value;
+            enlaceObraRelacionada = propTituloObraRelacionada.FirstPropertyValue.DownloadUrl;
+        }
+
+        //string imagenObraRelacionada = propObra.RelatedEntity.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p65_shows_visual_item@@@http://museodelprado.es/ontologia/ecidoc.owl#p3_has_note");
+		string imagenObraRelacionada = propObra.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image");
+
+
+        if (!string.IsNullOrEmpty(enlaceObraRelacionada) && !string.IsNullOrEmpty(tituloObraRelacionada))
+        {
+			<div class="slide">
+				<figure>					
+					@if (!string.IsNullOrEmpty(imagenObraRelacionada))
+					{
+						string urlImagenObraRelacionada = ViewBag.BaseUrlContent + "/" + imagenObraRelacionada;
+						<a href="@enlaceObraRelacionada">
+							<img src="@Html.ObtenerImagenConTamano(urlImagenObraRelacionada, 268)" alt="@tituloObraRelacionada" height="220" width="220">
+						</a>
+					}else
+					{
+						<div class="imgwrap">
+							<a href="@enlaceObraRelacionada">
+								<div class="no-img">
+									<div class="outer">
+										<span>@Html.Translate("IMAGENNODISPONIBLE")</span>
+									</div>
+								</div>
+							</a>				
+						</div>
+					}					
+					<figcaption>    				
+						<div class="name"><a href="@enlaceObraRelacionada">@tituloObraRelacionada</a></div>
+					</figcaption>
+				</figure>
+			</div>		
+        }
+    }
+}

@@ -1,0 +1,24 @@
+@*@using Es.Riam.Gnoss.Web.MVC.Controles.Helper*@
+@using Es.Riam.Gnoss.Web.MVC.Models
+@{ 
+	CommunityModel Comunidad = ViewBag.Comunidad;
+	string urlPersonalizacion=ViewBag.BaseURLContent+"/imagenes/proyectos/personalizacion/"+ Comunidad.Key.ToString(); 
+	string versionCSS="";
+	if (Comunidad.VersionCSS.HasValue)
+    {
+		versionCSS=Comunidad.VersionCSS.Value.ToString();
+	}		
+} 
+<link media="all" type="text/css" rel="stylesheet" href="@urlPersonalizacion/ElPrado/css/prado.css?v=@ViewBag.Version-@versionCSS" /> 
+<link media="all" type="text/css" rel="stylesheet" href="@urlPersonalizacion/ElPrado/css/tema_edicion.css?v=@ViewBag.Version-@versionCSS" /> 
+
+@if(Html.GetBodyClassPestanya()!=null && Html.GetBodyClassPestanya().Contains("bicentenariocss"))
+{
+	<link media="all" type="text/css" rel="stylesheet" href="@urlPersonalizacion/ElPrado/css/modulos/bicentenario.css?v=@ViewBag.Version-@versionCSS" /> 
+}
+	
+<link media="screen" type="text/css" rel="stylesheet" href="//cloud.typography.com/7751072/662984/css/fonts.css" /> 
+<link media="screen" type="text/css" rel="stylesheet" href="@urlPersonalizacion/community.css?v=@ViewBag.Version-@versionCSS" /> 
+<!--Visor360 -->
+<link  href="@urlPersonalizacion/ElPrado/css/modulos/visor360.css?v=@ViewBag.Version-@versionCSS"  media="all" rel="stylesheet" type="text/css" />
+

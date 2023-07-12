@@ -1,0 +1,37 @@
+@model FacetItemModel 
+@if (Model != null) 
+{        
+       
+    if (Model.FacetItemlist != null && Model.FacetItemlist.Count>0)
+	{ 
+		//Subniveles
+		<div>
+			@{
+				string cssFaceta="";
+				if(Model.Selected)
+				{
+					cssFaceta="selected";
+				}		
+			}
+			<p class="@cssFaceta no-close"><a rel="nofollow" name="@Model.Name" href="@Model.Filter" class="faceta">@Model.Tittle (@Model.Number)<span class="ico-lv2 no-close"></span></a></p>
+			@foreach (FacetItemModel item in Model.FacetItemlist) 
+			{ 
+				string cssSubFaceta="";
+				if(item.Selected)
+				{
+					cssSubFaceta="selected";
+				}
+				<p style="display: none;" class="@cssSubFaceta"><a rel="nofollow" class="faceta" name="@item.Name" href="@item.Filter">@item.Tittle <span>(@item.Number)</span></a></p>
+			} 
+		</div>	
+    }else
+	{
+		if(Model.Number<0)
+		{
+			<a rel="nofollow" href="@Model.Filter" class="faceta" name="@Model.Name">@Model.Tittle</a>     
+		}else
+		{
+			<a rel="nofollow" href="@Model.Filter" class="faceta" name="@Model.Name">@Model.Tittle <span>(@Model.Number)</span></a>     
+		}
+	}	
+} 

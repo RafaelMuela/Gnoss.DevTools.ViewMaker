@@ -1,0 +1,15 @@
+
+@using Es.Riam.Gnoss.Web.MVC.Models;
+@model CMSComponentFacet
+@if (Model != null)
+{
+	<div class="artistas">
+		<h2>@Model.Title</h2>
+		<div>
+			@foreach (FacetItemModel faceta in Model.FacetModel.FacetItemList)
+			{
+				<span><a href="@faceta.Filter">@faceta.Tittle</a></span>
+			}
+		</div>	
+	</div>
+}

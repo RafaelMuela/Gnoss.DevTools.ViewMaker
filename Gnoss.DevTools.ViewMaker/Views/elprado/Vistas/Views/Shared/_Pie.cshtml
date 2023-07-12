@@ -1,0 +1,62 @@
+@{
+	string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+}
+
+<div id="volver-arriba"><a href="#">@Html.Translate("ARRIBA")</a></div>
+<footer>
+	<div class="menu">
+		<nav>
+			<ul>
+				<li><a href="@ViewBag.Comunidad.Url/@Html.Translate("URL-APPS-OFICIALES")">@Html.Translate("APPS-OFICIALES")</a></li>
+				<li><a href="@ViewBag.Comunidad.Url/@Html.Translate("URL-REDESSOCIALES")">@Html.Translate("REDESSOCIALES")</a></li>
+				<li><a href="@ViewBag.Comunidad.Url/@Html.Translate("URL-NEWSLETTER")">@Html.Translate("NEWSLETTER")</a></li>
+			</ul>
+		</nav>
+	</div>
+	<div style="height: 255px; background: url(@urlPersonalizacion/cms/mapa_static2.gif); background-position: center; background-size: cover;">
+ 
+<div style="text-align: center; padding-top: 53px; padding-right: 10px; font-family: 'Gotham SSm A', 'Gotham SSm B'; font-size: 13px;"><h1>MUSEO NACIONAL DEL PRADO</h1><p>Paseo del Prado s/n</p><p>28014 Madrid</p><p>913 30 28 00</p></div>
+</div>
+
+	<div class="footer-items">
+		<section class="logos">
+			<a href="/" class="logo-museo-inicio">@Html.Translate("MUSEONACIONALPRADO")</a>				
+			<a href="http://www.mcu.es/" class="ministerio-educacion">
+				<img alt="Gobierno de España - Ministerio de Cultura y Deporte" src="@urlPersonalizacion/ElPrado/img/svg/logo_cultura.svg" width="205" height="65">
+			</a>
+			<div class="telefonica">
+				<p>@Html.Translate("CONELAPOYODE"):</p>
+                <a href="http://www.telefonica.es" class="logo" style="margin-left:10px;">
+                    <img alt="Telefónica" src="@urlPersonalizacion/ElPrado/img/svg/telefonica_logo_2021.svg" width="132" height="36">
+                </a>
+			</div>				
+		</section>
+		<section class="visit">
+			@Html.Raw(@Html.Translate("VIEWS_SHARED_PIE_HORARIOS"))
+		</section>
+		<section class="expo">
+			@Html.Raw(@Html.Translate("VIEWS_SHARED_PIE_EXPOSICIONES"))
+		</section>		
+	</div>
+	<div class="calls">
+		<div class="hazte-amigo">
+			<a href="@Html.Translate("URL_HAZTEAMIGO")">
+			<img alt="Imagen de @Html.Translate("ALT_HAZTEAMIGO")" src="@urlPersonalizacion/ElPrado/img/svg/logo_famp_blanco.svg">
+		
+            <p>@Html.Translate("HAZTEAMIGO")</p></a></div>
+		<div class="compra-entradas"><a href="@Html.Translate("URL_COMPRAENTRADAS")">@Html.Translate("COMPRAENTRADAS")</a></div>
+	</div>
+	<section class="pie">
+		<nav>
+			<ul>
+				<li><a href="@ViewBag.Comunidad.Url/@Html.Translate("URLAVISOLEGAL")">@Html.Translate("AVISOLEGAL")</a></li>
+				<li><a href="@ViewBag.Comunidad.Url/@Html.GetText("URLSEM", "POLITICAPRIVACIDAD")">@Html.Translate("POLITICAPRIVACIDAD")</a></li>	
+				<li><a href="@ViewBag.Comunidad.Url/@Html.Translate("URLPOLITICACOOKIES")">@Html.Translate("POLITICACOOKIES")</a></li>	
+				<li><a href="@ViewBag.Comunidad.Url/@Html.Translate("URLMODELOSEMANTICODIGITAL")">@Html.Translate("MODELOSEMANTICODIGITAL")</a></li>
+				<li><a href="@ViewBag.Comunidad.Url/@Html.Translate("URLCONTACTO")"">@Html.Translate("CONTACTO")</a></li>				
+			</ul>								
+		</nav>
+		<p>@Html.Translate("COPYRIGHT")</p>
+		<p>@Html.Translate("POWEREDBY") <a href="http://www.gnoss.com/" class="logo-gnoss">GNOSS</a></p>
+	</section>
+</footer>

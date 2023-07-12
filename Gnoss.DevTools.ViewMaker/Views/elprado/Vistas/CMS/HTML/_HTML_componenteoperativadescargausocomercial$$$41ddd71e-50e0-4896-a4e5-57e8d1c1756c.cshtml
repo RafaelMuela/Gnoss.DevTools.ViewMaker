@@ -1,0 +1,67 @@
+@model CMSComponentHTML
+@if(Model != null)    
+{
+   string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+   string urlComunidad=Html.GetComunidad().Url;
+   
+<html lang="es">
+	<head>  
+		<meta charset="utf-8" />	
+		<meta name="apple-mobile-web-app-capable" content="yes" />	
+		<meta name="viewport" content="initial-scale=1,minimum-scale=1,maximum-scale=1,width=device-width,user-scalable=yes" />
+		<title>@Html.Translate("MUSEONACIONALPRADO")</title>
+		<link href="@urlPersonalizacion/ElPrado/css/prado.css" media="all" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="//cloud.typography.com/7751072/662984/css/fonts.css" />		   
+		<script src="@urlPersonalizacion/ElPrado/js/jquery-1.10.2.min.js"></script>
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.hcsticky-min.js"></script> <!-- elementos semi-fixed, como barras o menús sticky -->
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.backstretch.min.js"></script> <!-- centra y escala backgrounds -->	
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.magnific-popup.min.js"></script>	<!-- Modal popups -->
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.expander.min.js"></script> <!-- Ampliar textos (leer más) -->
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.heapbox-0.9.3.min.js"></script> <!-- Para dar estilos a los selects -->	
+		<script src="@urlPersonalizacion/ElPrado/js/leaflet.js"></script>
+		<script src="@urlPersonalizacion/ElPrado/js/verge.min.js"></script> 
+		<script src="@urlPersonalizacion/ElPrado/js/idangerous.swiper-2.4.min.js"></script>	<!-- Carruseles -->	
+		<script src="@urlPersonalizacion/ElPrado/js/iscroll.js"></script>	
+		<script src="@Html.GetBaseUrlStatic()/jsUnificar/MVC.Comun.js"  type="text/javascript"></script>
+		<script src="@urlPersonalizacion/community.js"  type="text/javascript"></script>
+		<script src="@Html.GetBaseUrlStatic()/lang/@ViewBag.UtilIdiomas.LanguageCode/text.js"  type="text/javascript"></script>
+		<script src="@Html.GetBaseUrlStatic()/jsUnificar/busquedas.js"  type="text/javascript"></script>
+		<script src="@urlPersonalizacion/ElPrado/js/jquery-ui.min.js"  type="text/javascript"></script>	
+		<script defer src="@urlPersonalizacion/ElPrado/js/templates/common.js"></script>	
+	</head>
+		
+	<script type="text/javascript">
+		$(document).ready(function () {
+			var url=window.location.href;	
+			var tituloObra = getParam('titulo',url).replace(/\+/g,' ');
+			var urlImgObra = getParam('imagen',url);
+			var urlDescarga = getParam('urlDescarga',url);		
+			var autor = getParam('autor',url).replace(/\+/g,' ');		
+			$('.obra figure .titleObraActual h2').html(tituloObra);
+			$('.obra figure .imgObraActual img').attr('src', urlImgObra);
+			$('.obra figure p strong').html(autor);
+			$('.obra a.urlDescarga').attr('href', urlDescarga);		
+			$('.obra a.urlDescarga').attr('download', tituloObra+'.jpg');	
+		});   
+	</script>
+	<body class="mi-prado-pop-up">	
+		<section class="obra res-basica">			
+			<strong class="rastro">@Html.Translate("USOCOMERCIAL")</strong>
+			<div class="cabecera image-bank-header">						
+				<h1 class="res-main">
+					<span class="titulo">@Html.Translate("BANCODEIMAGENES")</span>				
+				</h1>				
+			</div>			
+			<figure>
+				<div class="img imgObraActual"><img /></div>
+				<figcaption class="titleObraActual">
+					<h2>@Html.Translate("TITULO")</h2>
+					<p><strong></strong></p>
+					<p>@Html.Translate("COPYRIGHTIMAGENMUSEODELPRADO")</p>
+				</figcaption>
+			</figure>					
+			<p>@Html.Raw(Html.Translate("DESCARGAUSOCOMERCIALDESCRIPCION"))</p>
+		</section>		
+	</body>
+</html>
+}                               

@@ -1,0 +1,65 @@
+@model List<CMSBlock>
+@{
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+    ViewBag.ListaJS.Add(urlPersonalizacion + "/ElPrado/js/jquery.scrollsteps-full-min.js?v=" + ViewBag.Version.ToString());
+
+
+}
+@if (Html.GetBodyClassPestanya().Contains("sinLayout"))
+{
+    if (Model != null && Model.Count > 0)
+    {
+        Layout = null;
+
+        foreach (CMSBlock bloque in Model)
+        {
+            if (bloque != null)
+            {
+
+                if (bloque.ComponentList != null)
+                {
+                    foreach (CMSComponent componente in bloque.ComponentList)
+                    {
+                        if (componente != null)
+                        {
+                            @Html.PartialView(componente.ViewName, componente);
+                        }
+                    }
+                }
+
+                if (bloque.BlockList != null)
+                {
+                    foreach (CMSBlock bloque1 in bloque.BlockList)
+                    {
+                        if (bloque1 != null)
+                        {
+
+                            if (bloque1.ComponentList != null)
+                            {
+                                foreach (CMSComponent componente in bloque1.ComponentList)
+                                {
+                                    if (componente != null)
+                                    {
+                                        @Html.PartialView(componente.ViewName, componente);
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+else
+{
+    if (Model != null && Model.Count > 0)
+    {
+        foreach (CMSBlock bloque in Model)
+        {
+            @Html.PartialView("_BloqueCMS", bloque)
+        }
+    }
+
+}

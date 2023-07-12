@@ -1,0 +1,32 @@
+@model GadgetModel
+@if (Model is GadgetHtmlModel)
+{
+    <div class="group">
+        @if (!ViewBag.OcultarPersonalizacion)
+        {
+            <h2>@Model.Title</h2>
+        }
+        @Html.Raw(((GadgetHtmlModel)Model).Html)
+    </div>
+}
+else if (Model is GadgetResourceListModel)
+{
+    GadgetResourceListModel gadgetListado = (GadgetResourceListModel)Model;
+    if (gadgetListado.Resources!=null&&gadgetListado.Resources.Count>0)
+    {
+        foreach (ResourceModel ficha in gadgetListado.Resources)
+        {
+            @Html.PartialView(gadgetListado.ViewNameResources, ficha)
+        }
+
+    }
+
+    if (gadgetListado.ResourcesPagers!=null&&gadgetListado.ResourcesPagers.Count>0)
+    {
+        foreach (ResourceModel ficha in gadgetListado.ResourcesPagers)
+        {
+            @Html.PartialView(gadgetListado.ViewNameResources, ficha)
+        }
+
+    }
+}

@@ -1,0 +1,78 @@
+@using Es.Riam.Gnoss.Web.MVC.Models;
+@model CMSComponentFacet
+@if (Model != null)
+{
+	<div id="@Model.Key" url="@Model.UrlSearcherCMS" style="display:none" class="buscadorHistoricoFacetasExposicion"> 
+	@{
+		SortedDictionary<int, FacetItemModel> anios = new SortedDictionary<int, FacetItemModel>();
+
+        bool meses=false;
+		foreach (FacetItemModel faceta in Model.FacetModel.FacetItemList)
+		{
+            int anio=0;
+            if (int.TryParse(faceta.Tittle, out anio))
+            {
+                anios.Add(int.Parse(faceta.Tittle), faceta);
+            }
+            else
+            {
+                meses = true;
+                break;
+            }		
+<div style="display:none">@faceta.Filter</div>	
+		}
+
+        if (meses)
+        {		
+            //Esta 'ñapa' hay que hacerla porque si todos los resultados son del mismo año me viene la faceta agrupada por meses en lugar de años           
+            foreach (FacetItemModel faceta in Model.FacetModel.FacetItemList)
+            {
+                int anio = 0;
+                string anioString=faceta.Name.Substring(faceta.Name.IndexOf("=")+1,4);
+
+                if (int.TryParse(anioString, out anio))
+                {
+                    if (anios.ContainsKey(anio))
+                    {
+                        anios[anio].Number += faceta.Number;
+                    }
+                    else
+                    {					
+                        FacetItemModel facetaAux = new FacetItemModel();
+                        facetaAux.Number = faceta.Number;
+                        facetaAux.Tittle = anioString;                        
+                        
+                        //Filter viene algo asi
+                        //http://depuracion.net/busqueda-contenido-colección?search=El retrato español. Del Greco a Picasso&rdf:type=pmexhibition&ecidoc:p4_p80_has_time-span_end=-GETDATE()&ordenarPor=ecidoc:p4_p79_has_time-span_beginning&orden=desc&ecidoc:p4_p79_has_time-span_beginning=20041000-20041031"
+                        //name viene algo asi
+                        //ecidoc:p4_p79_has_time-span_beginning=20041000-20041031
+                        
+                        //En filter reemplazamos el filtro de mes por el filtro de año
+                        facetaAux.Filter = faceta.Name;
+                        facetaAux.Filter = faceta.Name.Substring(0, faceta.Name.IndexOf("=")) +
+                            "=" +
+                            faceta.Name.Substring(faceta.Name.IndexOf("=") + 1, 4) + "0000" +
+                            "-" +
+                            faceta.Name.Substring(faceta.Name.LastIndexOf("-") + 1, 4) + "1231";
+                        facetaAux.Filter = faceta.Filter.Replace(faceta.Name, facetaAux.Filter);
+                        
+						 anios.Add(anio, facetaAux);
+                    }
+                }
+            }   
+        }
+		
+		if(anios.Count==0)
+		{
+			<p class="txt-no-results">@Html.Translate("NOSEENCONTRARONEXPOSICIONES")</p>
+		}
+		
+		foreach (KeyValuePair<int, FacetItemModel> anio in anios.Reverse())
+		{        
+			<div class="year dsp">
+				<h2><a num="@anio.Value.Number" filtro="@anio.Value.Filter">@anio.Value.Tittle</a><span class="ico">+</span></h2>
+			</div>
+		}
+	}	
+	</div>
+}

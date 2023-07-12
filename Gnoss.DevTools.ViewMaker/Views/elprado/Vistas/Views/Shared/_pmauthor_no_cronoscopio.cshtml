@@ -1,0 +1,548 @@
+@model ResourceViewModel
+@{
+	bool sherlock=false;
+    ResourceModel FichaDocumento = Model.Resource;
+    SemanticResourceModel semCmsModel = Model.SemanticFrom;
+
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+
+    // Idioma de navegación del usuario
+    string idiomaNav = ViewBag.UtilIdiomas.LanguageCode;
+
+    string palSobreEsp = "sobre";
+    string palSobreEng = "on";
+    string sobreIdiomaNav = null;
+    switch (idiomaNav)
+    {
+        case "es":
+            sobreIdiomaNav = palSobreEsp;
+            break;
+        case "en":
+            sobreIdiomaNav = palSobreEng;
+            break;
+        default:
+            sobreIdiomaNav = palSobreEsp;
+            break;
+    }
+    
+    string imagen = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_shows_visual_item");
+    
+    }    
+    
+<section  @Html.Raw(semCmsModel.GetRDFANamespaces()) @Html.Raw(semCmsModel.GetRDFAEntity(semCmsModel.RootEntities[0]))>
+    
+    @if (!string.IsNullOrEmpty(imagen))
+    {
+        string imagenAutor = ViewBag.BaseUrlContent + "/" + imagen;
+        <section class="imagen-cabecera" data-img="@imagenAutor"  @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p65_E36_shows_visual_item"))></section>
+    }
+    
+
+<section class="ficha-obra" id="ficha-obra" >
+    <div class="obra-autor">
+        <article>
+            @{
+                string nombreAutor = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title");        
+				string nombreAutorAumentado = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title_augmented");        
+                string lugarNacimientoAutor = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p96_E67_p7_gave_birth_place");
+                string fechaNacimientoAutor = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p96_E67_p4_gave_birth_date");
+                string lugarDefuncionAutor = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p100i_E69_p7_death_place");
+                string fechaDefuncionAutor = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p100i_E69_p4_death_date"); 
+                string descripcionAutor = semCmsModel.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note");
+				string descripcionAutorAumentado = semCmsModel.GetFirstValuePropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note_augmented");
+
+                int numeroDeObras = 0;
+                /*string numeroDeObrasString = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#artWorkNumber");
+
+                if (!string.IsNullOrEmpty(numeroDeObrasString))
+                {
+                     try
+                     {
+                         numeroDeObras = Int32.Parse(numeroDeObrasString);
+                     }
+                     catch (FormatException e)
+                     {
+                        numeroDeObras = 0;
+                     }
+                }*/
+
+                SemanticPropertyModel propEtiquetas = semCmsModel.GetPropertyByPath("http://purl.org/muto/core#tagLabel");
+                
+                SemanticPropertyModel propObrasRelacionadas = semCmsModel.GetPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p14i_performed");
+
+                if (propObrasRelacionadas != null && propObrasRelacionadas.OntologyPropInfo.EntitySelector.TotalEntitiesPagination > 0)
+                {
+                    numeroDeObras = propObrasRelacionadas.OntologyPropInfo.EntitySelector.TotalEntitiesPagination;
+                }
+                else if (propObrasRelacionadas != null && propObrasRelacionadas.PropertyValues != null)
+                {
+                    numeroDeObras = propObrasRelacionadas.PropertyValues.Count();
+                }
+                
+            }
+
+            @*<strong class="antetitulo">Goya y el siglo XVIII</strong>*@
+            
+            @if (!string.IsNullOrEmpty(nombreAutor))
+            {
+				if(sherlock && !string.IsNullOrEmpty(nombreAutorAumentado))
+				{
+					<h1 @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title"))>@Html.Raw(@nombreAutorAumentado)@*<span class="ly-miprado"><a href="#">Añadir a Mi Prado</a></span>*@</h1>
+				}else
+				{
+					<h1 @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p131_E82_p102_has_title"))>@nombreAutor@*<span class="ly-miprado"><a href="#">Añadir a Mi Prado</a></span>*@</h1>
+				}
+            }
+            
+
+            @{
+                
+               string infoAutor = string.Empty;
+                 
+                if (!string.IsNullOrEmpty(lugarNacimientoAutor))
+                {
+                    string htmlLugarNacimiento = "<span " + semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p96_E67_p7_gave_birth_place")+">"+lugarNacimientoAutor+"</span>";
+                    infoAutor = htmlLugarNacimiento;
+                }   
+
+                if(!string.IsNullOrEmpty(fechaNacimientoAutor))
+                {
+                    string htmlFechaNacimientoAutor = "<span " + semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p96_E67_p4_gave_birth_date") + ">" + fechaNacimientoAutor + "</span>";
+                    
+                    if(!string.IsNullOrEmpty(infoAutor))
+                    {
+                        infoAutor = string.Concat(infoAutor, ", ", htmlFechaNacimientoAutor);
+                    }
+                    else
+                    {
+                        infoAutor = htmlFechaNacimientoAutor;
+                    }
+                }
+
+
+                 if (!string.IsNullOrEmpty(lugarDefuncionAutor))
+                 {
+                    string htmlLugarDefuncionAutor = "<span " + semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p100i_E69_p7_death_place") + ">" + lugarDefuncionAutor + "</span>";
+                    
+                    if(!string.IsNullOrEmpty(infoAutor))
+                    {
+                        infoAutor = string.Concat(infoAutor, " - ", htmlLugarDefuncionAutor);
+                    }
+                    else
+                    {
+                        infoAutor = htmlLugarDefuncionAutor;
+                    }
+                  }
+                
+
+                  if (!string.IsNullOrEmpty(fechaDefuncionAutor))
+                  {
+                      string htmlFechaDefuncionAutor = "<span " + semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/ecidoc.owl#p100i_E69_p4_death_date") + ">" + fechaDefuncionAutor + "</span>";
+                    
+                     if(!string.IsNullOrEmpty(infoAutor))
+                     {
+                         infoAutor = string.Concat(infoAutor, ", ", htmlFechaDefuncionAutor);
+                     }
+                     else
+                     {
+                         infoAutor = htmlFechaDefuncionAutor;
+                     }
+                  }
+                
+                 if(!string.IsNullOrEmpty(infoAutor))
+                 {
+                     <strong class="subtitulo">@Html.Raw(infoAutor)</strong>
+                 }  
+              }
+
+            <div @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://www.cidoc-crm.org/cidoc-crm#p3_has_note"))>
+				@if(sherlock && !string.IsNullOrEmpty(descripcionAutorAumentado))
+				{
+					<p class="colapsado normal">@Html.Raw(Html.DeleteFirstParagraph(descripcionAutorAumentado))</p>
+				}else
+				{
+					<p class="colapsado normal">@Html.Raw(Html.DeleteFirstParagraph(descripcionAutor))</p>
+				}
+            </div>
+
+        </article>
+    </div>
+    <div class="side-der">
+		@{
+			ResourceModel fichaRecurso = Model.Resource;
+			ResourceModel.ActionsModel acciones = fichaRecurso.Actions;
+
+			if (sherlock && acciones.Edit)
+			{
+				<a class="botones-centrados bc-estandar hv-estandar sherlockAnotateAuthor">
+				<span class="txt">Anotar</span>
+				</a>
+				<a class="botones-centrados bc-estandar hv-estandar sherlockDeleteAnotateAuthor">				
+					<span class="txt">Eliminar anotación</span>
+				</a>
+			}
+		}
+		@if (propEtiquetas != null && propEtiquetas.PropertyValues != null && propEtiquetas.PropertyValues.Count > 0)
+		{
+		<div class="tags">
+            <h1>Etiquetas</h1>
+            @foreach (SemanticPropertyModel.PropertyValue propTag in propEtiquetas.PropertyValues)
+			{
+                if (propTag != null && propTag.Value != null)
+                {
+                    <span @Html.Raw(propEtiquetas.GetRDFA())><a href="@FichaDocumento.UrlSearch?search=@propTag.Value">@propTag.Value</a></span>	
+                }
+                
+			}
+        </div>
+		}
+
+
+        <nav class="social">			
+			<ul>
+				<li class="rrss-ico"><a href="#"><img src="@urlPersonalizacion/ElPrado/img/svg/twitter.svg" alt="Twitter" title="Twitter"></a></li>
+					<li class="rrss-ico"><a href="#"><img src="@urlPersonalizacion/ElPrado/img/svg/facebook.svg" alt="Facebook" title="Facebook"></a></li>
+					<li class="rrss-ico whatsapp"><a href="#"><img src="@urlPersonalizacion/ElPrado/img/svg/whatsapp.svg" alt="Whatsapp" title="Whatsapp"></a></li>
+					<li class="rrss-ico"><a href="#"><img src="@urlPersonalizacion/ElPrado/img/svg/email.svg" alt="E-Mail" title="E-Mail"></a></li>
+			</ul>	
+		</nav>		
+		
+        @{
+            SemanticPropertyModel enciclopediaEnlazada = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#i_author_encyclopedia@@@http://museodelprado.es/ontologia/pradomuseum.owl#encyclopediaEntryName");
+            if (enciclopediaEnlazada != null && enciclopediaEnlazada.PropertyValues != null && enciclopediaEnlazada.PropertyValues.Count > 0)
+            {
+                string enlaceRecEnciclopedia = enciclopediaEnlazada.FirstPropertyValue.DownloadUrl;
+		        <a href="@enlaceRecEnciclopedia" class="enlace-pag">Ver voz de la enciclopedia</a>  
+            }
+        }		
+		
+		@* Si es goya *@
+		@if(FichaDocumento.Key==new Guid("39568a17-81b5-4d6f-84fa-12db60780812"))
+		{
+			<div class="destacado">
+				<a href="http://www.goyaenelprado.es">
+					<img srcset="@urlPersonalizacion/cms/goyaenelprado.jpg 1x, @urlPersonalizacion/cms/goyaenelprado_2x.jpg 2x" src="@urlPersonalizacion/cms/goyaenelprado.jpg" alt="Goya en el Prado">
+				</a>
+			</div>
+		}
+    </div>
+</section>
+
+
+@{
+    if (propObrasRelacionadas != null && propObrasRelacionadas.PropertyValues!= null && propObrasRelacionadas.PropertyValues.Count > 0)
+    {           
+        if(numeroDeObras>0)
+        {
+            <div class="obras">
+                <h1><span>@Html.Translate("OBRAS") <strong>(<span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#artWorkNumber"))>@numeroDeObras</span>)</strong></span></h1>   
+                <form novalidate="novalidate">
+                    <ul class="vista-selector">
+                        <li class="miniaturas selected" data-mode="miniaturas"><a>@Html.Translate("IMAGENES")</a></li>
+                        <li class="listado" data-mode="listado"><a>@Html.Translate("LISTADO")</a></li>
+                        <li class="galeria" data-mode="big-galeria"><a>@Html.Translate("GALERIA")</a></li>
+                    </ul>
+                </form>
+
+                <div class="mostrable miniaturas">
+		
+                @if (!string.IsNullOrEmpty(propObrasRelacionadas.SpecificationProperty.SelectorEntidad.VistaPersonalizadaPaginacion))
+                {
+                    @Html.PartialView(propObrasRelacionadas.SpecificationProperty.SelectorEntidad.VistaPersonalizadaPaginacion, propObrasRelacionadas)
+                }
+                else
+                {
+				    @Html.PartialView("SemCms/_PropiedadOntoSelectorEntidadLectura", propObrasRelacionadas)     
+                }
+
+		        </div>
+
+            </div>
+            <section class="mostrable big-galeria oculto"></section>
+        }
+    }
+}
+
+    @{
+        SemanticPropertyModel propRecursosMultimedia = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#i_author_multimediaresource"); 
+          
+          if(propRecursosMultimedia != null && propRecursosMultimedia.PropertyValues!= null && propRecursosMultimedia.PropertyValues.Count > 0)
+          {
+				bool mostrar=false;
+				foreach(SemanticPropertyModel.PropertyValue recursoMultimedia in propRecursosMultimedia.PropertyValues)
+				{
+					string tipo = recursoMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");							
+					string tipoRM = string.Empty;
+					if (!string.IsNullOrEmpty(tipo) && tipo.Contains('#'))
+					{
+						tipoRM = tipo.Split(new Char[] { '#' }).Last();
+					} 
+					if(tipoRM.Equals("Interactive") || tipoRM.Equals("Video"))
+					{				
+						mostrar=true;
+					}
+				}
+				if(mostrar)
+				{
+                  <section class="multimedia" id="multimedia">
+			        <h2 class="heading">@Html.Translate("MULTIMEDIA")</h2>				
+			        <div class="loop carousel inactive">	
+                         @foreach(SemanticPropertyModel.PropertyValue recursoMultimedia in propRecursosMultimedia.PropertyValues)
+                         {
+						 
+							string tituloRM="";
+							string enlaceRM="";
+							SemanticPropertyModel propTitulo = recursoMultimedia.RelatedEntity.GetPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation");
+                            if (propTitulo != null && propTitulo.PropertyValues.Count > 0)
+                            {
+                                tituloRM = propTitulo.FirstPropertyValue.Value;
+                                enlaceRM = propTitulo.FirstPropertyValue.DownloadUrl;
+                            }
+						 
+						 
+                            string duracionRM = recursoMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#duration");
+                            string urlRM = recursoMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#url");
+                            string imagenRM = recursoMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image");
+                            string tipo = recursoMultimedia.RelatedEntity.GetFirstValuePropertyByPath("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");							
+                            string tipoRM = string.Empty;
+
+                            if (!string.IsNullOrEmpty(tipo) && tipo.Contains('#'))
+                            {
+                                tipoRM = tipo.Split(new Char[] { '#' }).Last();
+                            } 
+							if(tipoRM.Equals("Interactive"))
+							{
+								<div class="slide">
+									<figure>	
+										@if(string.IsNullOrEmpty(imagenRM))
+										{
+											<div class="thumb imgwrap">
+												<a href="@enlaceRM">
+													<div class="no-img">
+														<div class="outer">
+															<span>@Html.Translate("IMAGENNODISPONIBLE")</span>
+														</div>
+													</div>
+												</a>						
+											</div>
+										}else{
+											<a href="@enlaceRM">										
+												@if (!string.IsNullOrEmpty(imagenRM))
+												{
+													<img alt="@tituloRM" src="@ViewBag.BaseURLContent/@imagenRM" />
+												}
+											</a>
+										}
+										<figcaption>
+											<strong class="media-type">@Html.Translate("INTERACTIVO")</strong>
+											@if (!string.IsNullOrEmpty(tituloRM))
+											{
+												<h3 class="name">
+													<a href="@enlaceRM">
+														<span>@Html.Raw(tituloRM)</span>
+													</a>
+												</h3>
+											}
+										</figcaption>
+									</figure>
+								</div>
+							}else if (tipoRM.Equals("Video"))
+                            {
+								<div class="slide video">
+									<figure>						
+										<a href="@urlRM" class="modal-videoPlayer">
+											@if (!string.IsNullOrEmpty(duracionRM))
+											{
+												<span class="duracion">@duracionRM</span>
+											}
+											@if (!string.IsNullOrEmpty(imagenRM))
+											{
+												string imagenRMUrlCompleta = string.Concat(ViewBag.BaseUrlContent, "/", imagenRM); 
+												<img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick=""/>
+											}
+											else
+											{
+												<div class="imgwrap">													
+													<div class="no-img">
+														<div class="outer">
+															<span>@Html.Translate("Imagen no disponible")</span>
+														</div>
+													</div>
+												</div>
+											}
+										</a>
+										<figcaption>
+											@if (!string.IsNullOrEmpty(tipoRM))
+											{
+												<div class="media-type">@tipoRM</div>
+											}
+											@if (!string.IsNullOrEmpty(tituloRM))
+											{
+												<h3 class="name"><a href="@urlRM" class="modal-videoPlayer">@tituloRM</a></h3>
+											}
+										</figcaption>
+									</figure>
+								</div>
+							}
+                         }																
+			        </div>
+					@{
+						string urlVerMasMultimedia= Html.GetComunidad().Url+ "/"+ Html.Translate("URL_BUSQUEDA_MULTIMEDIA") + "?pm:relatedAuthor@@@ecidoc:p131_E82_p102_has_title="+nombreAutor.ToLower()+"@"+idiomaNav;
+					}
+			        <div class="ver-mas-multimedia"><a href="@urlVerMasMultimedia">@Html.Translate("VERMASMULTIMEDIA")</a></div>
+		        </section>    
+					}				
+                }
+        }
+                
+
+
+@{
+    string nombreCortoGadgetAutoresCoetaneos = "AutoresCoetaneos";
+    GadgetModel gadgetAutoresCoetaneos = FichaDocumento.Gadgets.Find(gadget => gadget.ShortName == nombreCortoGadgetAutoresCoetaneos);
+
+    if (gadgetAutoresCoetaneos != null)
+    {
+        GadgetResourceListModel gadgetContextoAutoresCoetaneos = gadgetAutoresCoetaneos as GadgetResourceListModel;
+        if (gadgetContextoAutoresCoetaneos != null)
+        {
+            Guid idGadgetMasObras = gadgetContextoAutoresCoetaneos.Key;
+
+            bool cargado = gadgetContextoAutoresCoetaneos.Resources != null && gadgetContextoAutoresCoetaneos.Resources.Count > 0;
+            string displayNone="";
+            string pag = "3";
+            if(!cargado)
+            { 
+                displayNone = "style=\"display:none\"";
+                pag = "1";
+            }
+            <section id="coetaneos" class="coetaneos" @Html.Raw(displayNone)>
+                <h2 class="heading">@Html.Translate("AUTORESCOETANEOS")</h2>
+                <div class="carousel inactive">
+					@if(cargado)
+					{
+						@Html.PartialView("ControlesMVC/_FichaGadget", gadgetContextoAutoresCoetaneos)
+					}                       
+					<div class="contenedorGadget swiper-slide" aux="coetaneos" pag="@pag" id="@idGadgetMasObras.ToString().ToLower()"></div>
+                </div>
+            </section>            
+        }           
+    }
+
+    //TIENDA EL PRADO
+    
+    <section class="tienda-prado">
+    @{
+        SemanticPropertyModel propProductosTienda = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#i_author_product");
+        if (propProductosTienda != null && propProductosTienda.PropertyValues != null && propProductosTienda.PropertyValues.Count > 0)
+        {
+            <h2 class="heading">@Html.Translate("TIENDAPRADO")</h2>           
+            <div class="carousel inactive">
+                @foreach (SemanticPropertyModel.PropertyValue productoTienda in propProductosTienda.PropertyValues)
+                {
+                    string nombreProd = productoTienda.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/goodrelations/v1#name");
+                    string categoria = productoTienda.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/goodrelations/v1#category");
+                    string oferta = productoTienda.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/egr.owl#offer");
+                    string imagenProd = productoTienda.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/egr.owl#image");
+                    string web = productoTienda.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/egr.owl#web");                
+                
+                    <div class="slide">
+                        <figure>
+                            @if(!string.IsNullOrEmpty(web))
+                            {
+                                <a href="@web" target="_blank">
+                                    @if(!string.IsNullOrEmpty(imagenProd) && !string.IsNullOrEmpty(nombreProd))
+                                    {
+                                        <img alt="@nombreProd" src="@ViewBag.BaseUrlContent/@imagenProd">
+                                    }
+                                </a>
+                            }
+
+                            <figcaption>
+                                @if (!string.IsNullOrEmpty(oferta) && oferta.Equals("true"))
+                                {
+                                    <div class="offer">Oferta</div>
+                                }
+                                @if(!string.IsNullOrEmpty(categoria))
+                                {
+                                    <div class="media-type">@categoria</div>
+                                }
+                                @if (!string.IsNullOrEmpty(nombreProd) && !string.IsNullOrEmpty(web))
+                                {
+                                    <div class="name"><a href="@web" target="_blank">@nombreProd</a></div>
+                                }
+                            </figcaption>
+                        </figure>
+                    </div> 
+                
+                }
+            </div>
+        }
+     }
+
+            <div class="impresion-a-la-carta">
+                <div>
+                    <h1><a href="http://www.tiendaprado.com/toolprintondemand.php" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h1>
+                    @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMPRESION"))
+                </div>
+                <div>
+                    <h1><a href="http://www.bancodeimagenesmuseodelprado.com/" target="_blank">@Html.Translate("BANCODEIMAGENES")</a></h1>
+                    @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMAGENES"))
+                </div>
+            </div>
+    </section>
+
+}
+
+</section>
+
+@{
+    Dictionary<string, List<object>> propsJsonLD = new Dictionary<string, List<object>>();
+    propsJsonLD.Add("@context", new List<object>(new string[] { "http://schema.org" }));
+    propsJsonLD.Add("@type", new List<object>(new string[] { "Person" }));
+    
+    if (!string.IsNullOrEmpty(nombreAutor))
+    {
+        propsJsonLD.Add("name", new List<object>(new string[] { nombreAutor }));
+    }
+
+    if (!string.IsNullOrEmpty(imagen))
+    {
+        propsJsonLD.Add("image", new List<object>(new string[] { ViewBag.BaseUrlContent + "/" + imagen }));
+    }
+     
+    if (!string.IsNullOrEmpty(descripcionAutor))
+    {
+        propsJsonLD.Add("description", new List<object>(new string[] { descripcionAutor }));
+    }
+     
+    if (!string.IsNullOrEmpty(fechaNacimientoAutor))
+    {
+        propsJsonLD.Add("birthDate", new List<object>(new string[] { fechaNacimientoAutor }));
+    }
+     
+    if (!string.IsNullOrEmpty(lugarNacimientoAutor))
+    {
+        Dictionary<string, List<object>> place = new Dictionary<string, List<object>>();
+        place.Add("@type", new List<object>(new string[] { "Place " }));
+        place.Add("address", new List<object>(new string[] { lugarNacimientoAutor }));
+
+        propsJsonLD.Add("birthPlace", new List<object>(new object[] { place }));
+    }
+     
+    if (!string.IsNullOrEmpty(fechaDefuncionAutor))
+    {
+        propsJsonLD.Add("deathDate", new List<object>(new string[] { fechaDefuncionAutor }));
+    }
+     
+    if (!string.IsNullOrEmpty(lugarDefuncionAutor))
+    {
+        Dictionary<string, List<object>> place = new Dictionary<string, List<object>>();
+        place.Add("@type", new List<object>(new string[] { "Place " }));
+        place.Add("address", new List<object>(new string[] { lugarDefuncionAutor }));
+
+        propsJsonLD.Add("deathPlace", new List<object>(new object[] { place }));
+    }
+ }
+        
+@Html.PartialView("_scriptJsonLD", propsJsonLD)

@@ -1,0 +1,29 @@
+@using Es.Riam.Gnoss.Web.MVC.Models;
+@model CMSComponentFacet
+@if (Model != null)
+{
+	SortedDictionary<int,FacetItemModel> listaAnios=new SortedDictionary<int,FacetItemModel>();
+	if (Model.FacetModel != null && Model.FacetModel.FacetItemList != null)
+	{
+		foreach (FacetItemModel faceta in Model.FacetModel.FacetItemList)
+		{					
+			int anio=0;
+			if(int.TryParse(faceta.Tittle, out anio))
+			{
+				listaAnios.Add(anio,faceta);
+			}
+		}
+	}
+
+	<select id="filtro-anno" class="select-custom">
+		<option value="ano">@Html.Translate("ANIO")</option>
+		@if (listaAnios.Count()>0)
+		{
+			foreach (KeyValuePair<int,FacetItemModel> item in listaAnios.Reverse())
+			{					
+				FacetItemModel faceta=item.Value;
+				<option value="@faceta.Tittle">@faceta.Tittle</option>					
+			}
+		}
+	</select>
+}

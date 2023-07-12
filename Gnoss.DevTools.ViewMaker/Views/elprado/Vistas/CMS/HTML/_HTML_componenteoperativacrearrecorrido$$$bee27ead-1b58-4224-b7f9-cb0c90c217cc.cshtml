@@ -1,0 +1,62 @@
+@model CMSComponentHTML
+@if(Model != null)    
+{
+   string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+   string urlComunidad=Html.GetComunidad().Url;
+
+<html lang="es">
+	<head>  
+		<meta charset="utf-8" />	
+		<meta name="apple-mobile-web-app-capable" content="yes" />	
+		<meta name="viewport" content="initial-scale=1,minimum-scale=1,maximum-scale=1,width=device-width,user-scalable=yes" />
+		<title>@Html.Translate("MUSEONACIONALPRADO")</title>
+		<link href="@urlPersonalizacion/ElPrado/css/prado.css" media="all" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="//cloud.typography.com/7751072/662984/css/fonts.css" />		   
+		<script src="@urlPersonalizacion/ElPrado/js/jquery-1.10.2.min.js"></script>
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.hcsticky-min.js"></script> <!-- elementos semi-fixed, como barras o menús sticky -->
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.backstretch.min.js"></script> <!-- centra y escala backgrounds -->	
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.magnific-popup.min.js"></script>	<!-- Modal popups -->
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.expander.min.js"></script> <!-- Ampliar textos (leer más) -->
+		<script src="@urlPersonalizacion/ElPrado/js/jquery.heapbox-0.9.3.min.js"></script> <!-- Para dar estilos a los selects -->	
+		<script src="@urlPersonalizacion/ElPrado/js/leaflet.js"></script>
+		<script src="@urlPersonalizacion/ElPrado/js/verge.min.js"></script> 
+		<script src="@urlPersonalizacion/ElPrado/js/idangerous.swiper-2.4.min.js"></script>	<!-- Carruseles -->	
+		<script src="@urlPersonalizacion/ElPrado/js/iscroll.js"></script>	
+		<script src="@Html.GetBaseUrlStatic()/jsUnificar/MVC.Comun.js"  type="text/javascript"></script>
+		<script src="@urlPersonalizacion/community.js"  type="text/javascript"></script>
+		<script src="@Html.GetBaseUrlStatic()/lang/@ViewBag.UtilIdiomas.LanguageCode/text.js"  type="text/javascript"></script>
+		<script src="@Html.GetBaseUrlStatic()/jsUnificar/busquedas.js"  type="text/javascript"></script>
+		<script src="@urlPersonalizacion/ElPrado/js/jquery-ui.min.js"  type="text/javascript"></script>	
+		<script defer src="@urlPersonalizacion/ElPrado/js/templates/common.js"></script>	
+	</head>
+	<body class="mi-prado-pop-up">	
+		<section class="usuario corazon">
+			<div class="logueado">
+				<h1><em>Mi</em> Prado</h1>			
+			</div>
+		</section>
+		<section class="obra">		
+			<h3>@Html.Translate("CREARNUEVORECORRIDO")</h3>
+			<form class="form-general nuevo-rec">
+
+				<div class="row titulo">
+					<input type="text" id="titulo-rec" name="titulo-rec" placeholder="@Html.Translate("TITULODELRECORRIDO")"/>
+					<label for="titulo-rec">@Html.Translate("TITULODELRECORRIDO")</label>	               
+				</div>
+							
+				<div class="switch red-blue"> 
+					<input type="checkbox" id="switch1" class="switch-check" checked="checked" /> 
+					<label for="switch1" class="switch-label"> 
+						<div class="op1">@Html.Translate("PRIVADO")</div>
+						<div class="op2">@Html.Translate("PUBLICO")</div>
+						<span></span>
+					</label>					
+				</div>
+			
+			</form>
+			<a class="botones-centrados bc-estandar hv-estandar btCancelarRecorrido" href="@(urlComunidad+"/cmspagina?ComponentName=operativaRecorridoListado")">@Html.Translate("CANCELAR")</a>
+			<a class="botones-centrados bc-estandar hv-estandar btCrearRecorrido" href="@(urlComunidad+"/cmspagina?ComponentName=operativaRecorridoCreado")">@Html.Translate("ACEPTAR")</a>
+		</section>
+	</body>
+</html>
+}                               

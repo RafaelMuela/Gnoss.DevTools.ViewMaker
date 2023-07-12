@@ -1,0 +1,63 @@
+@model Dictionary<string, List<object>>
+
+
+@functions
+{
+    private string PintarPropsJsonLD(Dictionary<string, List<object>> propsJsonLD)
+    {
+        int numProps = propsJsonLD.Count;
+        int propPint = 0;
+    
+        string html = "{";
+        foreach (string prop in propsJsonLD.Keys)
+        {
+            propPint++;
+            string propiedad = "\"" + prop + "\": ";
+
+            if (propsJsonLD[prop].Count == 1)
+            {
+                if (propsJsonLD[prop][0] is string)
+                {
+                    propiedad = string.Concat(propiedad, "\"" + ((string)propsJsonLD[prop][0]).Replace("\"","\\\"").Replace("\n","") + "\"");
+                }
+                else
+                {
+                    propiedad = string.Concat(propiedad, PintarPropsJsonLD((Dictionary<string, List<object>>)propsJsonLD[prop][0]));
+                }
+            }
+            else
+            {
+                propiedad = string.Concat(propiedad, "[");
+
+                foreach (object valor in propsJsonLD[prop])
+                {
+                    if (valor is string)
+                    {
+                        propiedad = string.Concat(propiedad, "\"" + ((string)valor).Replace("\"", "\\\"").Replace("\n", "") + "\",");
+                    }
+                    else
+                    {
+                        propiedad = string.Concat(propiedad, PintarPropsJsonLD((Dictionary<string, List<object>>)valor), ",");
+                    }
+                }
+
+                propiedad = propiedad.Substring(0,propiedad.Length - 1) + "]";
+            }
+        
+            if (propPint < numProps)
+            {
+                propiedad += ",";
+            }
+        
+            html = string.Concat(html, propiedad);
+        }
+            
+        html = string.Concat(html, "}");
+            
+        return html;
+    }
+}
+
+<script type="application/ld+json">
+    @Html.Raw(PintarPropsJsonLD(Model))
+</script>

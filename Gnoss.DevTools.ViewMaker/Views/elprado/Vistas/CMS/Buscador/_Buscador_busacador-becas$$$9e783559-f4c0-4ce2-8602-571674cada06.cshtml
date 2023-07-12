@@ -1,0 +1,48 @@
+
+
+@model CMSComponentSearch 
+@if (Model != null)
+{     
+        <div class="res-cont buscador-beca" id="@Model.Key" url="@Model.UrlSearcherCMS">
+            <strong class="rastro">@Model.Title</strong>
+            <div class="res-normal">
+                <h1 class="area no-main">@Model.Title</h1>
+                <section class="buscador-noticias">
+                    <form>
+                        <div>
+                            <span class="buscar small lupa">
+                                <input title="Título" type="text" placeholder="@Model.AttributeSearchTittle" class="texto">
+                                <a class="sup" href="#">Buscar</a>
+                            </span>
+                        </div>
+                    </form>
+                    <div class="oculto" id="pagina">@Model.Resultado.NumeroPaginaActual</div>
+                </section>
+            
+            @if (Model.Resultado.ListaResultados.Count() > 0)
+            {
+                <ul>
+
+                    @foreach (ResourceModel fichaModel in Model.Resultado.ListaResultados)
+                    {
+                        @Html.PartialView(Model.ViewNameResources, fichaModel)
+                    }
+                    @{
+                       var numTotal = Model.Resultado.NumeroResultadosTotal;
+                       var numResultadosPagina = Model.Resultado.NumeroResultadosPagina;
+                       var PaginaActual = Model.Resultado.NumeroPaginaActual;
+                       var numPaginas = (int)Math.Ceiling((double)numTotal / (double)numResultadosPagina);
+                    }
+                 </ul> 
+                @if (numPaginas > PaginaActual)
+                {
+                        <div class="ver-mas-general"><a>@Html.Translate("VERMAS")</a></div>
+                }
+            }           
+
+            </div>
+        </div>   
+}  
+
+
+

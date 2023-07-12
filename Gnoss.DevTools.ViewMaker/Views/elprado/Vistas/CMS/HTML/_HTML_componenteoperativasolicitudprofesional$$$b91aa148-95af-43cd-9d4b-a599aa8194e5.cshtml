@@ -1,0 +1,110 @@
+@model CMSComponentHTML
+@{
+	 string urlComunidad=Html.GetComunidad().Url;
+}
+<div id="formAcceso" class="res-cont">
+<form class="form-general formularioLogin oculto">
+<strong class="rastro">@Html.Translate("SALADEPRENSA")</strong>
+<h1>@Html.Translate("ACCESOPROFESIONALES")</h1>
+<fieldset>
+	<legend>@Html.Translate("INICIARSESION")</legend>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("USUARIO")*" name="Usuario" id="login-Usuario">
+		<label for="login-Usuario">@Html.Translate("USUARIO")</label>
+	</div>
+	<div class="row">
+		<input type="password" placeholder="@Html.Translate("CONTRASENA")*" name="Contrasenya" id="Contrasenya">
+		<label for="Contrasenya">@Html.Translate("CONTRASENA")</label>
+	</div>
+	<div class="row">
+		<a class="botones-centrados bc-estandar hv-estandar loginUsuario" href="#">Acceder</a>
+		<a class="fg-pass" href="@(urlComunidad+"/"+Html.GetText("URLSEM","OLVIDEPASSWORD"))">@Html.Translate("OLVIDASTELACONTRASENA")</a>
+		<div class="warning oculto">@Html.Translate("ELCORREOOLACONTRASENASONINCORRECTOS")</div>
+	</div>
+	<div class="crear-cuenta">
+		<a href="#">@Html.Translate("CREARCUENTAAHORA")</a>
+	</div>
+</fieldset>
+</form>
+
+<form class="form-general formularioRegistro oculto">
+<strong class="rastro">@Html.Translate("SALADEPRENSA")</strong>
+<h1>@Html.Translate("ACCESOPROFESIONALES")</h1>
+<div class=".registro-profesionales">
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("NOMBRE")*" class="obligatorio" name="Nombre" id="Nombre">
+		<label for="nombre">@Html.Translate("NOMBRE")</label>
+	</div>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("APELLIDO")*" class="obligatorio" name="Apellido" id="Apellido">
+		<label for="Apellido">@Html.Translate("APELLIDO")</label>
+	</div>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("PUESTOCARGOPROFESIONAL")*" class="obligatorio" name="Puesto" id="Puesto">
+		<label for="Puesto">@Html.Translate("PUESTOCARGOPROFESIONAL")</label>
+	</div>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("MEDIO")*" class="obligatorio" name="Medio" id="Medio">
+		<label for="Medio">@Html.Translate("MEDIO")</label>
+	</div>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("DIRECCION")" name="Direccion" id="Direccion">
+		<label for="Direccion">@Html.Translate("DIRECCION")</label>
+	</div>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("CIUDAD")" name="Ciudad" id="Ciudad">
+		<label for="Ciudad">@Html.Translate("CIUDAD")</label>
+	</div>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("ESTADOPROVINCIA")" name="Provincia" id="Provincia">
+		<label for="Provincia">@Html.Translate("ESTADOPROVINCIA")</label>
+	</div>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("PAIS")" name="Pais" id="Pais">
+		<label for="Pais">@Html.Translate("PAIS")</label>
+	</div>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("CODIGOPOSTAL")" name="CodigoPostal" id="CodigoPostal">
+		<label for="CodigoPostal">@Html.Translate("CODIGOPOSTAL")</label>
+	</div>
+	<div class="row">
+		<input type="text" placeholder="@Html.Translate("CORREOELECTRONICO")*" class="obligatorio" name="Correo" id="Correo">
+		<label for="Correo">@Html.Translate("CORREOELECTRONICO")</label>
+	</div>
+	
+	
+	<div class="check-radio first">	                
+		<input name="chkAceptoCondiciones" type="checkbox" class="obligatorio" id="chkAceptoCondiciones">
+		<label for="chkAceptoCondiciones"><span></span><div class="texto">@Html.Raw(Html.Translate("ACEPTOCONDICINOESPROFESIONAL"))</div></label>
+	</div>
+	
+	
+	
+	<input type="hidden" name="Idioma" id="Idioma" value="@Html.GetUtilIdiomas().LanguageCode">
+	<p class="disclaim">@Html.Translate("NOTALOSCAMPOSCON*SONREQUERIDOS")</p>
+	<div class="row">
+		<a class="botones-centrados bc-estandar hv-estandar crearSolicitud" href="#">@Html.Translate("CREARSOLICITUD")</a>
+	</div>
+	<div class="warning errorSolicitud oculto">
+		<p class="errorMail errorSolicitud">@Html.Translate("FORMATOEMAILINCORRECTO")</p>
+		<p class="errorCamposObligatorios errorSolicitud">@Html.Translate("LOSCAMPOSCON*SONREQUERIDOS")</p>
+		<p class="errorGenerico errorSolicitud">@Html.Translate("ERRORGENERICO")</p>
+	</div>
+	
+	<div class="tengo-cuenta">
+		<a href="#">@Html.Translate("YATENGOCUENTA")</a>
+	</div>
+</div>
+</form>
+
+<form class="form-general formularioRegistroOK oculto">
+<strong class="rastro">@Html.Translate("SALADEPRENSA")</strong>
+<h1>@Html.Translate("ACCESOPROFESIONALES")</h1>
+	<fieldset>
+		<div class="row">
+			<p>@Html.Raw(Html.Translate("SOLICITUDDEACCESOPROFESIONALENVIADA"))</p>
+		</div>
+	<fieldset>
+</form>
+
+</div>

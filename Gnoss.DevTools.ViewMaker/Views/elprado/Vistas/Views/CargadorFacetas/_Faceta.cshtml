@@ -1,0 +1,74 @@
+@model FacetModel  
+@if (Model != null && (Model.FacetItemList.Count > 0 || Model.AutocompleteBehaviour.Equals(AutocompleteBehaviours.OnlyTextBox) || Model.ShowWithoutItems))   
+{    
+	bool mostrarMas=false;
+	string desplegable="desplegable";
+	if(Model.FacetItemList.Count>9)
+	{
+		mostrarMas=true;
+		desplegable+=" mas-menos";
+	}
+	
+	if(Model.OneFacetRequest)
+	{
+		desplegable+=" on";
+	}
+	
+    <div class="@desplegable" id="@Model.FacetKey.Replace(":","--").Replace("@","-")" faceta="@Model.FacetKey.Replace(":","--").Replace("@","-")">
+        <h2><a>@Model.Name <span class="ico"></span></a></h2>
+
+        @if (Model.FacetKey == "cidoc:p48_has_preferred_identifier@@@cidoc:p102_has_title")
+        {
+           
+            string butId = Model.Key+ "fbotonBuscar";
+            string facetaIDf = Model.Key + "f";
+            <ul>
+                <li>
+                    <form>
+                        <div class="facetedSearchBox">
+                            <span class="buscar">
+                                <input type="text" title="@Model.FacetKey" class="texto no-close filtroFaceta ac_input" name="@Model.FacetKey" id="@facetaIDf"
+                    onfocus="autocompletarGenerico(this, '@Model.FacetKey', '@Model.Order', '@ViewBag.Parametros');" />
+                                <a name="@Model.FacetKey" class="searchButton" id="@butId" >@Html.GetText("COMMON", "BUSCAR")</a>  
+                            </span>
+                        </div>
+                    </form>
+                </li>
+            </ul>
+        }
+        
+
+        <ul>
+		@if(!Model.ShowWithoutItems){
+			int i=0;
+			foreach (FacetItemModel item in Model.FacetItemList)               
+			{       
+				i++;
+				string cssFaceta="";
+				if(i>5 && mostrarMas)
+				{
+					cssFaceta+="oculto ";
+				}	
+				
+				if(item.FacetItemlist != null && item.FacetItemlist.Count>0)
+				{
+					cssFaceta += "desplegable-lv2";
+				}else if(item.Selected)
+				{
+					cssFaceta += "selected";
+				}
+				
+                <li class="@cssFaceta">
+                    @Html.PartialView("_ItemFaceta", item)
+                </li>
+			} 
+		}
+        </ul>
+        @if(mostrarMas){
+            <ul class="opciones">
+                <li><span class="ver-mas"><a class="no-close">@Html.GetText("COMBUSQUEDAAVANZADA","VERMAS")</a></span></li>
+                <li><span class="oculto ver-menos"><a class="no-close">@Html.GetText("COMBUSQUEDAAVANZADA","VERMENOS")</a></span></li>
+            </ul>
+		}
+    </div>   
+}

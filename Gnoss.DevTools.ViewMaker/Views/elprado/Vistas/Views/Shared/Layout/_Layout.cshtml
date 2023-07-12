@@ -1,0 +1,119 @@
+@*@using Es.Riam.Gnoss.Web.MVC.Controles.Helper*@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd"> 
+  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:og="http://ogp.me/ns#" version="XHTML+RDFa 1.0" lang="@ViewBag.UtilIdiomas.LanguageCode"> 
+  <head> 
+	<!-- Google Tag Manager -->
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-K9VTZ3');</script>
+	<!-- End Google Tag Manager -->
+      <title>@ViewBag.TituloPagina</title> 
+       
+      <link runat="server" id="IMGfavicon" rel="shortcut icon" type="image/ico" href="@ViewBag.Favicon" /> 
+   
+	  @if (!string.IsNullOrEmpty(ViewBag.UrlCanonical)) 
+      {  
+          <link rel="canonical" href="@ViewBag.UrlCanonical" /> 
+      } 
+	  
+	  @if (Html.GetCabecera().MultiLingualLinks != null)
+	  {
+		  foreach (string language in Html.GetCabecera().MultiLingualLinks.Keys)
+		  {
+			  if (Html.GetCabecera().MultiLingualLinks[language].Key)
+			  {
+		  <link rel="alternate" hreflang="@language" href="@Html.GetCabecera().MultiLingualLinks[language].Value" />
+			  }
+		  }
+	  }
+   
+      @Html.PartialView("../Shared/Head/_HojasDeEstilo") 
+      @foreach (string css in ViewBag.ListaCSS) 
+      { 
+          <link media="screen" type="text/css" rel="stylesheet" href="@css" /> 
+      } 
+       
+      @Html.PartialView("../Shared/Head/_FicherosJavascript") 
+      
+   
+      @foreach (string busqeda in ViewBag.BusquedasXml) 
+      { 
+          <link rel="search" type="application/opensearchdescription+xml" href="@busqeda" /> 
+      } 
+   
+      @Html.PartialView("../Shared/Head/_Metas") 
+      @foreach (KeyValuePair<string, string> contentMeta in ViewBag.ListaMetas) 
+      { 
+          <meta name="@contentMeta.Key" content="@contentMeta.Value" />
+      } 
+   
+  </head> 
+   
+  <body class="@ViewBag.BodyClass @Html.GetBodyClassPestanya()">
+      <!-- Google Tag Manager (noscript) -->
+      <noscript><iframe title="Gestor de etiquetas de google" src="//www.googletagmanager.com/ns.html?id=GTM-K9VTZ3" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+      <!-- End Google Tag Manager (noscript)  -->
+
+      @RenderSection("breadcrumb", required: false)
+
+      @foreach (KeyValuePair<string, string> inputHidden in ViewBag.ListaInputHidden)
+      {
+          <input type="hidden" id="@inputHidden.Key" class="@inputHidden.Key" value="@inputHidden.Value" />
+      }
+
+
+      <input type="hidden" id="cookiechecktext" value="@Html.Translate("TEXTOAVISOCOOKIES")" />
+
+      <form method="post" target="_blank" action="" name="myform" id="myform">
+          <input type="text" style="display: none;" title="query" name="query" id="query" />
+          <input type="text" style="display: none;" title="pagina" name="pagina" id="InputPagina" />
+          <a style="display: none;" id="rdfHack" href="javascript:submitform();">RDF</a>
+      </form>
+
+      <div style="width: 100px; height: 100px; position: absolute; display: none; left: 0px; top: 0px; z-index: 2000" class="popup">
+          <img style="border-width: 0px;" alt="@Html.Translate("CARGANDO...")" src="@ViewBag.BaseUrlStatic/img/espera.gif" />
+          <p><strong>@Html.Translate("CARGANDO...")</strong></p>
+      </div>
+      <div id="txtAux" class="oculto">
+          <div class="RECORRIDOCREADO">@Html.Translate("RECORRIDOCREADO")</div>
+          <div class="OBRAANIADIDAARECORRIDO">@Html.Translate("OBRAANIADIDAARECORRIDO")</div>
+      </div>
+      <div style="display: none; z-index: 1999; width: 100%; top: 0px; left: 0px; position: absolute; height: 2900px;" id="mascaraBlanca"></div>
+
+      @Html.PartialView("../Shared/_Cabecera")
+  <main>
+
+      @RenderBody()
+      </main>
+      @Html.PartialView("../Shared/_Pie")
+
+      <script type="text/javascript">
+          $(document).ready(function () {
+              EjecutarScriptsIniciales2();
+          });
+          function getSubscription(reg) {
+              reg.pushManager.getSubscription().then(function (sub) {
+                  if (sub === null) {
+                      reg.pushManager.subscribe({
+                          userVisibleOnly: true,
+                          applicationServerKey: ""
+                      }).then(function (sub) {
+                          fillSubscribeFields(sub);
+                      }).catch(function (e) {
+                          console.error("Unable to subscribe to push", e);
+                      });
+                  } else {
+                      fillSubscribeFields(sub);
+                  }
+              });
+          }
+      </script>
+      <!-- El aviso de consentimiento de cookies de OneTrust comienza para museodelprado.es. -->
+      <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" data-document-language="true" type="text/javascript" charset="UTF-8" data-domain-script="88d2abc3-583f-4462-bc8a-cb8b6faf6850"></script>
+      <script type="text/javascript">
+          function OptanonWrapper() { }
+      </script>
+      <!-- El aviso de consentimiento de cookies de OneTrust finaliza para museodelprado.es. -->
+      @RenderSection("javascript", required: false)
+
+</body> 
+  </html> 
+  

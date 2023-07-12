@@ -1,0 +1,167 @@
+@{
+    CommunityModel Comunidad = ViewBag.Comunidad;
+    string urlPersonalizacion = ViewBag.BaseURLContent+"/imagenes/proyectos/personalizacion/"+Comunidad.Key.ToString();
+    string versionJS = "";
+    if (Comunidad.VersionJS.HasValue)
+    {
+        versionJS=Comunidad.VersionJS.Value.ToString();
+    }
+}
+
+@if (Html.GetJSYCSSunificado().HasValue&&Html.GetJSYCSSunificado().Value)
+{
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/unificado.js?v=@Html.GetVersion()"></script>
+    <!-- C�digo com�n -->
+
+    <link media="all" type="text/css" rel="stylesheet" href="@urlPersonalizacion/ElPrado/js/tooltips/bs/bootstrap.min.css?v=@versionJS" />
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/tooltips/bs/bootstrap.min.js?v=@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/templates/common.js?v=@Html.GetVersion()" defer="defer"></script>
+	<script type="text/javascript" src="@Html.GetBaseUrlStatic()/js/unificado.js?v=@Html.GetVersion()"></script>
+	<script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/freewall.js?v=@ViewBag.Version-@versionJS" defer="defer"></script> 
+     <!--Visor360 -->
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/templates/visor360.js?v=@ViewBag.Version-@versionJS"></script>
+}
+else
+{
+    
+
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/html5shiv.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/respond.min.js?v=@ViewBag.Version-@versionJS"></script>
+
+    @*<script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/jquery-1.10.2.min.js?v=@ViewBag.Version-@versionJS"></script>*@
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/jquery.hcsticky-min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/jquery.backstretch.min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/jquery.transit.min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/jquery.magnific-popup.min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/leaflet.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/jquery.expander.min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/jquery.heapbox-0.9.3.min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/jquery.dotdotdot.min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/jquery-ui.min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/responsive/theme/libraries/dirty-form/jquery.dirty.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/verge.min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/slick.min.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/response.min.js?v=@ViewBag.Version-@versionJS"></script>
+
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/responsive/theme/libraries/momentJS/moment.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/responsive/theme/libraries/momentJS/moment-timezone-with-data.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/responsive/theme/libraries/select2/js/select2.min.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/responsive/theme/libraries/fullScreenImageViewer/ddfullscreenimageviewer.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/responsive/theme/libraries/fullScreenImageViewer/zoomio.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/responsive/theme/theme.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/responsive/theme/libraries/customscroller/js/jquery.mCustomScrollbar.concat.min.js?v=@Html.GetVersion()"></script>
+
+    
+
+    <!-- C�digo com�n -->
+    <link media="all" type="text/css" rel="stylesheet" href="@urlPersonalizacion/ElPrado/js/tooltips/bs/bootstrap.min.css?v=@versionJS" />
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/tooltips/bs/bootstrap.min.js?v=@versionJS"></script>   
+    
+     <!--COMMON JS-->
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/templates/common.js?v=@Html.GetVersion()" defer="defer"></script>
+
+    <!--FREEWALL JS-->
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/freewall.js?v=@ViewBag.Version-@versionJS" defer="defer"></script>
+
+    <!--AUTOCOMPLETE JS-->
+    <script type="text/javascript" src="@ViewBag.BaseURLStatic/responsive/theme/libraries/autocomplete/jquery.autocomplete.js?v=@ViewBag.Version-@versionJS"></script>
+
+    <!-- Waypoints (Scrolling) -->
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/responsive/theme/libraries/waypoints/jquery.waypoints.min.js?v=@Html.GetVersion()"></script>
+
+    <!-- UNIFICADO JS -->
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/js/unificado.js?v=@Html.GetVersion()"></script>
+
+    <!--CKEDITOR JS-->
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/ckeditor/ckeditor.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/ckeditor/adapters/jquery.js?v=@Html.GetVersion()"></script>
+
+    @* JS insertados en unificados
+    <script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/templates/common.js?v=@ViewBag.Version-@versionJS" defer="defer"></script>
+    <script type="text/javascript" src="@ViewBag.BaseURLStatic/jsUnificar/global.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/jsUnificar/custom.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@ViewBag.BaseURLStatic/jsUnificar/ejemplosUso.js?v=@ViewBag.Version-@versionJS"></script>
+    <!--<script type="text/javascript" src="@ViewBag.BaseURLStatic/jsNuevo/waypoints.min.js?v=@ViewBag.Version-@versionJS"></script>-->
+    <script type="text/javascript"
+            src="@Html.GetBaseUrlStatic()/responsive/theme/libraries/waypoints/jquery.waypoints.min.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@ViewBag.BaseURLStatic/jsUnificar/WS.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@ViewBag.BaseURLStatic/jsUnificar/jMsAjax.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/jsUnificar/opcionesDestacadasMenuLateral.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/jsUnificar/listToSelect.jquery.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@ViewBag.BaseURLStatic/jsNuevo/jquery.gnoss.utils.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/jsNuevo/jquery.gnoss.apply.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/jsNuevo/jquery.gnoss.header.js?v=@Html.GetVersion()"></script>
+
+    <script type="text/javascript" src="@ViewBag.BaseURLStatic/jsUnificar/MVC.FichaDocumento.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/jsUnificar/MVC.FichaPerfil.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/jsUnificar/MVC.Registro.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@ViewBag.BaseURLStatic/jsUnificar/MVC.Comun.js?v=@ViewBag.Version-@versionJS"></script>
+    <script type="text/javascript" src="@Html.GetBaseUrlStatic()/jsUnificar/MVC.ComAdmin.js?v=@Html.GetVersion()"></script>
+    <script type="text/javascript" src="@ViewBag.BaseURLStatic/jsUnificar/busquedas.js?v=@ViewBag.Version-@versionJS"></script>
+
+    *@
+
+}
+
+
+
+        @foreach (string js in ViewBag.ListaJS)
+        {
+            if (!js.Contains("markerclusterer"))
+            {
+                if (js.StartsWith("defer/"))
+                {
+                    <script type="text/javascript" src="@js.Substring(6)" defer="defer"></script>
+
+                }
+                else
+                {
+                    <script type="text/javascript" src="@js"></script>
+
+                }
+            }
+        }
+
+        @{
+            string idioma = Html.GetUtilIdiomas().LanguageCode;
+
+            if (idioma.Contains("-"))
+            {
+                idioma=idioma.Substring(0, idioma.IndexOf('-'));
+            }
+        }
+        <script type="text/javascript" src="@Html.GetBaseUrlStatic()/lang/@idioma/text.js?v=@Html.GetVersion()"></script>
+
+        @* Código Google Analytics*@
+@if (Html.GetGoogleAnalytics()!=null&&Context.Request.Cookies["analiticas"]!=null&&Context.Request.Cookies["analiticas"].Equals("yes"))
+{
+    if (Comunidad.IntegracionContinuaActivada)
+    {
+        if (Comunidad.EntornoEsPro)
+        {
+            <script type="text/javascript">@Html.Raw(Html.GetGoogleAnalytics())</script>
+        }
+    }
+    else
+    {
+        <script type="text/javascript">@Html.Raw(Html.GetGoogleAnalytics())</script>
+    }
+
+}
+else if (!string.IsNullOrEmpty(@Html.GetGoogleAnalyticsCode()))
+{
+    <script>
+        $(document).ready(function () {
+            contarVisitaNoCookie("@Html.GetGoogleAnalyticsCode()");
+        });
+    </script>
+}
+<script type="text/javascript" src="@urlPersonalizacion/community.js?v=@ViewBag.Version-@versionJS"></script>
+
+
+
+
+<!--TIMELINE-->
+<input type="hidden" id="inpt_url_external_service" value="@Html.Translate("URL_SERVICIOEXTERNO")">
+<input type="hidden" id="inpt_url_cronoscopio" value="@Html.GetComunidad().Url/@Html.Translate("URL_CRONOSCOPIO")">

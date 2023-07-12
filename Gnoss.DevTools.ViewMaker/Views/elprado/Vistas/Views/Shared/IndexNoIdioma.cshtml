@@ -1,0 +1,29 @@
+@model Dictionary<string,KeyValuePair<bool, string>>
+@{
+    HeaderModel cabecera = ViewBag.Cabecera;
+    string urlPersonalizacion = ViewBag.BaseUrlPersonalizacion;
+
+	Dictionary<string, KeyValuePair<bool, string>> newMultiLingualLinks=new Dictionary<string, KeyValuePair<bool, string>>();
+
+	foreach (string idioma in cabecera.MultiLingualLinks.Keys)
+	{
+		newMultiLingualLinks.Add(idioma, new KeyValuePair<bool, string>(false, cabecera.MultiLingualLinks[idioma].Value));
+	}
+
+	cabecera.MultiLingualLinks=newMultiLingualLinks;
+}
+<section data-img="@urlPersonalizacion/cms/pagina-404.jpg" class="imagen-cabecera"></section>
+<section class="error-page no-nav">
+    <h1 class="res-tit-plus">@Html.GetText("404", "TITULO")</h1>
+    <p>@Html.GetText("COMMON", "CONTENIDOOTROSIDIOMAS")</p>
+	<ul>
+	@foreach (string idioma in Model.Keys)
+	{
+		if (@Model[idioma].Key)
+		{
+			<li><a href="@Model[idioma].Value">@Html.GetText("COMMON", "IDIOMA"+idioma)</a></li>
+		}
+	}
+	</ul>
+</section>
+

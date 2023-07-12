@@ -1,0 +1,478 @@
+@{
+    CommunityModel Comunidad = ViewBag.Comunidad;
+    HeaderModel cabecera = ViewBag.Cabecera;
+    UserIdentityModel IdentidadActual = Html.GetIdentidadActual();
+    UserProfileModel perfil = Html.GetPerfil();
+    bool nuevaColumna = false;
+}
+<header>
+    <div class="logo"><a href="@Comunidad.Url">@Comunidad.Name">Museo Nacional del Prado</a></div>
+    <nav>
+        <a href="@Html.Translate("URL_COMPRAENTRADAS")" class="texto entrada">@Html.Translate("ENTRADAS")</a>
+        @foreach (KeyValuePair<string, string> idioma in cabecera.Languajes)
+        {
+            string urlIdioma = "";
+            if (cabecera.MultiLingualLinks != null && cabecera.MultiLingualLinks.ContainsKey(idioma.Key))
+            {
+                urlIdioma = cabecera.MultiLingualLinks[idioma.Key].Value;
+            }
+
+            if (ViewBag.UtilIdiomas.LanguageCode != idioma.Key)
+            {
+                <a class="lang" lalt="@idioma.Value" href="@urlIdioma"><span>@idioma.Key</span></a>
+            }
+        }
+        <a class="open-popup-metasearch bt_buscar" href="#modal-buscador"><span>@Html.Translate("BUSCAR")</span></a>
+        <a class="ico_menuppal abrir"><span>@Html.Translate("MENU")<</span></a>
+    </nav>
+</header>
+<script language="javascript">
+    function subMenuDesp(e, clase) {
+        $(e).toggleClass('off');
+        $("." + clase).slideToggle(500);
+    }
+</script>
+<nav id="header" class="header home">
+    <form style="display:none" method="post" id="formLogin" action="@Html.GetUrlActionLogin()">
+        <input type="text" name="usuario" title="@Html.GetText("INICIO", "USUARIO")" id="usuario" />
+        <input type="text" name="password" title="@Html.GetText("INICIO", "CONTRASEÑA")" id="password" />
+    </form>
+    <ul>
+        <li class="lang">
+            @foreach (KeyValuePair<string, string> idioma in cabecera.Languajes)
+            {
+                string urlIdioma = "";
+                if (cabecera.MultiLingualLinks != null && cabecera.MultiLingualLinks.ContainsKey(idioma.Key))
+                {
+                    urlIdioma = cabecera.MultiLingualLinks[idioma.Key].Value;
+                }
+
+                if (ViewBag.UtilIdiomas.LanguageCode != idioma.Key)
+                {
+                    <a href="@urlIdioma">@idioma.Key.ToUpper()</a>
+                }
+                else
+                {
+                    <a class="on" href="#">@idioma.Key.ToUpper()</a>
+                }
+
+                //Si no es el ultimo pintar
+                if (cabecera.Languajes.Keys.Last() != idioma.Key)
+                {
+                    string barra = "|";
+                    {@barra}
+            }
+
+        }
+
+        </li>
+        @{
+            CommunityModel.TabModel pestanyaMiPrado = null;
+            CommunityModel.TabModel pestanyasPie = null;
+            List<CommunityModel.TabModel> listaPestanyasMenu = new List<CommunityModel.TabModel>();
+            foreach (CommunityModel.TabModel pestanya in Comunidad.Tabs)
+            {
+                if (pestanya.Url.EndsWith("mi-prado"))
+                {
+                    pestanyaMiPrado = pestanya;
+                }
+                if (pestanya.Url.EndsWith("pestanyas-pie"))
+                {
+                    pestanyasPie = pestanya;
+                }
+                if (pestanya.Visible)
+                {
+                    listaPestanyasMenu.Add(pestanya);
+                }
+            }
+        }
+
+        @*Pintamos todas las pestanyas, pero si somos el usuario conectado reemplazamos la última(Mi prado) por el menú del usuario*@
+        @{ foreach (CommunityModel.TabModel pestanya in listaPestanyasMenu)
+            {
+                if (pestanya.Url.EndsWith("--newcol--"))
+                {
+                    nuevaColumna = true;
+                }
+                else if (pestanya != pestanyaMiPrado && pestanya != pestanyasPie)
+                {
+
+
+                    string classActivo = "";
+                    if (ArbolActivo(pestanya) && Url.ToString() != Comunidad.Url)
+                    {
+                        classActivo += " activo";
+                    }
+                    if (nuevaColumna)
+                    {
+                        classActivo += " newcol";
+                        nuevaColumna = false;
+                    }
+
+                    <li class="@classActivo">
+                        <a href="@pestanya.Url">@pestanya.Name</a>
+                        @if (pestanya.SubTab != null && pestanya.SubTab.Where(x => x.Visible).Any())
+                        {
+                            string lastSegment = pestanya.Name.Trim();
+                            <button class="bt_desp" onclick="subMenuDesp(this, '@lastSegment.Trim().ToLower().ToString()_sub')">+</button>
+                            <div class="@lastSegment.Trim().ToLower().ToString()_sub submenu">
+                                <ul>
+                                    @{
+                                        foreach (var submenu in pestanya.SubTab)
+                                        {
+
+                                            string classActivo2 = "";
+                                            if (ArbolActivo(pestanya) && Url.ToString() != Comunidad.Url)
+                                            {
+                                                classActivo2 += " activo";
+                                            }
+                                            if (submenu.Url.Equals("---"))
+                                            {
+                                                foreach (var elemento in submenu.SubTab)
+                                                {
+                                                    if (elemento.Visible)
+                                                    {
+                                                        <li class="@classActivo2"><a href="@elemento.Url">@elemento.Name</a></li>
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (submenu.Visible)
+                                                {
+                                                    <li class="@classActivo2"><a href="@submenu.Url">@submenu.Name</a></li>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </li>
+
+                }
+            }
+
+        }
+        <li class="abajo">
+            <ul class="primero is-visible">
+                @{
+                    List<CommunityModel.TabModel> subPestanyasPie = pestanyasPie.SubTab;
+                    foreach (CommunityModel.TabModel pestanya in subPestanyasPie)
+                    {
+                        if (pestanya.Visible)
+                        {
+                            <li><a href="@pestanya.Url">@pestanya.Name</a></li>
+                        }
+                    }
+                }
+            </ul>
+            <ul class="segundo is-visible">
+                <li class="rrss facebook"><a href="@Html.Translate("URL_FACEBOOK")">Facebook</a></li>
+                <li class="rrss twitter"><a href="@Html.Translate("URL_TWITTER")">Twitter</a></li>
+                <li class="rrss insta"><a href="@Html.Translate("URL_INSTAGRAM")">Instagram</a></li>
+                <li class="rrss youtube"><a href="@Html.Translate("URL_YOUTUBE")">Youtube</a></li>
+                <li class="rrss tiktok"><a href="@Html.Translate("URL_TIKTOK")">TikTok</a></li>
+                @{
+                    string classMiPrado = "miprado";
+                    if (ArbolActivo(pestanyaMiPrado))
+                    {
+                        classMiPrado += " activo";
+                    }
+                    <li class="@classMiPrado">
+                        @if (IdentidadActual.IsGuestUser)
+                        {
+                            <a href="@pestanyaMiPrado.Url"> @pestanyaMiPrado.Name</a>
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(perfil.Foto))
+                            {
+                                <a href="@pestanyaMiPrado.Url"><span>@perfil.Name.ToUpper()[0]</span> @pestanyaMiPrado.Name</a>
+                            }
+                            else
+                            {
+                                <a href="@pestanyaMiPrado.Url"><img src="@ViewBag.BaseURLContent/@perfil.Foto" alt="Imagen de @pestanyaMiPrado.Name"> @pestanyaMiPrado.Name</a>
+                            }
+                        }
+                        @*@if (!IdentidadActual.IsGuestUser)
+                        {
+                            <span class="bt_desp" onclick="subMenuDesp(this,'user_options')">+</span>
+                            <div class="user_options submenu">
+                                <ul>
+                                    @{
+                                        List<CommunityModel.TabModel> pestanyasConectado = pestanyaMiPrado.SubTab;
+                                        foreach (CommunityModel.TabModel pestanya in pestanyasConectado)
+                                        {
+                                            if (pestanya.Visible)
+                                            {
+                                                <li><a href="@pestanya.Url">@pestanya.Name</a></li>
+                                            }
+                                        }
+                                    }
+                                    <li><a href="@perfil.Url@Html.GetText("URLSEM", "EDITARPERFIL")">@Html.Translate("MODIFICARPERFIL")</a></li>
+                                    <li><a href="@Html.GetUrlLogout()">@Html.Translate("SALIR")</a></li>
+                                </ul>
+                            </div>
+
+                        }*@
+                    </li>
+
+
+                }
+            </ul>
+        </li>
+    </ul>
+
+</nav>
+
+<section class="rec-novedades">
+    <p></p>
+</section>
+
+@functions{
+    //Devuelve si la pestanya pasada por parametro forma parte del árbol activo
+     bool ArbolActivo(CommunityModel.TabModel pPestanya)
+    {
+        bool activo = false;
+        if (pPestanya.Active)
+        {
+            return true;
+        }
+        if (pPestanya.SubTab != null)
+        {
+            foreach (CommunityModel.TabModel pPestanyaInt in pPestanya.SubTab)
+            {
+                if (ArbolActivo(pPestanyaInt))
+                {
+                    activo = true;
+                }
+            }
+        }
+        return activo;
+    }
+    //Devuelve si hay que pintar los hijos de la pestanya (tiene algun hijo visible)
+     bool PintarHijosPestanya(CommunityModel.TabModel pPestanya)
+    {
+        bool pintar = false;
+        if (pPestanya.SubTab != null)
+        {
+            foreach (CommunityModel.TabModel pPestanyaInt in pPestanya.SubTab)
+            {
+                if (pPestanyaInt.Visible)
+                {
+                    pintar = true;
+                    break;
+                }
+                if (PintarHijosPestanya(pPestanyaInt))
+                {
+                    pintar = true;
+                    break;
+                }
+            }
+        }
+        return pintar;
+    }
+
+
+
+
+ void PintarPestanya(CommunityModel.TabModel pPestanya)
+{
+    if (pPestanya.Url.Equals("---"))
+    {
+        if (PintarHijosPestanya(pPestanya))
+        {
+            <ul>
+                @foreach (CommunityModel.TabModel pPestanyaInt in pPestanya.SubTab)
+                {
+                    PintarPestanya(pPestanyaInt);
+                }
+            </ul>
+        }
+    }
+    else
+    {
+        if (pPestanya.Visible)
+        {
+            string clasePest = "";
+            string claseA = "";
+            if (pPestanya.SubTab != null && pPestanya.SubTab.Count > 0)
+            {
+                clasePest = "desplegable";
+            }
+            if (ArbolActivo(pPestanya) || pPestanya.Active)
+            {
+                claseA += " on";
+            }
+            <li class="@clasePest">
+                @{bool conMas = pPestanya.Url != "#" && PintarHijosPestanya(pPestanya);
+                    if (conMas)
+                    {
+                        claseA += " no-close";
+                    }
+                }
+
+                <a class="@claseA" href="@pPestanya.Url">
+                    @pPestanya.Name
+                    @if (conMas)
+                    {
+                        <span class="ico-mas"></span>
+                    }
+                </a>
+
+                @if (PintarHijosPestanya(pPestanya))
+                {
+                    <ul>
+                        @foreach (CommunityModel.TabModel pPestanyaInt in pPestanya.SubTab)
+                        {
+                            PintarPestanya(pPestanyaInt);
+                        }
+                    </ul>
+                }
+            </li>
+        }
+    }
+}
+
+
+}
+@{
+    CommunityModel.TabModel pestanyaMenu = null;
+    foreach (CommunityModel.TabModel pestanya in Comunidad.Tabs)
+    {
+        if (ArbolActivo(pestanya))
+        {
+            pestanyaMenu = pestanya;
+        }
+    }
+    string abierto = "";
+    if (pestanyaMenu != null && pestanyaMenu.Active)
+    {
+        abierto = "abiertoDesktop";
+    }
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if ($(window).width() >= 768) {
+            $('.abiertoDesktop').addClass('abierto');
+        }
+    });
+</script>
+
+@*@if (Context.Request.Url.ToString()!=Comunidad.Url && pestanyaMenu != null && pestanyaMenu.SubTab != null && PintarHijosPestanya(pestanyaMenu))
+    {
+        if(pestanyaMenu!=listaPestanyasMenu[listaPestanyasMenu.Count()-1])
+        {
+            <div class="bt-menu-lateral @abierto">
+                <a id="menu-lateral">
+                    <span class="txt">@pestanyaMenu.Name</span>
+                    <span class="ico">
+                </span></a>
+                @if (!pestanyaMenu.Active)
+                {
+                    //TODO 'apanyo' bicentenario
+                    if(pestanyaMenu.Name.ToLower()=="The Bicentenary"||pestanyaMenu.Name.ToLower()=="bicentenario")
+                    {
+                        CommunityModel.TabModel pestanyaAtras=pestanyaMenu;
+                        //Nivel 1
+                        if(pestanyaAtras.SubTab!=null || pestanyaAtras.SubTab.Count()>0)
+                        {
+                            foreach (CommunityModel.TabModel pestanyaAux in pestanyaAtras.SubTab)
+                            {
+                                if (ArbolActivo(pestanyaAux))
+                                {
+                                    if(pestanyaAux.SubTab!=null || pestanyaAux.SubTab.Count()>0)
+                                    {
+                                        foreach (CommunityModel.TabModel pestanyaAux2 in pestanyaAux.SubTab)
+                                        {
+                                            if (ArbolActivo(pestanyaAux2) && Context.Context.Request.Url.ToString().ToLower()!=pestanyaAux2.Url.ToLower())
+                                            {
+                                                //Nivel 2
+                                                pestanyaAtras=pestanyaAux2;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        <a href="@pestanyaAtras.Url" id="menu-lateral-back"><span class="ico">&lt;</span><span class="txt oculto">@Html.Translate("ATRAS")</span></a>
+                    }else
+                    {
+                        <a href="@pestanyaMenu.Url" id="menu-lateral-back"><span class="ico">&lt;</span><span class="txt oculto">@Html.Translate("ATRAS")</span></a>
+                    }
+                }
+            </div>
+
+            <nav class="sidr @abierto" id="sidr">
+                <!-- El menú en sí mismo -->
+                <div>
+                    <!-- Ponemos la pestanya principal -->
+                    <ul>
+                        @if (pestanyaMenu.Active)
+                        {
+                            <li>
+                                <a class="on" href="@pestanyaMenu.Url">@pestanyaMenu.Name</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li>
+                                <a href="@pestanyaMenu.Url">@pestanyaMenu.Name</a>
+                            </li>
+                        }
+                    </ul>
+                    <!-- Si la pestanya tiene hijas ponemos las hijas  -->
+                    @if(PintarHijosPestanya(pestanyaMenu))
+                    {
+                        foreach (CommunityModel.TabModel pestanyaHija in pestanyaMenu.SubTab)
+                        {
+                            @PintarPestanya(pestanyaHija)
+                        }
+                    }
+                </div>
+            </nav>
+        }
+    }*@
+
+    
+@foreach (HeaderModel.SearchHeaderModel.SearchSelectComboModel combo in cabecera.Searcher.ListSelectCombo)
+{
+    <input type="hidden" value="ub_@combo.ID@Html.Raw("@")@combo.Url" class="inpt_tipo_busqueda" />
+}
+@foreach (HeaderModel.SearchHeaderModel.SearchSelectComboModel combo in cabecera.Searcher.ListSelectCombo)
+{
+    if (!string.IsNullOrEmpty(combo.Autocomplete))
+    {
+        <input type="hidden" value="oa_@combo.ID@Html.Raw("@")@combo.Autocomplete" class="inpt_OrigenAutocompletar" />
+    }
+    if (!string.IsNullOrEmpty(combo.FacetAutocomplete))
+    {
+        <input type="hidden" value="fa_@combo.ID@Html.Raw("@")@combo.FacetAutocomplete" class="inpt_FacetasAutocompletar" />
+    }
+}
+
+
+<section id="modal-buscador" class="pop-buscador mfp-hide">
+    <div class="logo">
+        <a href="/">@Html.Translate("MUSEONACIONALPRADO")</a>
+    </div>
+    <form onsubmit="$('input#metabuscador').blur();return false;">
+        <input type="text" onsubmit="javascript:irAScroll('resultados',false); return false;" autocomplete="off" required="required" pattern="^(?!\s*$).+" placeholder="@Html.GetText("COMMON", "BUSCAR")" title="metabuscador" class="texto" id="metabuscador" autofocus="autofocus">
+        <div class="ico"></div>
+        <div class="loader">@Html.Translate("CARGANDO")</div>
+        <p>@Html.Raw(Html.Translate("BUSCAENTREXRESULTADOS").Replace("NUMRESULTADOS", Comunidad.NumberOfResources.ToString()))</p>
+    </form>
+    <div class="indice">
+    </div>
+
+    <!--BUSCADOR -->
+    <div class="buscador-layer popup-scroll" id="buscador-p1">
+        <div class="resultados oculto" id="resultados">
+        </div>
+    </div>
+    <!--Fin BUSCADOR -->
+</section>
+

@@ -1,0 +1,259 @@
+@model ResourceModel
+
+	@switch (Model.RdfType)
+	{
+		case "pmauthor":
+			string claveLugarNacimiento = "ecidoc:p96_E67_p7_gave_birth_place";
+			string claveFechaNacimiento = "ecidoc:p96_E67_p4_gave_birth_date";
+			string claveLugarDefuncion = "ecidoc:p100i_E69_p7_death_place";
+			string claveFechaDefuncion = "ecidoc:p100i_E69_p4_death_date";
+
+			string lugarNacimiento = "";
+			string fechaNacimiento = "";
+			string lugarDefuncion = "";
+			string fechaDefuncion = "";
+			if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+			{
+				if (Model.ViewSettings.SemanticProperties.ContainsKey(claveLugarNacimiento))
+				{
+					lugarNacimiento = Model.ViewSettings.SemanticProperties[claveLugarNacimiento][0].Name;
+				}
+				if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFechaNacimiento))
+				{
+					fechaNacimiento = Model.ViewSettings.SemanticProperties[claveFechaNacimiento][0].Name;
+				}
+				if (Model.ViewSettings.SemanticProperties.ContainsKey(claveLugarDefuncion))
+				{
+					lugarDefuncion = Model.ViewSettings.SemanticProperties[claveLugarDefuncion][0].Name;
+				}
+				if (Model.ViewSettings.SemanticProperties.ContainsKey(claveFechaDefuncion))
+				{
+					fechaDefuncion = Model.ViewSettings.SemanticProperties[claveFechaDefuncion][0].Name;
+				}
+			}
+			<div class="slide">
+				<a href="@Model.CompletCardLink">					 											
+					<h3 class="author">@Model.Title</h3>							
+					<p>@lugarNacimiento, @fechaNacimiento - @lugarDefuncion, @fechaDefuncion</p>					
+				</a>
+			</div>
+			break;
+		case "museumrnews":
+			<figure class="swiper-slide">
+				@if(string.IsNullOrEmpty(Model.UrlPreview))
+				{
+					<div class="imgwrap">
+						<a href="@Model.CompletCardLink">
+							<div class="no-img">
+								<div class="outer">
+									<span>@Html.Translate("IMAGENNODISPONIBLE")</span>
+								</div>
+							</div>
+						</a>			
+					</div>
+				}else
+				{
+					<a href="@Model.CompletCardLink">
+						<img src="@Model.UrlPreview" alt="Imagen de @Model.Title">
+					</a>
+				}				
+				<figcaption>
+					@if(Model.RdfType=="multimediaresource")
+					{	
+						string tipo="";
+						bool esVideo=false;
+						if (Model.ViewSettings!=null && Model.ViewSettings.SemanticProperties!=null )
+						{         
+							if(Model.ViewSettings.SemanticProperties.ContainsKey("gnoss:type"))
+							{
+								tipo=Model.ViewSettings.SemanticProperties["gnoss:type"][0].Name;
+								esVideo=Model.ViewSettings.SemanticProperties["gnoss:type"][0].Url.EndsWith("Video");
+							}
+						}
+						string claveCategoria="pm:subcategory@@@pm:categoryNode@@@skos2:prefLabel||pm:subcategory@@@pm:categoryNode@@@skos2:broader||pm:subcategory@@@pm:categoryNode@@@dce:identifier";
+						string nombreCategoria="";
+						if (Model.ViewSettings!=null && Model.ViewSettings.SemanticProperties!=null && Model.ViewSettings.SemanticProperties.ContainsKey(claveCategoria))
+						{
+							//Nombre, padre, identificador    
+							List<string> listaPadres = new List<string>();
+							Dictionary<string, string> categoriaIdentificadorNombre = new Dictionary<string, string>();
+							foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveCategoria])
+							{
+								string[] propCategoria=propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+								if(propCategoria.Length==3)
+								{
+									string nombre = propCategoria[0];
+									string padre = propCategoria[1];
+									if(padre.Contains("_"))
+									{
+										padre = padre.Substring(padre.IndexOf("_") + 1);
+									}
+									string identificador = propCategoria[2];
+									if(!listaPadres.Contains(padre))
+									{
+										listaPadres.Add(padre);
+									}
+									if (!categoriaIdentificadorNombre.ContainsKey(identificador))
+									{
+										categoriaIdentificadorNombre.Add(identificador,nombre);
+									}
+								}
+							}
+							
+							string separador = "";
+							foreach (string keyCategoria in categoriaIdentificadorNombre.Keys)
+							{
+								if(!listaPadres.Contains(keyCategoria))
+								{
+									string textoCategoria=Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(categoriaIdentificadorNombre[keyCategoria].ToLower());								
+									nombreCategoria +=separador+ textoCategoria;
+									if(separador=="")
+									{                                        
+										separador = ", ";
+									}
+								}                                
+							}  					
+						}
+						if(!esVideo)
+						{
+							if(string.IsNullOrEmpty(nombreCategoria))
+							{
+								<strong class="tipo">@tipo</strong>
+							}else
+							{
+								<strong class="tipo">@tipo, @nombreCategoria</strong>
+							}
+						}else
+						{
+							<strong class="tipo">@nombreCategoria</strong>
+						}				
+					}
+					<h2 class="trunca-texto"><a href="@Model.CompletCardLink">@Model.Title</a></h2>
+				</figcaption>
+			</figure>
+			break;
+		case "multimediaresource":
+			<figure>
+				@if(string.IsNullOrEmpty(Model.UrlPreview))
+				{
+					<div class="thumb imgwrap">
+						<a href="@Model.CompletCardLink">
+							<div class="no-img">
+								<div class="outer">
+									<span>@Html.Translate("IMAGENNODISPONIBLE")</span>
+								</div>
+							</div>
+						</a>			
+					</div>
+				}else
+				{
+					<a href="@Model.CompletCardLink">
+						<img src="@Model.UrlPreview" alt=" Imagen de @Model.Title">
+					</a>
+				}				
+				<figcaption>
+					@if(Model.RdfType=="multimediaresource")
+					{	
+						string tipo="";
+						bool esVideo=false;
+						bool esInteractivo=false;
+						if (Model.ViewSettings!=null && Model.ViewSettings.SemanticProperties!=null )
+						{         
+							if(Model.ViewSettings.SemanticProperties.ContainsKey("gnoss:type"))
+							{
+								tipo=Model.ViewSettings.SemanticProperties["gnoss:type"][0].Name;
+								esVideo=Model.ViewSettings.SemanticProperties["gnoss:type"][0].Url.EndsWith("Video");
+								esInteractivo=Model.ViewSettings.SemanticProperties["gnoss:type"][0].Url.EndsWith("Interactive");
+							}
+						}
+						string claveCategoria="pm:subcategory@@@pm:categoryNode@@@skos2:prefLabel||pm:subcategory@@@pm:categoryNode@@@skos2:broader||pm:subcategory@@@pm:categoryNode@@@dce:identifier";
+						string nombreCategoria="";
+						if (Model.ViewSettings!=null && Model.ViewSettings.SemanticProperties!=null && Model.ViewSettings.SemanticProperties.ContainsKey(claveCategoria))
+						{
+							//Nombre, padre, identificador    
+							List<string> listaPadres = new List<string>();
+							Dictionary<string, string> categoriaIdentificadorNombre = new Dictionary<string, string>();
+							foreach (SemanticPropertieModel propiedadSemantica in Model.ViewSettings.SemanticProperties[claveCategoria])
+							{
+								string[] propCategoria=propiedadSemantica.Name.Split(new string[] { "||" }, StringSplitOptions.None);
+								if(propCategoria.Length==3)
+								{
+									string nombre = propCategoria[0];
+									string padre = propCategoria[1];
+									if(padre.Contains("_"))
+									{
+										padre = padre.Substring(padre.IndexOf("_") + 1);
+									}
+									string identificador = propCategoria[2];
+									if(!listaPadres.Contains(padre))
+									{
+										listaPadres.Add(padre);
+									}
+									if (!categoriaIdentificadorNombre.ContainsKey(identificador))
+									{
+										categoriaIdentificadorNombre.Add(identificador,nombre);
+									}
+								}
+							}
+							
+							string separador = "";
+							foreach (string keyCategoria in categoriaIdentificadorNombre.Keys)
+							{
+								if(!listaPadres.Contains(keyCategoria))
+								{
+									string textoCategoria=Es.Riam.Util.UtilCadenas.ConvertirPrimeraLetraDeFraseAMayúsculas(categoriaIdentificadorNombre[keyCategoria].ToLower());								
+									nombreCategoria +=separador+ textoCategoria;
+									if(separador=="")
+									{                                        
+										separador = ", ";
+									}
+								}                                
+							}  					
+						}
+						if(!esVideo && !esInteractivo)
+						{
+							if(string.IsNullOrEmpty(nombreCategoria))
+							{
+								<strong class="tipo">@tipo</strong>
+							}else
+							{
+								<strong class="tipo">@tipo, @nombreCategoria</strong>
+							}
+						}else
+						{
+							<strong class="tipo">@nombreCategoria</strong>
+						}				
+					}
+					<h2 class="trunca-texto"><a href="@Model.CompletCardLink">@Model.Title</a></h2>
+				</figcaption>
+			</figure>
+			break;
+		default:
+			<div class="slide">
+				<figure>
+					@if(string.IsNullOrEmpty(Model.UrlPreview))
+					{
+						<div class="imgwrap">
+							<a href="@Model.CompletCardLink">
+								<div class="no-img">
+									<div class="outer">
+										<span>@Html.Translate("IMAGENNODISPONIBLE")</span>
+									</div>
+								</div>
+							</a>			
+						</div>
+					}else
+					{
+						<a href="@Model.CompletCardLink">
+							<img src="@Model.UrlPreview" alt="@Model.Title" height="220" width="220">
+						</a>
+					}			
+					<figcaption>    				
+						<div class="name"><a href="@Model.CompletCardLink">@Model.Title</a></div>
+					</figcaption>
+				</figure>
+			</div>
+			break;
+	}	
+
+

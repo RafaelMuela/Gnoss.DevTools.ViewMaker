@@ -1,0 +1,41 @@
+
+@model PaginaCMSModel
+@if (Model != null)
+{    
+	<figure>
+		<div class="imgwrap">
+			<a href="@Model.Url">
+				<div class="no-img">
+					<div class="outer">
+						<span>Imagen no disponible</span>
+					</div>
+				</div>
+			</a>		
+		</div>
+		<figcaption class="presentacion-mosaico">
+			<div>
+				<p class="etiquetas">
+					<ul>
+						<li>@Html.Translate("PAGINA")</li>
+					</ul>
+				</p>
+				<p class="" style="word-wrap: break-word;">
+					<a href="@Model.Url">@Model.Title</a>
+				</p>
+			</div>
+		</figcaption>
+		<figcaption class="presentacion-listado">
+			<div>
+				<p class="etiquetas">
+					<ul>
+						<li>@Html.Translate("PAGINA")</li>
+					</ul>
+				</p>
+				<p>
+					<a href="@Model.Url">@Model.Title</a>
+				</p>
+
+			</div>
+		</figcaption>
+	</figure>
+}
