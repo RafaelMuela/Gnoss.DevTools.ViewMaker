@@ -7,18 +7,40 @@
 
 
     string Nombre = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#given-name");
-    string Apellido = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#family-name");
-    string Puesto = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#title");
+    string Apellido1 = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#family-name");
+    string Apellido2 = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#additional-name");
+    string Telefono = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#tel");
+
+    string Puesto = !string.IsNullOrEmpty(semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#title"))
+            ? semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#title")
+            : semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasRole@@@http://purl.org/dc/elements/1.1/title");
     string Medio = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#organization-name");
     string Direccion = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#street-address");
     string Ciudad = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#locality");
+
     string Provincia = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#region");
-    string Pais = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#country-name");
+    string ComunidadAutonoma = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasRegion@@@http://purl.org/dc/elements/1.1/title");
+    List<string> Tematica = new List<string>();
+
+    var topicVirtuoso = semCmsModel.GetPropertyAtAnyLevel("http://xmlns.com/foaf/0.1/interest");
+    if (topicVirtuoso != null)
+    {
+        foreach (var item in topicVirtuoso.PropertyValues)
+        {
+            string valor = item.RelatedEntity.GetFirstValuePropertyByPath("http://purl.org/dc/elements/1.1/title");
+            Tematica.Add(valor);
+        }
+    }
+    string Pais = !string.IsNullOrEmpty(semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#country-name"))
+                   ? semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#country-name")
+                   : semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasCountry@@@http://purl.org/dc/elements/1.1/title");
+
     string CodigoPostal = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#postal-code");
     string Correo = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasEmail");
     string Idioma = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#language");
     string Contrasenya = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/evcard.owl#password");
     string Estado = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/evcard.owl#status");
+    string ErrorHubspot = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#errorHubspot");
     string Usuario = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasUID");
     Guid identidadUsuarioID = Guid.Empty;
 }
@@ -43,43 +65,59 @@
                     if (listaUsuarios != null && listaUsuarios.Count > 0)
                     {
                         identidadUsuarioID = listaUsuarios.First().Key;
-                        <p>Ficha del perfil: <a class="urlficha" href="@listaUsuarios.First().Value.UrlPerson">@listaUsuarios.First().Value.NamePerson</a></p>
+    <p>Ficha del perfil: <a class="urlficha" href="@listaUsuarios.First().Value.UrlPerson">@listaUsuarios.First().Value.NamePerson</a></p>}
                     }
-                }
                 <p>@Html.Translate("NOMBRE"): @Nombre</p>
-                <p>@Html.Translate("APELLIDO"): @Apellido</p>
+                <p>@Html.Translate("APELLIDO_1"): @Apellido1</p>
+                <p>@Html.Translate("APELLIDO_2"): @Apellido2</p>
                 <p>@Html.Translate("PUESTOCARGOPROFESIONAL"): @Puesto</p>
                 <p>@Html.Translate("MEDIO"): @Medio</p>
+                <p>@Html.Translate("TEMATICA"): @string.Join(",",Tematica)</p>
                 <p>@Html.Translate("DIRECCION"): @Direccion</p>
-                <p>@Html.Translate("CIUDAD"): @Ciudad</p>
-                <p>@Html.Translate("ESTADOPROVINCIA"): @Provincia</p>
                 <p>@Html.Translate("PAIS"): @Pais</p>
+                <p>@Html.Translate("COMUNIDAD_AUTONOMA"): @ComunidadAutonoma</p>
+                <p>@Html.Translate("ESTADOPROVINCIA"): @Provincia</p>
+                <p>@Html.Translate("CIUDAD"): @Ciudad</p>
                 <p>@Html.Translate("CODIGOPOSTAL"): @CodigoPostal</p>
                 <p>@Html.Translate("CORREOELECTRONICO"): <span class="correo">@Correo</span></p>
+                <p>@Html.Translate("TELEFONO"): @Telefono</p>
                 <p>@Html.Translate("IDIOMA"): @Idioma</p>
+                @if (!string.IsNullOrEmpty(ErrorHubspot))
+                {
+                     <p>@Html.Translate("ERRORHUBSPOT"):</p>
+                    <p>@ErrorHubspot</p>
+                }
             </fieldset>
 
-            @if (Estado.ToLower() == "pendiente")
+
+            @if (Estado.ToLower() == "pendiente" )
             {
-                <fieldset class="edicionSolicitudAcceso oculto">
-                    <legend>Selecciona los grupos a los que añadir al usuario</legend>
+                <fieldset class="edicionSolicitudAcceso ">
                     <div class="cargarGruposComunidad">
+                        <input type="checkbox" class="oculto" pertenece="false" name="nombreCortoGrupo" checked="checked" value="prensa-gral">
                     </div>
                     <div class="datosUsuario">
                         <input id="Nombre" type="hidden" value="@Nombre" name="Nombre">
-                        <input id="Apellido" type="hidden" value="@Apellido" name="Apellido">
+                        <input id="Apellido" type="hidden" value="@Apellido1" name="Apellido">
+                        <input id="Apellido2" type="hidden" value="@Apellido2" name="Apellido2">
                         <input id="Puesto" type="hidden" value="@Puesto" name="Puesto">
                         <input id="Medio" type="hidden" value="@Medio" name="Medio">
+                        @foreach (string itemTematica in Tematica)
+                        {
+                            <input  type="hidden" value="@itemTematica" name="Tematica">
+                        }
                         <input id="Direccion" type="hidden" value="@Direccion" name="Direccion">
+                        <input id="Pais" type="hidden" value="@Pais" name="Pais">
+                        <input id="ComunidadAutonoma" type="hidden" value="@ComunidadAutonoma" name="ComunidadAutonoma">
                         <input id="Ciudad" type="hidden" value="@Ciudad" name="Ciudad">
                         <input id="Provincia" type="hidden" value="@Provincia" name="Provincia">
-                        <input id="Pais" type="hidden" value="@Pais" name="Pais">
                         <input id="CodigoPostal" type="hidden" value="@CodigoPostal" name="CodigoPostal">
                         <input id="Correo" type="hidden" value="@Correo" name="Correo">
+                        <input id="Telefono" type="hidden" value="@Telefono" name="Telefono">
                         <input id="Idioma" type="hidden" value="@Idioma" name="Idioma">
                         <input id="Contrasenya" type="hidden" value="@Contrasenya" name="Contrasenya">
                         <input id="Estado" type="hidden" value="@Estado" name="Estado">
-
+                        <input id="ErrorHubspot" type="hidden" value="@ErrorHubspot" name="ErrorHubspot">
                         <a href="#" idSolicitud="@FichaDocumento.Key" class="botones-centrados bc-estandar hv-estandar aceptarSolicitud">@Html.Translate("ACEPTARSOLICITUD")</a>
                         <a href="#" idSolicitud="@FichaDocumento.Key" estado="@Estado" class="botones-centrados bc-estandar hv-estandar eliminarSolicitud">@Html.Translate("ELIMINARSOLICITUD")</a>
                     </div>
@@ -88,14 +126,54 @@
 
             @if (Estado.ToLower() == "aceptada" || Estado.ToLower() == "eliminada")
             {
-                <fieldset class="edicionSolicitudAcceso oculto">
-                    <legend>Selecciona los grupos a los que pertenece el usuario</legend>
+                <fieldset class="edicionSolicitudAcceso ">
                     <div class="cargarGruposComunidad" identidadID="@identidadUsuarioID" usuarioID="@Usuario">
+                        <input type="checkbox" class="oculto" pertenece="false" name="nombreCortoGrupo" checked="checked" value="prensa-gral">
+                    </div>
+                    @*<div class="datosUsuario">
+                        <a href="#" idSolicitud="@FichaDocumento.Key" class="botones-centrados bc-estandar hv-estandar editarSolicitud">@Html.GetText("COMMON", "GUARDAR")</a>
+                        </div>*@
+                </fieldset>
+            }
+            @if ((Estado.ToLower() == @Html.Translate("ESTADO_SOLICITUD_FALLIDA_HUBSPOT") || !string.IsNullOrEmpty(ErrorHubspot)) && Estado.ToLower() != "fallida")
+            {
+                @if(Estado.ToLower() != "pendiente")
+                {
+                    <fieldset class="edicionSolicitudAcceso ">
+                    <div class="cargarGruposComunidad">
+                        <input type="checkbox" class="oculto" pertenece="false" name="nombreCortoGrupo" checked="checked" value="prensa-gral">
                     </div>
                     <div class="datosUsuario">
-                        <a href="#" idSolicitud="@FichaDocumento.Key" class="botones-centrados bc-estandar hv-estandar editarSolicitud">@Html.GetText("COMMON", "GUARDAR")</a>
+                        <input id="Nombre" type="hidden" value="@Nombre" name="Nombre">
+                        <input id="Apellido" type="hidden" value="@Apellido1" name="Apellido">
+                        <input id="Apellido2" type="hidden" value="@Apellido2" name="Apellido2">
+                        <input id="Puesto" type="hidden" value="@Puesto" name="Puesto">
+                        <input id="Medio" type="hidden" value="@Medio" name="Medio">
+                        @foreach (string itemTematica in Tematica)
+                        {
+                            <input  type="hidden" value="@itemTematica" name="Tematica">
+                        }
+                        <input id="Direccion" type="hidden" value="@Direccion" name="Direccion">
+                        <input id="Pais" type="hidden" value="@Pais" name="Pais">
+                        <input id="ComunidadAutonoma" type="hidden" value="@ComunidadAutonoma" name="ComunidadAutonoma">
+                        <input id="Ciudad" type="hidden" value="@Ciudad" name="Ciudad">
+                        <input id="Provincia" type="hidden" value="@Provincia" name="Provincia">
+                        <input id="CodigoPostal" type="hidden" value="@CodigoPostal" name="CodigoPostal">
+                        <input id="Correo" type="hidden" value="@Correo" name="Correo">
+                        <input id="Telefono" type="hidden" value="@Telefono" name="Telefono">
+                        <input id="Idioma" type="hidden" value="@Idioma" name="Idioma">
+                        <input id="Contrasenya" type="hidden" value="@Contrasenya" name="Contrasenya">
+                        <input id="Estado" type="hidden" value="@Estado" name="Estado">
+                        <input id="ErrorHubspot" type="hidden" value="@ErrorHubspot" name="ErrorHubspot">
+
+                        <a href="#" idSolicitud="@FichaDocumento.Key" class="botones-centrados bc-estandar hv-estandar reprocesarHubspot">@Html.Translate("REPROCESARHUBSPOT")</a>
                     </div>
-                </fieldset>
+                    </fieldset>
+               }else
+               {
+                      <a href="#" idSolicitud="@FichaDocumento.Key" class="botones-centrados bc-estandar hv-estandar reprocesarHubspot">@Html.Translate("REPROCESARHUBSPOT")</a>  
+               }
+               
             }
         </form>
         <a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a>
@@ -106,11 +184,13 @@
     ResourceModel fichaRecurso = Model.Resource;
     ResourceModel.ActionsModel acciones = fichaRecurso.Actions;
 
-    if (acciones.Edit && (string.IsNullOrEmpty(@Estado) || @Estado.ToUpper() != "ACEPTADA"))
+    if (acciones.Edit && (!string.IsNullOrEmpty(@Estado) || @Estado.ToUpper().Equals("ACEPTADA")))
     {
-        <a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
+        @*<a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
             <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")</span>
-        </a>
+        </a>*@        
+        <a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();" style="display: inline-block;">	
+                <span class="txt">@(@Estado.ToUpper().Equals("ACEPTADA") ? @Html.Translate("ELMINAR_EL_USUARIO_DE_SALA_DE_PRENSA") : @Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")  ) </span></a>
         <div class="confirmarBorrar oculto">
             @Html.Translate("PREGUNTAESTASSEGURO")
             <a onclick="AccionRecurso_Eliminar_Aceptar('@fichaRecurso.ListActions.UrlDelete', '@fichaRecurso.Key')">@Html.GetText("COMMON", "SI")</a>
@@ -124,7 +204,7 @@
 <script type="text/javascript">
     $(document).ready(function () {
         //Cargar grupos de comunidad
-        if ($(".cargarGruposComunidad").length) {
+        @*if ($(".cargarGruposComunidad").length) {
             var arg = {};
             arg.pNombreServicio = 'servicioPradoProfesionales';
             arg.pNombreAccion = 'ObtenerGruposComunidad';
@@ -227,25 +307,69 @@
 				
 			    OcultarUpdateProgress();
 			});
-        }
+        }*@
 		
 		
+        //Reprocesar hubspot 
+        $("form.formularioAceptarSolicitudProfesional .reprocesarHubspot").click(function (event) {
+            event.preventDefault();
+            var arg = {};
+            arg.pNombreServicio = 'servicioPradoProfesionales';
+            arg.pNombreAccion = 'ReprocesarHubspot';
+            arg.pIdSolicitud = $(this).attr('idSolicitud');
+            var tematica = []           
+            $('.formularioAceptarSolicitudProfesional .datosUsuario input').each(function () {
+                var nombre = $(this).attr("name");
+                var valor = $(this).val();
+                if (nombre === "Tematica") {
+                    tematica.push(valor)
+                } else {
+                arg[nombre] = valor;
+                }                
+            });
+            if (tematica.length > 0) {
+                arg["Tematica"] = tematica;
+            }
+            var numGrupo = 0;
+            $('.cargarGruposComunidad input:checked').each(function () {
+                arg['pNombreCortoGrupos[' + numGrupo + ']'] = $(this).val();
+                numGrupo++;
+            });
+
+            MostrarUpdateProgress();
+            var urlAction = urlComunidadConIdioma + '/ExternalService';
+            GnossPeticionAjax(urlAction, arg, true)
+			.done(function (data) {
+			    if (data.status == 1) {
+			        $('.edicionSolicitudAcceso').html("<p>" + data.message.replace("\n", "</br>") + "</p>");
+			    } else {
+			        parent.showInfoBar(data.message, true, true);
+			    }
+			    OcultarUpdateProgress(); 
+			});
+        });
 		
 
         //Aceptar Solicitud acceso profesionales
-        $("form.formularioAceptarSolicitudProfesional .aceptarSolicitud").click(function (event) {
+        $("form.formularioAceptarSolicitudProfesional .aceptarSolicitud, #reprocesarSolicitud").click(function (event) {
             event.preventDefault();
             var arg = {};
             arg.pNombreServicio = 'servicioPradoProfesionales';
             arg.pNombreAccion = 'AceptarSolicitud';
             arg.pIdSolicitud = $(this).attr('idSolicitud');
-
+            var tematica = []           
             $('.formularioAceptarSolicitudProfesional .datosUsuario input').each(function () {
                 var nombre = $(this).attr("name");
                 var valor = $(this).val();
+                if (nombre === "Tematica") {
+                    tematica.push(valor)
+                } else {
                 arg[nombre] = valor;
+                }                
             });
-
+            if (tematica.length > 0) {
+                arg["Tematica"] = tematica;
+            }
             var numGrupo = 0;
             $('.cargarGruposComunidad input:checked').each(function () {
                 arg['pNombreCortoGrupos[' + numGrupo + ']'] = $(this).val();

@@ -1,0 +1,197 @@
+﻿@model CMSComponentGroupComponents
+
+@if (Model != null)
+{
+
+    string urlComunidad = Html.GetComunidad().Url;
+
+    <div id="formAcceso" class="res-cont">
+        <form class="form-general formularioLogin oculto">
+            <strong class="rastro">@Html.Translate("SALADEPRENSA")</strong>
+            <h1>@Html.Translate("ACCESOPROFESIONALES")</h1>
+            <fieldset>
+                <legend>@Html.Translate("INICIARSESION")</legend>
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("USUARIO")*" name="Usuario" id="Usuario">
+                    <label for="Usuario">@Html.Translate("USUARIO")</label>
+                </div>
+                <div class="row">
+                    <input type="password" placeholder="@Html.Translate("CONTRASENA")*" name="Contrasenya" id="Contrasenya">
+                    <label for="Contrasenya">@Html.Translate("CONTRASENA")</label>
+                </div>
+                <div class="row">
+                    <a class="botones-centrados bc-estandar hv-estandar loginUsuario" href="#">Acceder</a>
+                    <a class="fg-pass" href="@(urlComunidad + "/" + Html.GetText("URLSEM", "OLVIDEPASSWORD"))">@Html.Translate("OLVIDASTELACONTRASENA")</a>
+                    <div class="warning oculto">@Html.Translate("ELCORREOOLACONTRASENASONINCORRECTOS")</div>
+                </div>
+                <div class="crear-cuenta">
+                    <a href="#">@Html.Translate("CREARCUENTAAHORA")</a>
+                </div>
+            </fieldset>
+        </form>
+
+        <form class="form-general formularioRegistro oculto">
+            <strong class="rastro">@Html.Translate("SALADEPRENSA")</strong>
+            <h1>@Html.Translate("ACCESOPROFESIONALES")</h1>
+            <fieldset>
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("NOMBRE")*" class="obligatorio" name="Nombre" id="Nombre" required>
+                    <label for="nombre">@Html.Translate("NOMBRE")</label>
+                </div>
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("APELLIDO_1")*" class="obligatorio" name="Apellido" id="Apellido" required>
+                    <label for="Apellido">@Html.Translate("APELLIDO_1")</label>
+                </div>
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("APELLIDO_2")"  name="Apellido2" id="Apellido2">
+                    <label for="Apellido2">@Html.Translate("APELLIDO_2")</label>
+                </div>
+                @{
+                    CMSComponentQuerySPARQL consultaSparqlPuesto = (CMSComponentQuerySPARQL)Model.ComponentList.Where(x => x.Styles.Equals("Puesto")).First();
+
+                    
+                    if (consultaSparqlPuesto != null)
+                    {
+                        <div class="form-group">
+                            <label for="Puesto">@Html.Translate("PUESTOCARGOPROFESIONAL")*</label><br />
+                            <select class="form-control obligatorio" name="Puesto" id="Puesto" required>
+                                <option label=" "></option>
+                                @foreach (System.Data.DataRow fila in consultaSparqlPuesto.DataSetResult.Tables[0].Rows)
+                                {
+                                    string idGnoss = fila["s"].ToString();
+                                    string titulo = fila["titulo"].ToString();
+                                    <option value="@idGnoss">@titulo</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                }
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("MEDIO")*" class="obligatorio" name="Medio" id="Medio" required>
+                    <label for="Medio">@Html.Translate("MEDIO")</label>
+                </div>
+                @{
+
+                    CMSComponentQuerySPARQL consultaSparqlTematica = Model.ComponentList.Where(x => x.Styles.Equals("tematica")) != null && Model.ComponentList.Where(x => x.Styles.Equals("tematica")).Count() > 0
+                            ? (CMSComponentQuerySPARQL)Model.ComponentList.Where(x => x.Styles.Equals("tematica")).First()
+                            : null;
+
+                    if (consultaSparqlTematica != null)
+                    {
+                        <div class="form-check">
+                            <label for="Tematica">@Html.Translate("TEMATICA")*</label><br />                            
+                                @foreach (System.Data.DataRow fila in consultaSparqlTematica.DataSetResult.Tables[0].Rows)
+                                {
+                                    string idGnoss = fila["s"].ToString();
+                                    string titulo = fila["titulo"].ToString();                                    
+                                    <input class="form-check-input" type="checkbox" value="@idGnoss"  name="Tematica">
+                                    <label class="form-check-label" for="Tematica">@titulo</label><br>
+                                                                       
+                                }                            
+                        </div>
+                    }
+                }
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("DIRECCION")" name="Direccion" id="Direccion">
+                    <label for="Direccion">@Html.Translate("DIRECCION")</label>
+                </div>
+                @{
+                    CMSComponentQuerySPARQL consultaSparqlPais = (CMSComponentQuerySPARQL)Model.ComponentList.Where(x => x.Styles.Equals("pais")).First();
+
+                    if (consultaSparqlPais != null)
+                    {
+                        <div class="form-group">
+                            <label for="Pais">@Html.Translate("PAIS")</label><br />
+                            <select class="form-control" name="Pais" id="Pais">
+                                <option label=" "></option>
+                                @foreach (System.Data.DataRow fila in consultaSparqlPais.DataSetResult.Tables[0].Rows)
+                                {
+                                    string idGnoss = fila["s"].ToString();
+                                    string titulo = fila["titulo"].ToString();
+                                    <option value="@idGnoss">@titulo</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                }
+                @{
+                    CMSComponentQuerySPARQL consultaSparqlEstado = (CMSComponentQuerySPARQL)Model.ComponentList.Where(x => x.Styles.Equals("estados")).First();
+                    if (consultaSparqlEstado != null)
+                    {
+                        <div class="form-group oculto">
+                            <label for="ComunidadAutonoma">@Html.Translate("COMUNIDAD_AUTONOMA")</label><br />
+                            <select class="form-control" name="ComunidadAutonoma" id="ComunidadAutonoma">
+                                <option label=" "></option>
+                                @foreach (System.Data.DataRow fila in consultaSparqlEstado.DataSetResult.Tables[0].Rows)
+                                {
+                                    string idGnoss = fila["s"].ToString();
+                                    string titulo = fila["titulo"].ToString();
+                                    <option value="@idGnoss">@titulo</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                }
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("PROVINCIA")" name="Provincia" id="Provincia">
+                    <label for="Provincia">@Html.Translate("PROVINCIA")</label>
+                </div>
+
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("CIUDAD")" name="Ciudad" id="Ciudad">
+                    <label for="Ciudad">@Html.Translate("CIUDAD")</label>
+                </div>
+
+
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("CODIGOPOSTAL")" name="CodigoPostal" id="CodigoPostal">
+                    <label for="CodigoPostal">@Html.Translate("CODIGOPOSTAL")</label>
+                </div>
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("CORREOELECTRONICO")*" class="obligatorio" name="Correo" id="Correo" required>
+                    <label for="Correo">@Html.Translate("CORREOELECTRONICO")</label>
+                </div>
+                <div class="row">
+                    <input type="text" placeholder="@Html.Translate("TELEFONO") (+xxxxxxxxxxx)" name="Telefono" id="Telefono" pattern="[+][0-9]*">
+                    <label for="Telefono">@Html.Translate("TELEFONO")</label>
+                </div>
+
+
+                <div class="check-radio first">
+                    <input name="chkAceptoCondiciones" type="checkbox" class="obligatorio" id="chkAceptoCondiciones">
+                    <label for="chkAceptoCondiciones"><span></span><div class="texto">@Html.Raw(Html.Translate("ACEPTOCONDICINOESPROFESIONAL"))</div></label>
+                </div>
+
+
+
+                <input type="hidden" name="Idioma" id="Idioma" value="@Html.GetUtilIdiomas().LanguageCode">
+                <p class="disclaim">@Html.Translate("NOTALOSCAMPOSCON*SONREQUERIDOS")</p>
+                <div class="row">
+                    <a class="botones-centrados bc-estandar hv-estandar crearSolicitud" href="#">@Html.Translate("CREARSOLICITUD")</a>
+                </div>
+                <div class="warning errorSolicitud oculto">
+                    <p class="errorMail errorSolicitud oculto">@Html.Translate("FORMATOEMAILINCORRECTO")</p>
+                    <p class="errorCamposObligatorios errorSolicitud oculto">@Html.Translate("LOSCAMPOSCON*SONREQUERIDOS")</p>
+                    <p class="errorGenerico errorSolicitud oculto">@Html.Translate("ERRORGENERICO")</p>
+                    <p class="errorTelefono errorSolicitud oculto">@Html.Translate("FORMATO_TELEFONO_INCORRECTO")</p>
+                </div>
+
+                <div class="tengo-cuenta">
+                    <a href="#">@Html.Translate("YATENGOCUENTA")</a>
+                </div>
+            </fieldset>
+        </form>
+
+        <form class="form-general formularioRegistroOK oculto">
+            <strong class="rastro">@Html.Translate("SALADEPRENSA")</strong>
+            <h1>@Html.Translate("ACCESOPROFESIONALES")</h1>
+            <fieldset>
+                <div class="row">
+                    <p>@Html.Raw(Html.Translate("SOLICITUDDEACCESOPROFESIONALENVIADA"))</p>
+                </div>
+                <fieldset>
+        </form>
+
+    </div>
+}
+
