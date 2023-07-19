@@ -1,3 +1,4 @@
+@*[security|||shared/_propiedadontoselectorentidadlectura_obras.cshtml|||elprado]*@
 @model SemanticPropertyModel
 
 @{
@@ -49,7 +50,7 @@
                 {
                     orden = "1";
                 }
-                if (orden == "1")
+                if (orden == "1" && valorPropiedad.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#supportNode") != null)
                 {
                     //Cada una de las ramas
                     string textoSoporte = valorPropiedad.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#supportNode").PropertyValues.Last().RelatedEntity.GetPropertyByPath("http://www.w3.org/2008/05/skos#prefLabel").FirstPropertyValue.Value;

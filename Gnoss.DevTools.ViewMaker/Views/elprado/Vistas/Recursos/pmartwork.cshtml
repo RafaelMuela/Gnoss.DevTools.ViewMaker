@@ -1,3 +1,4 @@
+@*[security|||pmartwork|||elprado]*@
 @using System.Data;
 @using System.Reflection;
 @using System.Drawing;
@@ -805,12 +806,13 @@
             </nav>
             <!-- <a class="anclaInit">@Html.Translate("BAJAR")</a> -->
             <a href="#ficha-obra" class="scroll-to" title="Continuar a ficha de la obra">Continuar a ficha de la obra</a>
-            <dl id="descarga-modal" class="menu-modal mfp-hide">
-                <dt>Descargar</dt>
-                <dd><a onclick="goMenuModal('@urlDescargaPersonal')"><p>@Html.Translate("USOPERSONAL")</p></a></dd>
-                <dd><a onclick="goMenuModal('@urlDescargaComercial')"><p>@Html.Translate("USOCOMERCIAL")</p></a></dd>
+         <a href="#ficha-obra" class="scroll-to" title="Continuar a ficha de la obra">Continuar a ficha de la obra</a>
+              <div id="descarga-modal" class="menu-modal mfp-hide">
+                <div class="menu-modal-heading">Descargar</div>
+                <div><a onclick="goMenuModal('@urlDescargaPersonal')"><p>@Html.Translate("USOPERSONAL")</p></a></div>
+                <div><a onclick="goMenuModal('@urlDescargaComercial')"><p>@Html.Translate("USOCOMERCIAL")</p></a></div>
                 <button title="Close (Esc)" type="button" class="mfp-close">×</button>
-            </dl>
+            </div>
         </section>
         <!-- Fin Visor Zoom -->
     }
@@ -834,6 +836,7 @@
                         <li class="menu-multimedia"><a>@Html.Translate("MULTIMEDIA")</a></li>
                     }
                     <li class="menu-ficha"><a>@Html.Translate("FICHATECNICA")</a></li>
+                    <li class="menu-visor360"  style="display:none"><a>@Html.Translate("VISOR360")</a></li>
                     @if (propMasObras != null && propMasObras.PropertyValues != null && propMasObras.PropertyValues.Count > 0)
                     {
                         <li class="menu-mas-obras"><a>@Html.Translate("MASOBRAS")</a></li>
@@ -843,14 +846,15 @@
                         <li class="menu-tienda-prado"><a>@Html.Translate("TIENDAPRADO")</a></li>
                     }
                 </ul>
-                <div class="menu-small">
-                    <select class="select-custom">
+                <div class="menu-small form-group">
+                    <select class="select-custom form-control" title="Menu Pequeño">
                         <option value="menu-visor">@Html.Translate("INICIO")</option>
                         @if (multimediaEnlazado != null && multimediaEnlazado.PropertyValues.Count > 0)
                         {
                             <option value="menu-multimedia">@Html.Translate("MULTIMEDIA")</option>
                         }
                         <option value="menu-ficha">@Html.Translate("FICHATECNICA")</option>
+                        <option class="menu-visor360" value="menu-visor360"  style="display:none">@Html.Translate("VISOR360")</option>
                         @if (propMasObras != null && propMasObras.PropertyValues != null && propMasObras.PropertyValues.Count > 0)
                         {
                             <option value="menu-mas-obras">@Html.Translate("MASOBRAS")</option>
@@ -1049,7 +1053,7 @@
 
                     if (propTags != null && propTags.PropertyValues != null && propTags.PropertyValues.Count > 0)
                     {
-                        <h1>@Html.Translate("ETIQUETAS")</h1>
+                        <h2>@Html.Translate("ETIQUETAS")</h2>
                         <div class="tags">
                             @{int numTag = 0;
                                 foreach (SemanticPropertyModel.PropertyValue propTag in propTags.PropertyValues)
@@ -1210,11 +1214,11 @@
                                             @if (!string.IsNullOrEmpty(imagenRM))
                                             {
                                                 string imagenRMUrlCompleta = string.Concat(ViewBag.BaseUrlContent, "/", imagenRM);
-                                                <img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
+                                                <img alt="@tituloRM" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
                                             }
                                             else
                                             {
-                                                <img alt="" src="img/provisionales/miniatura_multimedia.png" onclick="" />
+                                                <img alt="@tituloRM" src="img/provisionales/miniatura_multimedia.png" onclick="" />
                                             }
                                         </a>
                                         <figcaption>
@@ -1242,11 +1246,11 @@
                                             @if (!string.IsNullOrEmpty(imagenRM))
                                             {
                                                 string imagenRMUrlCompleta = string.Concat(ViewBag.BaseUrlContent, "/", imagenRM);
-                                                <img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
+                                                <img alt="@tituloRM" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
                                             }
                                             else
                                             {
-                                                <img alt="" src="img/provisionales/miniatura_multimedia.png" onclick="" />
+                                                <img alt="@tituloRM" src="img/provisionales/miniatura_multimedia.png" onclick="" />
                                             }
                                         </a>
                                         <figcaption>
@@ -1270,7 +1274,7 @@
         }
         <!-- Si tiene RDFa -->
         <section class="ficha" id="ficha">
-            <h1><span>@Html.Translate("FICHATECNICA")</span></h1>
+            <h2 class="heading"><span>@Html.Translate("FICHATECNICA")</span></h2>
             <div class="stick-container">
                 <div class="imagenes">
                     @{
@@ -1335,8 +1339,8 @@
                                             {
                                                 <div class="slide">
                                                     <a onclick="javascript:muestraImagen(@numObra);">
-                                                        <img data-lazy="@Html.ObtenerImagenConTamano(imagen.Item1, 832)" data-pyr="@imagen.Item1.Replace(".jpg", "/")" class="img_cache" data-width="@imagen.Item2" data-height="@imagen.Item3">
-                                                        <noscript><img alt=" " src="@Html.ObtenerImagenConTamano(imagen.Item1, 832)"></noscript>
+                                                        <img alt="@tituloObra" data-lazy="@Html.ObtenerImagenConTamano(imagen.Item1, 832)" data-pyr="@imagen.Item1.Replace(".jpg", "/")" class="img_cache" data-width="@imagen.Item2" data-height="@imagen.Item3">
+                                                        <noscript><img alt="@tituloObra" src="@Html.ObtenerImagenConTamano(imagen.Item1, 832)"></noscript>
                                                         <span class="help">@Html.Translate("CLICKPARAAMPLIAR")</span>
                                                     </a>
                                                 </div>
@@ -1366,7 +1370,7 @@
                                         @foreach (Tuple<string, string, string> imagen in listaImagenesObraAnchoAlto)
                                         {
                                             <div class="slide">
-                                                <img src="@Html.ObtenerImagenConTamano(imagen.Item1, 268)">
+                                                <img alt="Imagen del carrusel"src="@Html.ObtenerImagenConTamano(imagen.Item1, 268)">
                                             </div>
                                         }
                                     </div>
@@ -1680,7 +1684,7 @@
                         {
                             <div class="dsp">
                                 @{
-                                    <h2>@Pm_frame.GetLabel(nameof(Pm_frame.Pm_modelType), idiomaUsuario) <span class='ico'>+</span></h2>
+                                    <h3>@Pm_frame.GetLabel(nameof(Pm_frame.Pm_modelType), idiomaUsuario) <span class='ico'>+</span></h3>
                                     <p class="mostrable">
                                         @{
 
@@ -1745,7 +1749,7 @@
                         if (propBiblio != null && propBiblio.PropertyValues != null && propBiblio.PropertyValues.Count > 0)
                         {
                             <div class="dsp">
-                                <h2>@titularBibliografia <span class="ico">+</span></h2>
+                                <h3>@titularBibliografia <span class="ico">+</span></h3>
                                 @{
                                     SortedDictionary<int, List<SemanticPropertyModel.PropertyValue>> listaPropiedadesBibliografia = new SortedDictionary<int, List<SemanticPropertyModel.PropertyValue>>();
 
@@ -1809,7 +1813,7 @@
                                 @foreach (E37_Mark filigrana in Pm_hasFiligree)
                                 {
                                     int numFiligrana = Pm_hasFiligree.IndexOf(filigrana) + 1;
-                                    <h2 @Html.Raw(numFiligrana != 1 ? "class='mostrable oculto'" : "")>@titularFiligrana @Html.Raw(numFiligrana != 1 ? $"{numFiligrana}" : "<span class='ico'>+</span>")</h2>
+                                    <h3 @Html.Raw(numFiligrana != 1 ? "class='mostrable oculto'" : "")>@titularFiligrana @Html.Raw(numFiligrana != 1 ? $"{numFiligrana}" : "<span class='ico'>+</span>")</h3>
                                     <p class="mostrable">
                                         @{
                                             bool anyadirBr = false;
@@ -1831,7 +1835,7 @@
                                                 {
 
                                                     <div class="slide">
-                                                        <a><img src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagenTamagno.Ecidoc_p3_has_note, 268)"></a>
+                                                        <a><img alt="Imagen de la bibliografia" src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagenTamagno.Ecidoc_p3_has_note, 268)"></a>
                                                     </div>
 
                                                 }
@@ -2007,7 +2011,7 @@
                                                     if (imagen != null)
                                                     {
                                                         <div class="slide">
-                                                            <a onclick="javascript: muestraImagen(@listaImagenesObraAnchoAlto.IndexOf(imagenTamagno));"><img src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagen.Ecidoc_p3_has_note, 268)" width="@imagenTamagno.Item2" height="@imagenTamagno.Item3" alt=""></a>
+                                                            <a onclick="javascript: muestraImagen(@listaImagenesObraAnchoAlto.IndexOf(imagenTamagno));"><img src="@ViewBag.BaseUrlContent/@Html.ObtenerImagenConTamano(imagen.Ecidoc_p3_has_note, 268)" width="@imagenTamagno.Item2" height="@imagenTamagno.Item3" alt="Imagen de la bibliografia"></a>
                                                         </div>
                                                     }
                                                 }
@@ -2120,7 +2124,7 @@
                             if (diccionarioIdentifiers != null && diccionarioIdentifiers.Count > 0)
                             {
                                 <div class="dsp">
-                                    <h2>@titularInventarios <span class="ico">+</span></h2>
+                                    <h3>@titularInventarios <span class="ico">+</span></h3>
                                     @foreach (KeyValuePair<SemanticPropertyModel.PropertyValue, int> par in diccionarioIdentifiers.OrderBy(p => p.Value))
                                     {
                                         SemanticPropertyModel.PropertyValue inventario = par.Key;
@@ -2185,7 +2189,7 @@
                         if (propInscripciones != null && propInscripciones.PropertyValues != null && propInscripciones.PropertyValues.Count > 0)
                         {
                             <div class="dsp">
-                                <h2>@titularInscripciones <span class="ico">+</span></h2>
+                                <h3>@titularInscripciones <span class="ico">+</span></h3>
                                 @foreach (SemanticPropertyModel.PropertyValue inscripcion in propInscripciones.PropertyValues)
                                 {
                                     if (inscripcion != null)
@@ -2252,7 +2256,7 @@
                             }
 
                             <div class="dsp">
-                                <h2>@titularTranscripciones <span class="ico">+</span></h2>
+                                <h3>@titularTranscripciones <span class="ico">+</span></h3>
 
 
                                 @if (!string.IsNullOrEmpty(trancripciones))
@@ -2278,7 +2282,7 @@
                         if (listaExposiciones != null && listaExposiciones.Count > 0)
                         {
                             <div class="dsp">
-                                <h2>@Html.Translate("EXPOSICIONES") <span class="ico">+</span></h2>
+                                <h3>@Html.Translate("EXPOSICIONES") <span class="ico">+</span></h3>
                                 @foreach (Exposicion expo in listaExposiciones)
                                 {
 
@@ -2395,7 +2399,7 @@
                             if (!string.IsNullOrEmpty(ubicacionSala))
                             {
                                 <div class="dsp">
-                                    <h2>@Html.Translate("UBICACION") <span class="ico">+</span></h2>
+                                    <h3>@Html.Translate("UBICACION") <span class="ico">+</span></h3>
                                     <p class="mostrable">@Html.Raw(ubicacionSala)</p>
                                     <script>
                                         var mapaUbik;
@@ -2458,7 +2462,7 @@
 
 
                                         <div class="dsp">
-                                            <h2>@Html.Translate("OBJETOSPRESENTADOS") <span class="ico">+</span></h2>
+                                            <h3>@Html.Translate("OBJETOSPRESENTADOS") <span class="ico">+</span></h3>
                                             @foreach (SemanticPropertyModel.PropertyValue propObjeto in propObjetosRepresentados.PropertyValues)
                                             {
                                                 string descripcionObjeto = null;
@@ -2616,6 +2620,33 @@
             </div>
         </section>
         <!-- No tiene RDFa-->
+        <section class="visor360 oculto" id="visor360">
+            @*<script type="text/javascript" src="@urlPersonalizacion/ElPrado/js/templates/visor360.js"></script>*@
+            <h2>@Html.Translate("VISOR360")</h2>
+            <div class="visor360">
+                <div id="mySpriteSpin"></div>
+                <button id="visor360fsbutton">@Html.Translate("PANTALLACOMPLETA")</button>
+                <div class="helper rota-x">
+                    <img src="@urlPersonalizacion/ElPrado/interactivos/tesoro-delfin/img/ico_rota_x.gif" alt="@Html.Translate("ARRASTRACURSOR")">
+                </div>
+            </div>
+            <script>
+                $(document).ready(function () {
+                    var myPromise = new Promise(comportamientoVisorPrado360.isCargarVisor360);
+                    myPromise.then(
+                        function (value) {
+                            if (value) {
+                                comportamientoVisorPrado360.init();
+                            }
+                        }
+                    );
+                    //comportamientoVisorPrado360.init();
+                    //var recursoID = $(".recurso_id").val().replace("/", "").replace("_","");
+                    //var url = `interactivos/tesoro-delfin/secuencias/${recursoID}/`;
+                    //iniciaInteractivo(url);
+                })
+            </script>
+        </section>
         @{
             if (!autorAnonimo)
             {
@@ -2754,17 +2785,17 @@
                     <div>
                         @if (idiomaNav.Equals("es"))
                         {
-                            <h1><a href="http://www.tiendaprado.com/es/404-impresion-a-la-carta" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h1>
+                            <h2><a href="http://www.tiendaprado.com/es/404-impresion-a-la-carta" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h2>
                             @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMPRESION"))
                         }
                         else
                         {
-                            <h1><a href="http://www.tiendaprado.com/en/404-print-on-demand" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h1>
+                            <h2><a href="http://www.tiendaprado.com/en/404-print-on-demand" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h2>
                             @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMPRESION"))
                         }
                     </div>
                     <div>
-                        <h1><a href="mailto:bimnp@museodelpradodifusion.es" target="_blank">@Html.Translate("BANCODEIMAGENES")</a></h1>
+                        <h2><a href="mailto:bimnp@museodelpradodifusion.es" target="_blank">@Html.Translate("BANCODEIMAGENES")</a></h2>
                         @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMAGENES"))
                     </div>
                 </div>
@@ -3117,17 +3148,17 @@
                             {
                                 if (string.IsNullOrEmpty(tipoAutoria))
                                 {
-                                    <h2 class="borde">@nombreAutor</h2>
+                                    <strong class="borde">@nombreAutor</strong>
                                 }
                                 else
                                 {
                                     if (AutoriaPrimero(tipoAutoria) && autor.autoria.Count == 0)
                                     {
-                                        <h2 class="borde">@tipoAutoria @nombreAutor </h2>
+                                        <strong class="borde">@tipoAutoria @nombreAutor </strong>
                                     }
                                     else
                                     {
-                                        <h2 class="borde">@nombreAutor  @tipoAutoria</h2>
+                                        <strong class="borde">@nombreAutor  @tipoAutoria</strong>
                                     }
                                 }
 
@@ -3186,13 +3217,13 @@
 
                                             if (nombreAutor.Contains("Anónimo") || nombreAutor.Contains("Taller"))
                                             {
-                                                <h2 class="borde"> @nombreAutor -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</h2>
+                                                <strong class="borde"> @nombreAutor -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</strong>
 
                                             }
                                             else
                                             {
 
-                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</h2>
+                                                <strong class="borde"><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- (@valorAutorias)</strong>
 
                                             }
                                         }
@@ -3201,13 +3232,13 @@
                                             if (nombreAutor.Contains("Anónimo") || nombreAutor.Contains("Taller"))
                                             {
 
-                                                <h2 class="borde">@nombreAutor (@valorAutorias)</h2>
+                                                <strong class="borde">@nombreAutor (@valorAutorias)</strong>
 
                                             }
                                             else
                                             {
 
-                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> (@valorAutorias)</h2>
+                                                <strong class="borde"><a href="@enlaceAutor">@nombreAutor</a> (@valorAutorias)</strong>
 
                                             }
                                         }
@@ -3219,13 +3250,13 @@
                                             if (nombreAutor.Contains("Anónimo") || nombreAutor.Contains("Taller"))
                                             {
 
-                                                <h2 class="borde">@nombreAutor -@String.Join(", ", tipoAutor.ToArray())- @tipoAutoria</h2>
+                                                <strong class="borde">@nombreAutor -@String.Join(", ", tipoAutor.ToArray())- @tipoAutoria</strong>
 
                                             }
                                             else
                                             {
 
-                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- @tipoAutoria</h2>
+                                                <strong class="borde"><a href="@enlaceAutor">@nombreAutor</a> -@String.Join(", ", tipoAutor.ToArray())- @tipoAutoria</strong>
 
                                             }
                                         }
@@ -3234,13 +3265,13 @@
                                             if (nombreAutor.Contains("Anónimo") || nombreAutor.Contains("Taller"))
                                             {
 
-                                                <h2 class="borde">@nombreAutor @tipoAutoria</h2>
+                                                <strong class="borde">@nombreAutor @tipoAutoria</strong>
 
                                             }
                                             else
                                             {
 
-                                                <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a> @tipoAutoria</h2>
+                                                <strong class="borde"><a href="@enlaceAutor">@nombreAutor</a> @tipoAutoria</strong>
 
                                             }
                                         }
@@ -3250,7 +3281,7 @@
                                 else if (!string.IsNullOrEmpty(nombreAutor))
                                 {
 
-                                    <h2 class="borde"><a href="@enlaceAutor">@nombreAutor</a></h2>
+                                    <strong class="borde"><a href="@enlaceAutor">@nombreAutor</a></strong>
                                     if (!string.IsNullOrEmpty(infoAutor))
                                     {
                                         <p>@infoAutor</p>

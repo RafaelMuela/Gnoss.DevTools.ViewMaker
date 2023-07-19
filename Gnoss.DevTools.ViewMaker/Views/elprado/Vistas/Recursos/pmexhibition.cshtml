@@ -1,3 +1,4 @@
+@*[security|||pmexhibition|||elprado]*@
 @model ResourceViewModel
 @using System.Data;
 @using System.Reflection;
@@ -778,6 +779,7 @@
 
 
 }
+
 <section @Html.Raw(semCmsModel.GetRDFANamespaces()) @Html.Raw(semCmsModel.GetRDFAEntity(semCmsModel.RootEntities[0]))>
     @{
 
@@ -811,7 +813,7 @@
                                     }
                                     @if (bicentenario)
                                     {
-                                        <img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/[%%%_PROYECTO_ID_%%%]/ElPrado/img/svg/bicentenario_logo_cuadrado.svg" width="150" height="150" alt="Museo del Prado 200 años" class="logo-200" onclick="location.href='@Html.Translate("URL_BICENTENARIO")'; return false;">
+                                        <img src="@ViewBag.BaseURLContent/imagenes/proyectos/personalizacion/7317a29a-d846-4c54-9034-6a114c3658fe/ElPrado/img/svg/bicentenario_logo_cuadrado.svg" width="150" height="150" alt="Museo del Prado 200 años" class="logo-200" onclick="location.href='@Html.Translate("URL_BICENTENARIO")'; return false;">
                                     }
                                     <img alt="@titulo" src="@ViewBag.BaseURLContent/@imagen.Ecidoc_p65_E36_shows_visual_item">
                                 </figure>
@@ -834,7 +836,7 @@
                     }
                     @if (exposiciones != null && exposiciones.PropertyValues.Count > 0 && !ocultarPaginas)
                     {
-                        <li class="menu-exposicion"><a>@Html.Translate("EXPOSICION")</a></li>
+                        <li class="menu-exposicion"><a>@(!string.IsNullOrEmpty(esEnElMuseo) && esEnElMuseo.Equals("http://museodelprado.es/items/place_at_museum_itinerary") || esEnElMuseo.Equals("activitytype_44") ? @Html.Translate("ITINERARIO_EXPOSITIVO") : @Html.Translate("EXPOSICION"))</a></li>
                     }
                     @if (exposicionObras != null && exposicionObras.PropertyValues.Count() > 0 && !ocultarObras)
                     {
@@ -857,8 +859,8 @@
                         <li class="menu-tienda-prado"><a>@Html.Translate("TIENDAPRADO")</a></li>
                     }
                 </ul>
-                <div class="menu-small">
-                    <select class="select-custom">
+                <div class="menu-small form-group">
+                    <select class="select-custom form-control" title="Menu de Inicio">
                         <option value="menu-ficha-expo-carrusel">@Html.Translate("INICIO")</option>
                         @if ((videos != null && videos.PropertyValues != null && videos.PropertyValues.Count > 0) || mostrarInteractivosCarrusel)
                         {
@@ -866,7 +868,7 @@
                         }
                         @if (exposiciones != null && exposiciones.PropertyValues != null && exposiciones.PropertyValues.Count > 0 && !ocultarPaginas)
                         {
-                            <option value="menu-exposicion">@Html.Translate("EXPOSICION")</option>
+                            <option value="menu-exposicion">@(!string.IsNullOrEmpty(esEnElMuseo) && esEnElMuseo.Equals("http://museodelprado.es/items/place_at_museum_itinerary") || esEnElMuseo.Equals("activitytype_44") ? @Html.Translate("ITINERARIO_EXPOSITIVO") : @Html.Translate("EXPOSICION"))</option>
                         }
                         @if (exposicionObras != null && exposicionObras.PropertyValues.Count() > 0 && !ocultarObras)
                         {
@@ -908,7 +910,7 @@
                     <a href="@Html.Translate("URL_COMPRAENTRADAS_TEMPORALES")" target="_blank">@Html.Translate("VENTADEENTRADAS")</a>
                 </div>
             }
-            else if (esEnElMuseo == "http://museodelprado.es/items/place_at_museum_in")
+            else if (esEnElMuseo == "http://museodelprado.es/items/place_at_museum_in" || esEnElMuseo == "http://museodelprado.es/items/place_at_museum_itinerary")
             {
                 <div class="venta-entradas">
                     <a href="@Html.Translate("URL_COMPRAENTRADAS")" target="_blank">@Html.Translate("VENTADEENTRADAS")</a>
@@ -968,11 +970,11 @@
                                 {
                                     if (!string.IsNullOrEmpty(comprarCatalogo))
                                     {
-                                        <h2><a href="@comprarCatalogo" target="_blank">@Html.Raw(tituloCatalogo)</a></h2>
+                                        <p><a href="@comprarCatalogo" target="_blank">@Html.Raw(tituloCatalogo)</a></p>
                                     }
                                     else
                                     {
-                                        <h2>@Html.Raw(tituloCatalogo)</h2>
+                                        <p>@Html.Raw(tituloCatalogo)</p>
                                     }
                                 }
 
@@ -1176,7 +1178,7 @@
             }
             <div class="famp">
                 <a href="https://www.amigosmuseoprado.org/es/amigos/amigos-particulares/boletin-alta-paso-1">
-                    <img src="@urlPersonalizacion/cms/fnd-tarjeta-amigos.png" alt="Hazte Amigo">
+                    <img src="@urlPersonalizacion/cms/fnd-tarjeta-amigos.png" alt="Imágen de hazte Amigo del museo">
                     <p class="mu-am-tit">Hazte Amigo</p>
                 </a>
             </div>
@@ -1561,7 +1563,7 @@
         Dictionary<SemanticPropertyModel.PropertyValue, int> dicExposicionesConIdiomaNav = new Dictionary<SemanticPropertyModel.PropertyValue, int>();
 
         <section class="exposicion" id="exposicion">
-            <h1><span>@Html.Translate("EXPOSICION")</span></h1>
+            <h2 class="heading"><span>@(!string.IsNullOrEmpty(esEnElMuseo) && esEnElMuseo.Equals("http://museodelprado.es/items/place_at_museum_itinerary") || esEnElMuseo.Equals("activitytype_44") ? @Html.Translate("ITINERARIO_EXPOSITIVO") : @Html.Translate("EXPOSICION"))</span></h2>
             @*<div @Html.Raw(semCmsModel.GetRDFAEntity(exposiciones.FirstPropertyValue.RelatedEntity))>*@
             <div class="exp-menu desktop">
                 <nav>
@@ -1723,7 +1725,7 @@
                         <div @Html.Raw(semCmsModel.GetRDFAEntity(exposicion.RelatedEntity))>
                             @if (!string.IsNullOrEmpty(nombreCortoExposicion))
                             {
-                                <h2 @Html.Raw(semCmsModel.GetRDFAProperty(propNombreExposicion))>@Html.Raw(nombreExposicion)</h2>
+                                <h3 @Html.Raw(semCmsModel.GetRDFAProperty(propNombreExposicion))>@Html.Raw(nombreExposicion)</h3>
                             }
                             @if (propImagenExposicion != null && propImagenExposicion.FirstPropertyValue != null)
                             {
@@ -1773,7 +1775,7 @@
     @if (exposicionObras != null && exposicionObras.PropertyValues.Count() > 0 && !ocultarObras)
     {
         <section class="obras-ficha-expo" id="obras-ficha-expo">
-            <h1><span>@Html.Translate("OBRAS")</span></h1>
+            <h2 class="heading"><span>@Html.Translate("OBRAS")</span></h2>
             <form novalidate="novalidate">
                 <ul class="vista-selector">
                     <li class="miniaturas selected" data-mode="vista-muro"><a>@Html.Translate("IMAGENES")</a></li>
@@ -2187,7 +2189,7 @@
                                                 }
 
                                                 <figcaption class="textos">
-                                                    <h1 @Html.Raw(rdfaPropTituloObra)>@obra_titulo</h1>
+                                                    <strong @Html.Raw(rdfaPropTituloObra)>@obra_titulo</strong>
                                                     <span @Html.Raw(rdfaPropDescripcionObra)>@Html.Raw(obra_descripcion)</span>
                                                 </figcaption>
                                             }
@@ -2205,7 +2207,7 @@
                                                         <div class="num" @Html.Raw(semCmsModel.GetRDFAProperty(obraExposicion.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#artWorkOrder")))>@obra_orden</div>
                                                     }
                                                     <figcaption class="textos">
-                                                        <h1 @Html.Raw(rdfaPropTituloObra)>@obra_titulo</h1>
+                                                        <strong @Html.Raw(rdfaPropTituloObra)>@obra_titulo</strong>
                                                         <span @Html.Raw(rdfaPropDescripcionObra)>@Html.Raw(obra_descripcion)</span>
                                                     </figcaption>
                                                 </a>
@@ -2232,7 +2234,7 @@
         SemanticPropertyModel.PropertyValue catalogo = propCatalogo.FirstPropertyValue;
         <section class="catalogo" id="catalogo" @Html.Raw(semCmsModel.GetRDFAProperty(propCatalogo))>
             <div @Html.Raw(semCmsModel.GetRDFAEntity(propCatalogo.FirstPropertyValue.RelatedEntity))>
-                <h1><span>@Html.Translate("CATALOGO")</span></h1>
+                <h2 class="heading"><span>@Html.Translate("CATALOGO")</span></h2>
                 <div class="ca-venta">
                     <div class="venta-item">
                         @if (!string.IsNullOrEmpty(ilustracionCatalogo)) // || !string.IsNullOrEmpty(precioCatalogo))
@@ -2883,7 +2885,7 @@
             <a href="@Html.Translate("URL_COMPRAENTRADAS_TEMPORALES")" target="_blank">@Html.Translate("VENTADEENTRADAS")</a>
         </div>
     }
-    else if (esEnElMuseo == "http://museodelprado.es/items/place_at_museum_in")
+    else if (esEnElMuseo == "http://museodelprado.es/items/place_at_museum_in" || esEnElMuseo == "http://museodelprado.es/items/place_at_museum_itinerary")
     {
         <div class="venta-entradas">
             <a href="@Html.Translate("URL_COMPRAENTRADAS")" target="_blank">@Html.Translate("VENTADEENTRADAS")</a>
@@ -2948,11 +2950,11 @@
     }
     <div class="impresion-a-la-carta">
         <div>
-            <h1><a href="http://www.tiendaprado.com/toolprintondemand.php" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h1>
+            <h2><a href="http://www.tiendaprado.com/toolprintondemand.php" target="_blank">@Html.Translate("IMPRESIONALACARTA")</a></h2>
             @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMPRESION"))
         </div>
         <div>
-            <h1><a href="mailto:bimnp@museodelpradodifusion.es" target="_blank">@Html.Translate("BANCODEIMAGENES")</a></h1>
+            <h2><a href="mailto:bimnp@museodelpradodifusion.es" target="_blank">@Html.Translate("BANCODEIMAGENES")</a></h2>
             @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMAGENES"))
         </div>
     </div>
