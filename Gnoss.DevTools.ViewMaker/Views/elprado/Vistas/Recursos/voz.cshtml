@@ -1,0 +1,995 @@
+@*[security|||voz|||elprado]*@
+@model ResourceViewModel
+@{
+
+    ResourceModel FichaDocumento = Model.Resource;
+    SemanticResourceModel semCmsModel = Model.SemanticFrom;
+    string idioma = ViewBag.UtilIdiomas.LanguageCode;
+    Voz voz = new Voz(semCmsModel, FichaDocumento, idioma, Html, ViewBag.BaseURLContent);
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+
+    string coleccionparam = Context.Request.Query["coleccion"];
+
+
+}
+
+<link media="all" type="text/css" rel="stylesheet" href="@urlPersonalizacion/ElPrado/css/modulos/bicentenario.css" />
+<link media="all" type="text/css" rel="stylesheet" href="@urlPersonalizacion/ElPrado/js/jquery.dotdotdot.min.js" />
+
+<section class="bicentenario menu-nav">
+    <nav>
+        <div>
+            <ul class="menu-normal">
+                <li class="menu-bic-video"><a>@Html.Translate("VIDEO")</a></li>
+                @if (voz.InterviewCollective != null && voz.InterviewCollective.Count > 0)
+                {
+                    <li class="menu-bic-recomendados"><a>@Html.Translate("COLECTIVO")</a></li>
+                }
+                <li class="menu-bic-coleccion"><a>@Html.Translate("TEMA")</a></li>
+                <li class="menu-bic-buscar"><a>@Html.Translate("BUSCAR")</a></li>
+            </ul>
+            <div class="menu-small">
+                <select   title="Menú"  class="select-custom">
+                    <option value="menu-bic-video">@Html.Translate("VIDEO")</option>
+                    @if (voz.InterviewCollective != null && voz.InterviewCollective.Count > 0)
+                    {
+                        <option value="menu-bic-recomendados">@Html.Translate("RECOMENDADOS")</option>
+                    }
+                    <option value="menu-bic-coleccion">@Html.Translate("TEMA")</option>
+                    <option value="menu-bic-buscar">@Html.Translate("BUSCAR")</option>
+                </select>
+            </div>
+        </div>
+    </nav>
+</section>
+
+
+
+<section class="bicentenario modulo multimedia" id="bic-video">
+    <div class="buscador-coleccion">
+        <h1><a href="@Html.GetBaseUrlIdioma()/@Html.Translate("URLHOMEVOCES")">@Html.Translate("VOCESDELPRADO")</a> </h1>
+    </div>
+    <div class="wrap">
+        <div class="player col-izq">
+            <div class="video-grande">
+                <div class="videoWrapper" id="playerVideo">
+                    <div videoID="@voz.VideoID" startTime="@voz.Start" endTime="@voz.End" rel="0" controles="1" showinfo="0" class="youtubeplayer" id="youtube-player-2">
+                    </div>
+                    @*
+                        <div class="constrolesvideo">
+                            <select  title="Subtitulos vídeo"  class="subtitlesvideo oculto"></select>
+                            <div class="progress" id="youtube-player-2-bar">
+                                <span class="bar" style="width: 0%;">0</span>
+                            </div>
+                        </div>*@
+                </div>
+            </div>
+            <script>
+
+
+				//Regtistramos todos los fragmentos
+
+
+				var dictionarySec = {};
+
+
+				@{
+					int lastsec=0;
+					Voz lastVoz=null;
+					foreach(Voz vozint in voz.InterviewVoz)
+					{
+						lastVoz=vozint;
+						while(lastsec<=vozint.End)
+						{
+							if(vozint.ChapterID!=voz.ChapterID)
+							{
+								@Html.Raw("dictionarySec["+lastsec+"]='"+vozint.Uri+"';")
+							}
+							lastsec++;
+						}
+					}
+					if(lastVoz!=null)
+					{
+						for(int i=lastsec;i<lastsec+500;i++)
+						{
+							if(lastVoz.ChapterID!=voz.ChapterID)
+							{
+								@Html.Raw("dictionarySec["+i+"]='"+lastVoz.Uri+"';")
+							}
+						}
+					}
+				}
+
+
+				// Append the YouTube IFRAME API Script
+				var youtube = document.createElement('script');
+				youtube.type = "text/javascript";
+				youtube.src = "//www.youtube.com/iframe_api";
+				var s = document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(youtube, s);
+				function onYouTubeIframeAPIReady() {
+					cargarVideos.init();
+				};
+
+
+				var cargarVideos = {
+					player:null,
+					reproducir:true,
+					interval:null,
+					init: function(){
+						this.config();
+						return;
+					},
+					config: function(){
+						var that=this;
+						// Prepare the YouTube Player
+						// We set rel=0 and showinfo=1 to hide related videos & info bar
+						$('.youtubeplayer').each(function(indice) {
+							var node = $(this).attr('id');
+							var params = document.getElementById(node);
+							var rel = params.getAttribute("rel");
+							var controls = params.getAttribute("controles");
+							var showinfo = params.getAttribute("showinfo");
+							cargarVideos.player=new YT.Player(node, {
+								playerVars: {'rel': rel, 'showinfo': showinfo, 'controls':controls },
+								events: {
+									'onReady': that.loadVideo,
+									'onStateChange':that.stateChange
+								}
+							});
+							@*$('#'+node+'-bar').unbind('click');
+							$('#'+node+'-bar').bind('click', function(e) {
+								if(cargarVideos.interval!=null)
+								{
+									 clearInterval(cargarVideos.interval);
+								}
+
+								var x=e.pageX-this.parentElement.parentElement.offsetLeft;
+								x=x/this.offsetWidth;
+								var id="#"+$(this).attr('id').replace('-bar','');
+								var totalTime=parseInt($(id).attr('endTime'))-parseInt($(id).attr('startTime'));
+								$(id).attr('startTimeAux',parseInt($(id).attr('startTime'))+totalTime*x);
+								var aux={};
+								aux.target=cargarVideos.player;
+								var state=cargarVideos.player.getPlayerState();
+								cargarVideos.reproducir=state==1|| state==3;
+								cargarVideos.loadVideo(aux);
+
+								var time=totalTime * x;
+
+								var totalTimeMin=parseInt(totalTime/60);
+								var totalTimeSec=parseInt(totalTime%60);
+								if(totalTimeSec<10)
+								{
+									totalTimeSec='0'+totalTimeSec;
+								}
+								var totalTimeText=totalTimeMin+':'+totalTimeSec;
+
+								var timeMin=parseInt(time/60);
+								var timeSec=parseInt(time%60);
+								if(timeSec<10)
+								{
+									timeSec='0'+timeSec;
+								}
+								var timeText=timeMin+':'+timeSec;
+
+								$(this).find('.bar').attr('style','width:'+x*100+'%');
+								$(this).find('.bar').text(timeText+'/'+totalTimeText);
+
+							});*@
+
+						})
+						return;
+					},
+					loadVideo: function(e){
+						var that=this;
+						var idFrame=e.target.getIframe().id;
+						var videoID=$('#'+idFrame).attr('videoID');
+						var startTime=$('#'+idFrame).attr('startTime');
+						@*var startTimeAux=$('#'+idFrame).attr('startTimeAux');
+						if(startTimeAux!=null)
+						{
+							$('#'+idFrame).removeAttr('startTimeAux');
+							startTime=startTimeAux;
+						}*@
+						var endTime=$('#'+idFrame).attr('endTime');
+						var sec=getParam('sec',document.location.href);
+						if(sec!=null)
+						{
+							//if(parseInt(sec)<startTime)
+							//{
+								startTime=parseInt(sec);
+							//}
+						}
+
+						e.target.cueVideoById({
+							videoId: videoID,
+							startSeconds: startTime,
+							endSeconds: endTime
+						});
+						if(cargarVideos.reproducir)
+						{
+							cargarVideos.player.playVideo();
+						}
+					},
+					stateChange: function(e){
+						if(e.data==2)
+						{
+							//Comprobamos si tenemos que saltar a otro video
+							if(dictionarySec[parseInt(e.target.getCurrentTime())]!=null)
+							{
+								document.location.href= dictionarySec[parseInt(e.target.getCurrentTime())]+'?sec='+parseInt(e.target.getCurrentTime());
+							}
+						}
+
+						if(e.data==0)
+						{
+							//Siguiente video
+							if($('.modulo.multimedia .col-der ol li.activo').next().find('a').length)
+							{
+								document.location.href= $('.modulo.multimedia .col-der ol li.activo').next().find('a').attr('href');
+							}//else
+							//{
+							//	document.location.href= $($('.modulo.multimedia .col-der ol li')[0]).find('a').attr('href');
+							//}
+							cargarVideos.reproducir=false;
+							cargarVideos.loadVideo(e);
+						}
+						if(cargarVideos.interval!=null)
+						{
+							 clearInterval(cargarVideos.interval);
+						}
+						cargarVideos.interval=setInterval(
+							function()
+							{
+								cargarVideos.drawTime(e);
+								cargarVideos.subtitulos();
+							}, 200);
+					},
+					drawTime: function(e){
+						@*var id='#'+e.target.a.id;
+						if($(id).attr('controles')=='0')
+						{
+							var totalTime=parseInt($(id).attr('endTime'))-parseInt($(id).attr('startTime'));
+							var time=(e.target.getCurrentTime()-parseInt($(id).attr('startTime')));
+							if(time>-1)
+							{
+								var progress=time/totalTime;
+								totalTime=parseInt(totalTime);
+								time=parseInt(time);
+								var totalTimeMin=parseInt(totalTime/60);
+								var totalTimeSec=parseInt(totalTime%60);
+								if(totalTimeSec<10)
+								{
+									totalTimeSec='0'+totalTimeSec;
+								}
+								var totalTimeText=totalTimeMin+':'+totalTimeSec;
+
+								var timeMin=parseInt(time/60);
+								var timeSec=parseInt(time%60);
+								if(timeSec<10)
+								{
+									timeSec='0'+timeSec;
+								}
+								var timeText=timeMin+':'+timeSec;
+								$(id+'-bar .bar').attr('style','width:'+progress*100+'%');
+								$(id+'-bar .bar').text(timeText+'/'+totalTimeText);
+							}
+						}*@
+					},
+					subtitulos: function(){
+						if(!$('.subtitlesvideo').hasClass('cargado'))
+						{
+							var tracks = cargarVideos.player.getOption('captions', 'tracklist');
+							if(tracks==null)
+							{
+								cargarVideos.player.loadModule("captions");
+
+							}else
+							{
+								if(tracks.length>0)
+								{
+									$('.subtitlesvideo').append($('<option value="off">Off</option>'))
+									$('.subtitlesvideo').show();
+									for(var j=0;j<tracks.length;j++)
+									{
+										$('.subtitlesvideo').append($('<option value="'+tracks[j].languageCode+'">'+tracks[j].languageName+'</option>'))
+									}
+									$('.subtitlesvideo').addClass('cargado');
+								}else
+								{
+									cargarVideos.player.loadModule("captions");
+								}
+
+							}
+						}
+						if($('.subtitlesvideo').val()=='off')
+						{
+							cargarVideos.player.unloadModule("captions");
+						}else if(lang=="es")
+						{
+							cargarVideos.player.loadModule("captions");
+							cargarVideos.player.setOption("captions", "track", {"languageCode": "es"});
+						}else if(lang=="en")
+						{
+							cargarVideos.player.loadModule("captions");
+							cargarVideos.player.setOption("captions", "track", {"languageCode": "en"});
+						}
+						$(".subtitlesvideo").unbind('change');
+						$(".subtitlesvideo").bind('change', function(e) {
+							localStorage.setItem('langsubtitle', $(this).val());
+						});
+
+						if(localStorage.getItem('langsubtitle')!=null)
+						{
+							$(".subtitlesvideo").val(localStorage.getItem('langsubtitle'));
+						}
+					}
+				};
+
+            </script>
+
+            @if (!string.IsNullOrEmpty(coleccionparam) && voz.InterviewCollection.ContainsKey(coleccionparam))
+            {
+                <strong class="upper">@Html.Raw(voz.titleLimpioTitle[coleccionparam])</strong>}
+            else
+            {
+                <strong class="upper">@Html.Translate("ENTREVISTACOMPLETA")</strong>}
+
+            <h2 @Html.Raw(voz.RDFAChapterTitle)>@Html.Raw(voz.ChapterTitle)</h2>
+            <strong class="subtitle"><span @Html.Raw(@voz.RDFAInterviewedName)>@voz.InterviewedName</span>, <span @Html.Raw(@voz.RDFAInterviewedCharge)>@voz.InterviewedCharge</span>, @voz.WorkingDate</strong>
+            <div class="compartir" id="share-video">
+                <script type="text/javascript">
+                    function muestraCompartir(id) {
+                        $("#" + id).fadeOut(500);
+                        $(" nav.social").delay(500).fadeIn(500);
+                    }
+                </script>
+                <a href="#modal-info-transcripcion" class="masinfo open-popup-link bt-rnd">@Html.Translate("LEERTRANSCRIPCION")</a>
+                <a href="javascript:muestraCompartir('bt-share')" class="bt-rnd" id="bt-share">@Html.GetText("COMMON", "COMPARTIR")</a>
+                <nav class="social oculto">
+                    <ul>
+                        <li class="rrss-ico"><a href="#"><img src="@urlPersonalizacion/ElPrado/img/svg/twitter.svg" alt="Twitter" title="Twitter"></a></li>
+                        <li class="rrss-ico"><a href="#"><img src="@urlPersonalizacion/ElPrado/img/svg/facebook.svg" alt="Facebook" title="Facebook"></a></li>
+                        <li class="rrss-ico whatsapp">
+                            @{
+                                string urlwatsapp = "whatsapp://send?text=";
+                                urlwatsapp += voz.ChapterTitle;
+                                urlwatsapp += Url.ToString();
+                            }
+                            <a href="@urlwatsapp" target="_blank">
+                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0" y="0" viewBox="0 0 60 60" xml:space="preserve"><style type="text/css">
+                                                                                                                                               .st0 {
+                                                                                                                                                   fill: #da322a;
+                                                                                                                                               }
+</style><path class="st0" d="M49 29.5C49 39.7 40.6 48 30.3 48c-3.3 0-6.3-0.8-9-2.3L11 49l3.4-9.9c-1.7-2.8-2.7-6.1-2.7-9.6C11.7 19.3 20 11 30.3 11 40.6 11 49 19.3 49 29.5zM30.3 13.9c-8.6 0-15.7 7-15.7 15.6 0 3.4 1.1 6.6 3 9.1l-2 5.8 6-1.9c2.5 1.6 5.4 2.6 8.6 2.6 8.6 0 15.7-7 15.7-15.6S39 13.9 30.3 13.9zM39.8 33.8c-0.1-0.2-0.4-0.3-0.9-0.5 -0.5-0.2-2.7-1.3-3.1-1.5 -0.4-0.2-0.7-0.2-1 0.2 -0.3 0.5-1.2 1.5-1.4 1.8 -0.3 0.3-0.5 0.3-1 0.1 -0.5-0.2-1.9-0.7-3.7-2.3 -1.4-1.2-2.3-2.7-2.5-3.1 -0.3-0.5 0-0.7 0.2-0.9 0.2-0.2 0.5-0.5 0.7-0.8 0.2-0.3 0.3-0.5 0.5-0.8 0.2-0.3 0.1-0.6 0-0.8 -0.1-0.2-1-2.5-1.4-3.4 -0.4-0.9-0.8-0.8-1-0.8 -0.3 0-0.6 0-0.9 0 -0.3 0-0.8 0.1-1.2 0.6 -0.4 0.5-1.6 1.6-1.6 3.8 0 2.2 1.6 4.4 1.9 4.7 0.2 0.3 3.2 5 7.8 6.8 4.6 1.8 4.6 1.2 5.5 1.1 0.8-0.1 2.7-1.1 3.1-2.2C39.9 34.9 39.9 34 39.8 33.8z"></path></svg>
+                            </a>
+                        </li>
+                        <li class="rrss-ico"><a href="#"><img src="@urlPersonalizacion/ElPrado/img/svg/email.svg" alt="E-Mail" title="E-Mail"></a></li>
+                    </ul>
+                </nav>
+                @if (!string.IsNullOrEmpty(coleccionparam) && voz.InterviewCollection.ContainsKey(coleccionparam))
+                {
+                    <a href="@voz.InterviewVoz[0].Uri" class="bt-rnd">@Html.Translate("ENTREVISTACOMPLETA")</a>
+                }
+
+            </div>
+            <div class="pop-transcripcion modal-blanco modal-normal  mfp-hide" id="modal-info-transcripcion">
+                <div class="wrap">
+                    <h2 @Html.Raw(voz.RDFAChapterTitle)>@Html.Raw(voz.ChapterTitle)</h2>
+                    <h3><span @Html.Raw(@voz.RDFAInterviewedName)>@Html.Raw(voz.InterviewedName)</span>, <span @Html.Raw(@voz.RDFAInterviewedCharge)>@voz.InterviewedCharge</span>, @voz.WorkingDate</h3>
+                    <p><span @Html.Raw(@voz.RDFATranscription)>@Html.Raw(voz.Transcription)</span></p>
+                </div>
+            </div>
+            @*<blockquote @Html.Raw(voz.RDFAComment)>@Html.Raw(@voz.Comment)</blockquote>*@
+            <div class="colapsado normal">
+                <p><span @Html.Raw(@voz.RDFABiography)>@Html.Raw(@voz.Biography)</span></p>
+            </div>
+            <p class="fechaEntrevistado">@Html.Translate("ENTREVISTAREALIZADAEL") @voz.InterviewedDate</p>
+        </div>
+        <div class="col-der">
+            <div class="listado">
+                <div class="inner">
+                    <div class="cabecera">
+                        @{
+                            List<Voz> listaVocesContexto = voz.InterviewVoz;
+                            string uricolecion = "";
+                        }
+                        @if (!string.IsNullOrEmpty(coleccionparam) && voz.InterviewCollection.ContainsKey(coleccionparam))
+                        {
+                            listaVocesContexto = voz.InterviewCollection[coleccionparam];
+
+                            <h3>@Html.Raw(voz.titleLimpioTitle[coleccionparam])</h3>
+                            uricolecion = "?coleccion=" + coleccionparam;
+                        }
+                        else
+                        {
+                            <h3>@Html.Translate("INDICEENTREVISTA")</h3>
+                        }
+
+                        @{
+                            Voz vozintactual = listaVocesContexto.First(x => x.InterviewID == voz.InterviewID && x.ChapterID == voz.ChapterID);
+                        }
+                        <strong class="pos-listado">@(listaVocesContexto.IndexOf(vozintactual) + 1) / @listaVocesContexto.Count</strong>
+                    </div>
+                    <ol>
+                        @foreach (Voz vozint in listaVocesContexto)
+                        {
+                            string classactivo = "";
+                            if (vozint == vozintactual)
+                            {
+                                classactivo = "activo";
+                            }
+                            <li class="@classactivo">
+                                <a href="@vozint.Uri@uricolecion">
+                                    <figure>
+                                        <img src="@vozint.Image" alt="@vozint.ChapterTitle">
+                                        <figcaption class="trunca-texto">
+                                            <strong><span @Html.Raw(vozint.RDFAChapterTitle)>@Html.Raw(vozint.ChapterTitle)</span></strong>
+                                        </figcaption>
+                                    </figure>
+                                </a>
+                            </li>
+                        }
+                    </ol>
+                </div>
+            </div>
+            <dl class="ficha">
+                @if ((string.IsNullOrEmpty(coleccionparam) && voz.Collections.Count > 0) || (!string.IsNullOrEmpty(coleccionparam) && voz.Collections.Count > 1))
+                {
+                    <div>
+                        <dt>@Html.Translate("APARECEENCOTEMAS")</dt>
+                        @foreach (string coleccion in voz.Collections)
+                        {
+                            if (string.IsNullOrEmpty(coleccionparam) || coleccionparam != coleccion)
+                            {
+                                string coleccionLimpia = System.Text.RegularExpressions.Regex.Replace(coleccion, "<.*?>", String.Empty);
+                                <dd><a href="@voz.InterviewCollection[coleccionLimpia][0].Uri?coleccion=@coleccionLimpia" class="playable"><span class="play"></span><span class="text">@Html.Raw(coleccion)</span></a></dd>
+                            }
+                        }
+                    </div>
+                }
+                @if (voz.Collective.Count() > 0)
+                {
+                    <div>
+                        <dt>@Html.Translate("COLECTIVO")</dt>
+                        @foreach (string colectivo in voz.Collective)
+                        {
+                            string uri = "?pm:collective=" + colectivo + "@" + idioma;
+                            <dd><a href="@Html.GetBaseUrlIdioma()/@Html.Translate("URL_BUSQUEDAVOCES")@uri">@colectivo</a></dd>
+                        }
+
+                    </div>
+                }
+                @if (voz.Decade.Count > 0)
+                {
+                    <div>
+                        <dt>@Html.Translate("CRONOLOGIA")</dt>
+                        @foreach (string decada in voz.Decade)
+                        {
+                            <dd><a href="@Html.GetBaseUrlIdioma()/@Html.Translate("URL_BUSQUEDAVOCES")?pm:decade=@decada">@decada</a></dd>
+                        }
+                    </div>
+                }
+                <div>
+                          <dt>@Html.Translate("RDF")</dt>
+                          <dd><a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a></dd>
+                     </div>
+                <div>
+                    <p><a href="@Html.GetBaseUrlIdioma()/@Html.Translate("URL_BUSQUEDAVOCES")">@Html.Translate("VERTODO")</a></p>
+                </div>
+
+            </dl>
+        </div>
+
+    </div>
+</section>
+
+@if (voz.InterviewCollective != null && voz.InterviewCollective.Count > 0)
+{
+    <section class="bicentenario modulo galeria-video" id="bic-recomendados">
+        @{
+            Random rnd = new Random();
+            int aleatorio = rnd.Next(voz.InterviewCollective.Count());
+
+        }
+        <div class="wrap">
+            <strong class="upper">@Html.Translate("COLECTIVO")</strong>
+            <h2 class="big">@voz.InterviewCollective.ElementAt(aleatorio).Key</h2>
+        </div>
+        <div class="galeria">
+
+            @foreach (Voz vozint in voz.InterviewCollective.ElementAt(aleatorio).Value)
+            {
+                <div class="item">
+                    <figure>
+                        <a href="@vozint.Uri">
+                            <div class="img">
+                                <img src="@vozint.Image" alt="@vozint.ChapterTitle">
+                                <div class="flecha-play der"></div>
+                            </div>
+                        </a>
+                        <figcaption>
+                            <a href="@vozint.Uri"><h3>@vozint.InterviewedName</h3></a>
+                            <strong>@vozint.InterviewedCharge, @vozint.WorkingDate</strong>
+                        </figcaption>
+                    </figure>
+                </div>}
+        </div>
+    </section>
+}
+
+
+
+<script>
+    $(document).ready(function () {
+		$('.bicentenario .listado').animate({
+			scrollTop: $('.bicentenario .listado li.activo').position().top-50
+		}, 500);
+
+        //Cargamos una colección aleatoria
+        var params = {};
+        params['pLang'] = configuracion.idioma;
+        params['pNombreServicio'] = 'servicioVoces';
+        params['pNombreAccion'] = 'ObtenerTemaAleatorio';
+		params['pIdVoz'] = '@voz.Id';
+
+
+
+        var urlAction = urlComunidadConIdioma + '/ExternalService';
+
+        $.post(urlAction, params, function (data) {
+            $('#bic-coleccion .big').html(data[0].Collection);
+
+            for (var i = 0; i < data.length; i++) {
+                var divItem=$('<div class="item">');
+                var figure=$('<figure>');
+                divItem.append(figure);
+				if(data[i].Image!=null)
+				{
+					var a=$('<a href="'+data[i].Url+'"><div class="img"><img src="'+data[i].Image+'" alt="Imagen del video"><div class="flecha-play der"></div></div></a>');
+					figure.append(a);
+				}
+				var figcaption = $('<figcaption><a href="' + data[i].Url + '"><h3><em>' + data[i].ChapterTitle + '</em></h3></a><strong>' + data[i].InterviewedName + '. ' + data[i].InterviewedCharge + ', ' + data[i].WorkingDate + '</strong></figcaption>');
+                figure.append(figcaption);
+                $('#bic-coleccion .galeria').append(divItem);
+            }
+
+            $('#bic-coleccion').show();
+
+            // GALERIA CON CITAS
+            numeroslides = $('#bic-coleccion .galeria .item').length;
+            slideInicialTres = 0;
+            slideInicialDos = 0;
+            if (numeroslides > 3) slideInicialTres = 1;
+            if (numeroslides > 2) slideInicialDos = 1;
+            $('#bic-coleccion .galeria').slick({
+                infinite: false,
+                swipeToSlide: true,
+                slidesToShow: 3,
+                slidesToScroll: 3,
+                centerMode: true,
+                initialSlide: slideInicialTres,
+                responsive: [
+                    {
+                        breakpoint: 1600,
+                        settings: {
+                            slidesToShow: 2,
+                            slidesToScroll: 2,
+                            initialSlide: slideInicialDos
+                        }
+                    },
+                    {
+                        breakpoint: 768,
+                        settings: {
+                            slidesToShow: 1,
+                            slidesToScroll: 1,
+                            initialSlide: 0
+                        }
+                    }
+                ]
+            });
+        });
+
+
+
+
+		// GALERIA NORMAL
+		var numeroslides=$('#bic-recomendados .galeria .item').length;
+		var slideInicialCuatro=0;
+		var slideInicialTres=0;
+		var slideInicialDos=0;
+		if (numeroslides>4) slideInicialCuatro=2;
+		if (numeroslides>3) slideInicialTres=1;
+		if (numeroslides>2) slideInicialDos=1;
+		$('#bic-recomendados .galeria').slick({
+			infinite: false,
+			swipeToSlide:true,
+			slidesToShow: 4,
+			slidesToScroll: 4,
+			centerMode: true,
+			initialSlide:slideInicialCuatro,
+			responsive: [
+				{
+			      breakpoint: 1600,
+			      settings: {
+			        slidesToShow: 3,
+			        slidesToScroll: 3,
+			        initialSlide:slideInicialTres
+			      }
+			    },
+			    {
+			      breakpoint: 768,
+			      settings: {
+			        slidesToShow: 2,
+			        slidesToScroll: 2,
+			        initialSlide:slideInicialDos
+			      }
+			    },
+			    {
+			      breakpoint: 600,
+			      settings: {
+			        slidesToShow: 1,
+			        slidesToScroll: 1,
+			        initialSlide:0
+			      }
+			    }
+			]
+		});
+	});
+</script>
+
+
+<section class="bicentenario modulo galeria-video con-citas oculto" id="bic-coleccion">
+
+    <div class="wrap">
+        <strong class="upper">@Html.Translate("TEMA")</strong>
+        <h2 class="big">--</h2>
+    </div>
+    <div class="galeria">
+
+
+    </div>
+</section>
+
+
+<section class="bicentenario modulo buscador-coleccion" id="bic-buscar">
+    <div class="wrap">
+        <strong class="upper">@Html.Translate("VOCESDELPRADO")</strong>
+        <h2>@Html.Translate("MUSEODENTROMASDE30ENTREVISTAS")</h2>
+        <form>
+            <div>
+                <span class="buscar fieldsetGroup searchGroup lupa">
+                    <input type="text" title="Criterio" id="criterio" origen="@Html.Translate("IDPESTANYABUSQUEDAVOCES")" placeholder="@Html.Translate("BUSCAENVOCESDELPRADO")" name="busqueda" class="texto default text defaultText autocompletar ac_input" autocomplete="off">
+                    <a class="encontrar sup" href="#">@Html.Translate("BUSCAR")</a>
+                </span>
+            </div>
+        </form>
+    </div>
+</section>
+
+
+
+
+@functions
+{
+
+    public class Voz
+    {
+        public const string LanguageProp = "http://purl.org/dc/elements/1.1/language";
+        public const string AreaProp = "http://museodelprado.es/ontologia/pradomuseum.owl#area";
+        public const string CollectiveProp = "http://museodelprado.es/ontologia/pradomuseum.owl#collective";
+        public const string BiographyProp = "http://purl.org/dc/elements/1.1/description";
+        public const string ChapterIDProp = "http://museodelprado.es/ontologia/pradomuseum.owl#chapterID";
+        public const string ChapterTitleProp = "http://purl.org/dc/elements/1.1/title";
+        public const string CommentProp = "http://museodelprado.es/ontologia/pradomuseum.owl#comment";
+        public const string DecadeProp = "http://museodelprado.es/ontologia/pradomuseum.owl#decade";
+        public const string StartProp = "http://museodelprado.es/ontologia/pradomuseum.owl#start";
+        public const string DurationProp = "http://purl.org/dc/terms/SizeOrDuration";
+        public const string EndProp = "http://museodelprado.es/ontologia/pradomuseum.owl#end";
+        public const string Main_imageProp = "http://museodelprado.es/ontologia/pradomuseum.owl#main_image";
+        public const string InterviewedChargeProp = "http://museodelprado.es/ontologia/pradomuseum.owl#interviewedCharge";
+        public const string InterviewedNameProp = "http://museodelprado.es/ontologia/pradomuseum.owl#interviewedName";
+        public const string InterviewedDateProp = "http://museodelprado.es/ontologia/pradomuseum.owl#interviewedDate";
+        public const string InterviewIDProp = "http://museodelprado.es/ontologia/pradomuseum.owl#interviewID";
+        public const string TranscriptionProp = "http://purl.org/dc/terms/subject";
+        public const string VideoUrlProp = "http://purl.org/dc/terms/URI";
+        public const string YearProp = "http://purl.org/dc/elements/1.1/date";
+        public const string CollectionsProp = "http://museodelprado.es/ontologia/pradomuseum.owl#collection";
+        public const string CollectionTitleProp = "http://purl.org/dc/elements/1.1/title";
+        public const string OrderProp = "http://museodelprado.es/ontologia/pradomuseum.owl#order";
+        public const string WorkingDateProp = "http://museodelprado.es/ontologia/pradomuseum.owl#workingDate";
+        public const string InterviewedSurnameProp = "http://museodelprado.es/ontologia/pradomuseum.owl#interviewedSurname";
+
+        public Voz()
+        {
+        }
+
+        public Voz(SemanticResourceModel pSemCmsModel, ResourceModel pFichaDocumento, string pIdioma, IHtmlHelper pHtmlHelper, string pBaseUrlContent)
+        {
+
+            this.Id = pSemCmsModel.RootEntities[0].Entity.Uri;
+            this.ChapterTitle = pSemCmsModel.GetFirstValuePropertyByPath(ChapterTitleProp);
+            this.RDFAChapterTitle = pSemCmsModel.GetRDFAPropertyByPath(ChapterTitleProp);
+            this.Transcription = pSemCmsModel.GetFirstValuePropertyByPath(TranscriptionProp);
+            this.RDFATranscription = pSemCmsModel.GetRDFAPropertyByPath(TranscriptionProp);
+            this.InterviewedName = pSemCmsModel.GetFirstValuePropertyByPath(InterviewedNameProp);
+
+            this.InterviewedDate = pSemCmsModel.GetFirstValuePropertyByPath(InterviewedDateProp);
+            this.WorkingDate = pSemCmsModel.GetFirstValuePropertyByPath(WorkingDateProp);
+            this.WorkingDate = this.WorkingDate.Replace("Actualidad", pHtmlHelper.Translate("ACTUALIDAD"));
+            this.InterviewedSurname = pSemCmsModel.GetFirstValuePropertyByPath(InterviewedSurnameProp);
+
+            this.RDFAInterviewedName = pSemCmsModel.GetRDFAPropertyByPath(InterviewedNameProp);
+            this.Area = pSemCmsModel.GetFirstValuePropertyByPath(AreaProp);
+            //this.Collective = pSemCmsModel.GetFirstValuePropertyByPath(CollectiveProp);
+            this.InterviewedCharge = pSemCmsModel.GetFirstValuePropertyByPath(InterviewedChargeProp);
+            this.RDFAInterviewedCharge = pSemCmsModel.GetRDFAPropertyByPath(InterviewedChargeProp);
+            this.Comment = pSemCmsModel.GetFirstValuePropertyByPath(CommentProp);
+            this.RDFAComment = pSemCmsModel.GetRDFAPropertyByPath(CommentProp);
+            this.Biography = pSemCmsModel.GetFirstValuePropertyByPath(BiographyProp);
+            this.RDFABiography = pSemCmsModel.GetRDFAPropertyByPath(BiographyProp);
+            this.VideoUrl = pSemCmsModel.GetFirstValuePropertyByPath(VideoUrlProp);
+            this.VideoID = this.VideoUrl.Replace("https://www.youtube.com/watch?v=", "");
+            this.InterviewID = int.Parse(pSemCmsModel.GetFirstValuePropertyByPath(InterviewIDProp));
+            this.ChapterID = int.Parse(pSemCmsModel.GetFirstValuePropertyByPath(ChapterIDProp));
+            this.Start = int.Parse(pSemCmsModel.GetFirstValuePropertyByPath(StartProp));
+            this.Duration = int.Parse(pSemCmsModel.GetFirstValuePropertyByPath(DurationProp));
+            this.End = int.Parse(pSemCmsModel.GetFirstValuePropertyByPath(EndProp));
+            this.Order = int.Parse(pSemCmsModel.GetFirstValuePropertyByPath(OrderProp));
+
+            this.Collective = new List<string>();
+            SemanticPropertyModel propCollective = pSemCmsModel.GetPropertyByPath(CollectiveProp);
+            if (propCollective != null && propCollective.PropertyValues != null && propCollective.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue collective in propCollective.PropertyValues)
+                {
+                    if (collective != null && collective.Value != null)
+                    {
+                        this.Collective.Add(collective.Value);
+                    }
+                }
+            }
+
+
+
+            this.Year = new HashSet<int>();
+            SemanticPropertyModel propYear = pSemCmsModel.GetPropertyByPath(YearProp);
+            if (propYear != null && propYear.PropertyValues != null && propYear.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue year in propYear.PropertyValues)
+                {
+                    if (year != null && year.Value != null)
+                    {
+                        this.Year.Add(int.Parse(year.Value));
+                    }
+                }
+            }
+
+            this.Decade = new HashSet<string>();
+            SemanticPropertyModel propDecade = pSemCmsModel.GetPropertyByPath(DecadeProp);
+            if (propDecade != null && propDecade.PropertyValues != null && propDecade.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue decade in propDecade.PropertyValues)
+                {
+                    if (decade != null && decade.Value != null)
+                    {
+                        this.Decade.Add(decade.Value);
+                    }
+                }
+            }
+
+            this.Collections = new HashSet<string>();
+            SemanticPropertyModel propCollection = pSemCmsModel.GetPropertyByPath(CollectionsProp);
+            if (propCollection != null && propCollection.PropertyValues != null && propCollection.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue collection in propCollection.PropertyValues)
+                {
+                    if (collection != null && collection.Value != null)
+                    {
+                        this.Collections.Add(collection.RelatedEntity.GetFirstValuePropertyByPath(CollectionTitleProp));
+                    }
+                }
+            }
+
+            this.InterviewVoz = new List<Voz>();
+            SemanticPropertyModel propChapters = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#i_interviewChapters");
+            if (propChapters != null && propChapters.PropertyValues != null && propChapters.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue entitychapter in propChapters.PropertyValues)
+                {
+                    if (entitychapter != null && entitychapter.Value != null)
+                    {
+                        Voz nuevavoz = new Voz();
+                        nuevavoz.ChapterTitle = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(ChapterTitleProp);
+                        nuevavoz.RDFAChapterTitle = entitychapter.RelatedEntity.GetRDFAPropertyByPath(ChapterTitleProp);
+                        nuevavoz.Order = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(OrderProp));
+                        nuevavoz.ChapterID = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(ChapterIDProp));
+                        nuevavoz.InterviewID = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewIDProp));
+                        nuevavoz.InterviewedName = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewedNameProp);
+                        //nuevavoz.InterviewedDate = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewedDateProp);
+                        nuevavoz.WorkingDate = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(WorkingDateProp);
+                        nuevavoz.WorkingDate = nuevavoz.WorkingDate.Replace("Actualidad", pHtmlHelper.Translate("ACTUALIDAD"));
+                        nuevavoz.RDFAInterviewedName = entitychapter.RelatedEntity.GetRDFAPropertyByPath(InterviewedNameProp);
+                        nuevavoz.Start = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(StartProp));
+                        nuevavoz.End = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(EndProp));
+
+                        nuevavoz.Image = "";
+                        if (entitychapter.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image") != null)
+                        {
+                            nuevavoz.Image = pBaseUrlContent + "/" + entitychapter.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image").Replace(".jpg", "_480.jpg");
+                        }
+                        nuevavoz.Uri = entitychapter.RelatedEntity.GetPropertyByPath(ChapterTitleProp).FirstPropertyValue.DownloadUrl;
+                        this.InterviewVoz.Add(nuevavoz);
+                    }
+                }
+            }
+            this.InterviewVoz = this.InterviewVoz.OrderBy(x => x.Order).ToList();
+
+            this.InterviewCollection = new Dictionary<string, List<Voz>>();
+            SemanticPropertyModel propChaptersCollection = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#i_interviewChaptersCollection");
+            if (propChaptersCollection != null && propChaptersCollection.PropertyValues != null && propChaptersCollection.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue entitychapter in propChaptersCollection.PropertyValues)
+                {
+                    if (entitychapter != null && entitychapter.Value != null)
+                    {
+                        Voz nuevavoz = new Voz();
+                        nuevavoz.ChapterTitle = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(ChapterTitleProp);
+                        nuevavoz.RDFAChapterTitle = entitychapter.RelatedEntity.GetRDFAPropertyByPath(ChapterTitleProp);
+                        nuevavoz.ChapterID = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(ChapterIDProp));
+                        nuevavoz.InterviewID = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewIDProp));
+                        nuevavoz.InterviewedName = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewedNameProp);
+                        //nuevavoz.InterviewedDate = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewedDateProp);
+                        nuevavoz.WorkingDate = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(WorkingDateProp);
+                        nuevavoz.WorkingDate = nuevavoz.WorkingDate.Replace("Actualidad", pHtmlHelper.Translate("ACTUALIDAD"));
+                        nuevavoz.RDFAInterviewedName = entitychapter.RelatedEntity.GetRDFAPropertyByPath(InterviewedNameProp);
+                        nuevavoz.Order = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(OrderProp));
+                        nuevavoz.Image = "";
+                        if (entitychapter.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image") != null)
+                        {
+                            nuevavoz.Image = pBaseUrlContent + "/" + entitychapter.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image").Replace(".jpg", "_480.jpg");
+                        }
+                        nuevavoz.Uri = entitychapter.RelatedEntity.GetPropertyByPath(ChapterTitleProp).FirstPropertyValue.DownloadUrl;
+
+                        SemanticPropertyModel propChaptersCollectionInt = entitychapter.RelatedEntity.GetPropertyByPath(CollectionsProp);
+                        foreach (SemanticPropertyModel.PropertyValue collectionint in propChaptersCollectionInt.PropertyValues)
+                        {
+                            if (collectionint != null && collectionint.Value != null)
+                            {
+                                string title = collectionint.RelatedEntity.GetFirstValuePropertyByPath(CollectionTitleProp);
+                                string titleLimpio = System.Text.RegularExpressions.Regex.Replace(title, "<.*?>", String.Empty);
+                                if (!this.InterviewCollection.ContainsKey(titleLimpio))
+                                {
+                                    this.InterviewCollection.Add(titleLimpio, new List<Voz>());
+                                }
+
+                                this.InterviewCollection[titleLimpio].Add(nuevavoz);
+                                if (!titleLimpioTitle.Keys.Contains(titleLimpio))
+                                {
+                                    titleLimpioTitle.Add(titleLimpio, title);
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            this.InterviewCollective = new Dictionary<string, List<Voz>>();//new List<Dictionary<string, List<Voz>>>();
+            Dictionary<string, List<Voz>> dicColectivoVoces = new Dictionary<string, List<Voz>>();
+            foreach (string colectivo in this.Collective)
+            {
+                if (!dicColectivoVoces.Keys.Contains(colectivo))
+                {
+                    dicColectivoVoces.Add(colectivo, new List<Voz>());
+                }
+
+            }
+            SemanticPropertyModel propChaptersCollective = pSemCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#i_interviewChaptersCollective");
+            if (propChaptersCollective != null && propChaptersCollective.PropertyValues != null && propChaptersCollective.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue entitychapter in propChaptersCollective.PropertyValues)
+                {
+                    if (entitychapter != null && entitychapter.Value != null)
+                    {
+                        Voz nuevavoz = new Voz();
+                        nuevavoz.ChapterTitle = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(ChapterTitleProp);
+                        nuevavoz.Order = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(OrderProp));
+                        nuevavoz.ChapterID = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(ChapterIDProp));
+                        nuevavoz.InterviewID = int.Parse(entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewIDProp));
+                        nuevavoz.InterviewedName = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewedNameProp);
+                        //nuevavoz.InterviewedDate = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewedDateProp);
+                        nuevavoz.WorkingDate = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(WorkingDateProp);
+                        nuevavoz.WorkingDate = nuevavoz.WorkingDate.Replace("Actualidad", pHtmlHelper.Translate("ACTUALIDAD"));
+                        nuevavoz.InterviewedCharge = entitychapter.RelatedEntity.GetFirstValuePropertyByPath(InterviewedChargeProp);
+                        nuevavoz.Image = "";
+                        if (entitychapter.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image") != null)
+                        {
+                            nuevavoz.Image = pBaseUrlContent + "/" + entitychapter.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_image").Replace(".jpg", "_480.jpg");
+                        }
+                        nuevavoz.Uri = entitychapter.RelatedEntity.GetPropertyByPath(ChapterTitleProp).FirstPropertyValue.DownloadUrl;
+                        nuevavoz.Year = new HashSet<int>();
+                        SemanticPropertyModel propYearInt = entitychapter.RelatedEntity.GetPropertyByPath(YearProp);
+                        if (propYearInt != null && propYearInt.PropertyValues != null && propYearInt.PropertyValues.Count > 0)
+                        {
+                            foreach (SemanticPropertyModel.PropertyValue year in propYearInt.PropertyValues)
+                            {
+                                if (year != null && year.Value != null)
+                                {
+                                    nuevavoz.Year.Add(int.Parse(year.Value));
+                                }
+                            }
+                        }
+                        SemanticPropertyModel propColective = entitychapter.RelatedEntity.GetPropertyByPath(CollectiveProp);
+                        nuevavoz.Collective = new List<string>();
+                        if (propColective != null && propColective.PropertyValues != null && propColective.PropertyValues.Count > 0)
+                        {
+                            foreach (SemanticPropertyModel.PropertyValue coll in propColective.PropertyValues)
+                            {
+                                if (coll != null && coll.Value != null)
+                                {
+                                    nuevavoz.Collective.Add(coll.Value);
+                                }
+                            }
+                        }
+
+                        foreach (string colDic in dicColectivoVoces.Keys)
+                        {
+                            foreach (string colectivo in nuevavoz.Collective)
+                            {
+                                if (colDic.Equals(colectivo))
+                                {
+                                    dicColectivoVoces[colectivo].Add(nuevavoz);
+                                }
+                            }
+                        }
+
+                        //this.InterviewCollective.Add(dicColectivoVoces);
+                        this.InterviewCollective = dicColectivoVoces;
+                    }
+                }
+            }
+
+        }
+        #region propiedades
+        public string Id { get; set; }
+        public List<string> Language { get; set; }
+        public int InterviewID { get; set; }
+        public int ChapterID { get; set; }
+        public string ChapterTitle { get; set; }
+        public int Start { get; set; }
+        public int Duration { get; set; }
+        public int End { get; set; }
+        public string Transcription { get; set; }
+        public string InterviewedName { get; set; }
+        public string InterviewedDate { get; set; }
+        public string WorkingDate { get; set; }
+        public string InterviewedSurname { get; set; }
+        public string Area { get; set; }
+        public List<string> Collective { get; set; }
+        public string InterviewedCharge { get; set; }
+        public HashSet<int> Year { get; set; }
+        public string Comment { get; set; }
+        public string Biography { get; set; }
+        public string VideoUrl { get; set; }
+        public string VideoID { get; set; }
+        public HashSet<string> Decade { get; set; }
+        public HashSet<string> Collections { get; set; }
+        public int Order { get; set; }
+        public List<Voz> InterviewVoz { get; set; }
+        public Dictionary<string, List<Voz>> InterviewCollection { get; set; }
+        public Dictionary<string, List<Voz>> InterviewCollective { get; set; }
+        public string Image { get; set; }
+        public string Uri { get; set; }
+
+        public string RDFAChapterTitle { get; set; }
+        public string RDFAInterviewedName { get; set; }
+        public string RDFAInterviewedCharge { get; set; }
+        public string RDFABiography { get; set; }
+        public string RDFATranscription { get; set; }
+        public string RDFAComment { get; set; }
+        public Dictionary<string, string> titleLimpioTitle = new Dictionary<string, string>();
+        #endregion
+    }
+}
