@@ -545,12 +545,12 @@
                 var divItem=$('<div class="item">');
                 var figure=$('<figure>');
                 divItem.append(figure);
-				if(data[i].Image!=null)
+				if(data[i].image!=null)
 				{
-					var a=$('<a href="'+data[i].Url+'"><div class="img"><img src="'+data[i].Image+'" alt="Imagen del video"><div class="flecha-play der"></div></div></a>');
+					var a=$('<a href="'+data[i].url+'"><div class="img"><img src="'+data[i].image+'" alt="Imagen del video"><div class="flecha-play der"></div></div></a>');
 					figure.append(a);
 				}
-				var figcaption = $('<figcaption><a href="' + data[i].Url + '"><h3><em>' + data[i].ChapterTitle + '</em></h3></a><strong>' + data[i].InterviewedName + '. ' + data[i].InterviewedCharge + ', ' + data[i].WorkingDate + '</strong></figcaption>');
+				var figcaption = $('<figcaption><a href="' + data[i].url + '"><h3><em>' + data[i].chapterTitle + '</em></h3></a><strong>' + data[i].interviewedName + '. ' + data[i].interviewedCharge + ', ' + data[i].workingDate + '</strong></figcaption>');
                 figure.append(figcaption);
                 $('#bic-coleccion .galeria').append(divItem);
             }

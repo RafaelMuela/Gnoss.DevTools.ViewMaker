@@ -1,3 +1,4 @@
+@*[security|||pmauthor|||elprado]*@
 @model ResourceViewModel
 @using System.Reflection;
 @using System.Drawing;
@@ -162,7 +163,7 @@
                     }
                 </ul>
                 <div class="menu-small">
-                    <select class="select-custom">
+                    <select  title="Menú"  class="select-custom">
                         @if (!string.IsNullOrEmpty(imagen))
                         {
                             <option value="menu-imagen-cabecera">@Html.Translate("INICIO")</option>
@@ -349,7 +350,7 @@
             @if (propEtiquetas != null && propEtiquetas.PropertyValues != null && propEtiquetas.PropertyValues.Count > 0)
             {
                 <div class="tags">
-                    <h1>Etiquetas</h1>
+                    <h2>Etiquetas</h2>
                     @foreach (SemanticPropertyModel.PropertyValue propTag in propEtiquetas.PropertyValues)
                     {
                         if (propTag != null && propTag.Value != null)
@@ -373,7 +374,7 @@
                 if (numeroDeObras > 0)
                 {
                     <div id="obras-autor" class="obras">
-                        <h1><span>@Html.Translate("OBRAS") <strong>(<span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#artWorkNumber"))>@numeroDeObras</span>)</strong></span></h1>
+                        <h2 class="heading"><span>@Html.Translate("OBRAS") <strong>(<span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#artWorkNumber"))>@numeroDeObras</span>)</strong></span></h2>
                         <form novalidate="novalidate">
                             <ul class="vista-selector">
                                 <li class="miniaturas selected" data-mode="miniaturas"><a>@Html.Translate("IMAGENES")</a></li>
@@ -419,7 +420,7 @@
                                 }
                                 @if (subcolec1.Pm_artworkOrder.Count > 0)
                                 {
-                                    <select class="oculto filtrosMenu">
+                                    <select   title="Filtros Menú"  class="oculto filtrosMenu">
                                         @foreach (Pm_Order ordenC in subcolec1.Pm_artworkOrder)
                                         {
                                             <option value="@ordenC.Pm_value">@ordenC.Dc_title</option>
@@ -455,7 +456,7 @@
                                                         }
                                                         @if (subcolec3.Pm_artworkOrder.Count > 0)
                                                         {
-                                                            <select class="oculto filtrosMenu">
+                                                            <select  title="Filtros Menú"  class="oculto filtrosMenu">
                                                                 @foreach (Pm_Order ordenC in subcolec3.Pm_artworkOrder)
                                                                 {
                                                                     <option value="@ordenC.Pm_value">@ordenC.Dc_title</option>
@@ -480,7 +481,7 @@
                                             }
                                             @if (subcolec2.Pm_artworkOrder.Count > 0)
                                             {
-                                                <select class="oculto filtrosMenu">
+                                                <select   title="Filtros Menú"  class="oculto filtrosMenu">
                                                     @foreach (Pm_Order ordenC in subcolec2.Pm_artworkOrder)
                                                     {
                                                         <option value="@ordenC.Pm_value">@ordenC.Dc_title</option>
@@ -544,11 +545,14 @@
                     });
 
                     function ActualizarDescMenu(itemMenu) {
-                        if (itemMenu.find(">.descripMenu").size() > 0) {
+                        if (itemMenu.find(">.descripMenu").length > 0) {
                             if ($('ul.nivel1 li').find('a').attr('filter-value') == itemMenu.find('a').attr('filter-value')) {
                                 $(".secciontit").html('');
+                                $(".secciontit").hide();
+                     
                             }
                             else {
+                                $(".secciontit").show();
                                 $(".secciontit").html(itemMenu.find("a").html());
                             }
                             if (itemMenu.find(">.itemsSubMenu a").length > 0) {
@@ -571,7 +575,7 @@
                                 }
                             });
                         }
-                        if (itemMenu.find(">.itemsSubMenu").size() > 0) {
+                        if (itemMenu.find(">.itemsSubMenu").length > 0) {
                             $("#tagsSubmenuObras").html(itemMenu.find(">.itemsSubMenu").html());
                             $("#tagsSubmenuObras a").first().addClass("on");
                             $("#tagsSubmenuObras a").click(function (e) {
@@ -583,10 +587,10 @@
                         }
                         //Filtramos en caso de tener filtro:
                         if (itemMenu.find('a').attr('filter-value')) {
-                            while ($('.orden .select-custom option').size() > 2) {
+                            while ($('.orden .select-custom option').length > 2) {
                                 $('.orden .select-custom option').first().remove();
                             }
-                            if (itemMenu.find(">.filtrosMenu").size() > 0) {
+                            if (itemMenu.find(">.filtrosMenu").length > 0) {
                                 $('.orden .select-custom').prepend(itemMenu.find(">.filtrosMenu").html());
                             }
                             $('.orden .select-custom option:first-child').attr("selected", "selected");
@@ -678,7 +682,7 @@
                         return;
                     }
                 </script>
-                <h2 class="secciontit"></h2>
+                <h2 class="secciontit" style="display:none"></h2>
                 <div id="descripcionMenuObras">
                     <div class="texto colapsado normal">
                         @Html.Raw(coleccion.Pm_subcollection_1.First().Dc_description)
@@ -696,7 +700,7 @@
                         <form novalidate="novalidate">
                             <span class="orden panelOrdenContenedor">
                                 <label for="orden">Orden:</label>
-                                <div class="oculto" id="filtroActivo" value="@coleccion.Pm_subcollection_1.First().multiLan_filter"></div>
+                                <div class="oculto"  title="Filtro activo"  id="filtroActivo" value="@coleccion.Pm_subcollection_1.First().multiLan_filter"></div>
                                 <select class="select-custom filtro" id="orden">
                                     <option value="pm:relevance,ecidoc:p62_E52_p79_has_time-span_beginning|orden=asc" selected="selected">@Html.Translate("CRONOLOGICO")</option>
                                     <option value="ecidoc:p102_E35_p3_has_title|orden=asc">@Html.Translate("ALFABETICO")</option>
@@ -934,11 +938,11 @@
                                         @if (!string.IsNullOrEmpty(imagenRM))
                                         {
                                             string imagenRMUrlCompleta = string.Concat(ViewBag.BaseUrlContent, "/", imagenRM);
-                                            <img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
+                                            <img alt="Video de instagram" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
                                         }
                                         else
                                         {
-                                            <img alt="" src="img/provisionales/miniatura_multimedia.png" onclick="" />
+                                            <img alt="Video de instagram" src="img/provisionales/miniatura_multimedia.png" onclick="" />
                                         }
                                     </a>
                                     <figcaption>
@@ -966,7 +970,7 @@
                                         @if (!string.IsNullOrEmpty(imagenRM))
                                         {
                                             string imagenRMUrlCompleta = string.Concat(ViewBag.BaseUrlContent, "/", imagenRM);
-                                            <img alt="" src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
+                                            <img alt="Video de " src="@Html.ObtenerImagenConTamano(imagenRMUrlCompleta, 300)" onclick="" />
                                         }
                                         else
                                         {
@@ -1089,7 +1093,7 @@
                     @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMPRESION"))
                 </div>
                 <div>
-                    <h1><a href="mailto:bimnp@museodelpradodifusion.es" target="_blank">@Html.Translate("BANCODEIMAGENES")</a></h1>
+                    <h2><a href="mailto:bimnp@museodelpradodifusion.es" target="_blank">@Html.Translate("BANCODEIMAGENES")</a></h2>
                     @Html.Raw(@Html.Translate("FICHA_RECURSO_OBRA_IMAGENES"))
                 </div>
             </div>
