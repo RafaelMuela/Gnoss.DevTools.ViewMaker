@@ -1,3 +1,4 @@
+@*[security|||shared/head/_ficherosjavascript.cshtml|||elprado]*@
 @{
     CommunityModel Comunidad = ViewBag.Comunidad;
     string urlPersonalizacion = ViewBag.BaseURLContent+"/imagenes/proyectos/personalizacion/"+Comunidad.Key.ToString();
@@ -6,6 +7,9 @@
     {
         versionJS=Comunidad.VersionJS.Value.ToString();
     }
+    Uri baseUri = new Uri(Html.GetBaseUrlContent());
+    Uri uriServicioExterno = new Uri(baseUri,"servicioexterno");
+    
 }
 
 @if (Html.GetJSYCSSunificado().HasValue&&Html.GetJSYCSSunificado().Value)
@@ -163,5 +167,5 @@ else if (!string.IsNullOrEmpty(@Html.GetGoogleAnalyticsCode()))
 
 
 <!--TIMELINE-->
-<input type="hidden" id="inpt_url_external_service" value="@Html.Translate("URL_SERVICIOEXTERNO")">
+<input type="hidden" id="inpt_url_external_service" value="@uriServicioExterno.AbsoluteUri">
 <input type="hidden" id="inpt_url_cronoscopio" value="@Html.GetComunidad().Url/@Html.Translate("URL_CRONOSCOPIO")">

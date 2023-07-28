@@ -3518,8 +3518,11 @@ catch (Exception e)
 {
 
     <div id="messageException">@e.Message</div>
-    <div id="messageException">@e.InnerException.Message</div>
-    <div id="messageException">@e.InnerException.StackTrace</div>
+    @if (@e.InnerException != null)
+    {
+        <div id="messageException">@e.InnerException.Message</div>
+        <div id="messageException">@e.InnerException.StackTrace</div>
+    }
 }
 @functions{
     public static List<string> ObtenerValoresPropiedadSemCms(SemanticPropertyModel pPropiedad)
