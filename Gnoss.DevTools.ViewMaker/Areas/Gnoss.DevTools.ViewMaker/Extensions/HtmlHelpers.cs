@@ -670,7 +670,7 @@ namespace Gnoss.DevTools.ViewMaker.Extensions
             {
                 string partialPath = IHtmlHelper.ViewBag.ViewPath;
 
-                if (partialPath.Equals($"~/{rutaVistasPersonalizadas}/Views/FichaRecurso") || partialPath.Equals($"~/{rutaVistasPersonalizadas}/Recursos"))
+                if (partialPath.Equals($"~/{rutaVistasPersonalizadas}/Views/FichaRecurso") || partialPath.Equals($"~/{rutaVistasPersonalizadas}/Recursos") || partialViewName.Contains("_PropiedadOntoData"))
                 {
                     if (partialViewName.StartsWith("SemCms/_") || partialViewName.StartsWith("ControlesMVC/"))
                     {
