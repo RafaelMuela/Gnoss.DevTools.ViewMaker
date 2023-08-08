@@ -1,0 +1,161 @@
+@*[security|||busqueda/index.cshtml|||elprado]*@
+@model SearchViewModel
+@{ CommunityModel Comunidad = ViewBag.Comunidad;
+    string jsExtra = ViewBag.JSExtra;
+
+    string nombrePestanyaActual = Model.PageName;
+    string htmlResultados = Model.HTMLResourceList;
+    string htmlFacetas = Model.HTMLFaceted;
+    Dictionary<string, string> listaFiltrosOrden = Model.FilterOrderList;
+    string FiltroOrdenSeleccionado = Model.FilterOrderSelected;
+    ViewBag.ListaJS.Add(ViewBag.BaseURLPersonalizacion + "/ElPrado/js/slick.min.js");
+                var location = new Uri($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}"); }
+<section class="buscador-coleccion">
+    <form>
+        <div>
+            <input class="ddlCategorias" value="@Model.PageName" type="hidden" />
+            @*<span class="buscar" id="filtroPaginaBusqueda">
+                    <input type="text" value="@Model.TextSearchBox"  title="@Model.TextSearchBox" class="texto default autocompletar">
+                    <a class="encontrar" id="@Guid.NewGuid()" href="#">@Html.GetText("COMMON", "BUSCAR")</a>
+                </span>
+                <input type="button" value="@Html.GetText("COMMON", "BUSCAR")" title="@Html.GetText("COMMON", "BUSCAR")" class="bt">*@
+            <span class="buscar lupa filtroPaginaBusqueda">
+                <input type="text" id="finderSection" placeholder="@Model.TextSearchBox" name="busqueda" title="@Model.TextSearchBox"  class="texto default autocompletar">
+                <a class="encontrar sup" id="@Guid.NewGuid()" href="#">@Html.GetText("COMMON", "BUSCAR")</a>
+            </span>
+        </div>
+    </form>
+    @if (!string.IsNullOrEmpty(Model.PageName))
+    {
+        if (Html.GetUrlPagina().Contains("efimero"))
+        {
+<h1><a href="@Html.GetBaseUrlIdioma()/@Html.Translate("URLHOMEEFIMERA")">@Html.Raw(Model.PageName)</a> </h1> }
+        else if (Html.GetUrlPagina().Contains("voces"))
+        {
+<h1><a href="@Html.GetBaseUrlIdioma()/@Html.Translate("URLHOMEVOCES")">@Html.Raw(Model.PageName)</a> </h1> }
+        else
+        {
+<h1>@Html.Raw(Model.PageName)</h1>}
+
+    }
+</section>
+<section class="resultados-widgets panelOrdenContenedor">
+    <strong id="panNumResultados"></strong>
+    <form novalidate="novalidate">
+        @if (listaFiltrosOrden != null && listaFiltrosOrden.Count > 0)
+        {
+            <span class="orden">
+                <label for="orden">@Html.Translate("ORDEN"):</label>
+                <select id="orden" class="select-custom filtro" >
+                    @foreach (string filtro in listaFiltrosOrden.Keys)
+                    {
+<option value="@listaFiltrosOrden[filtro]" @if (FiltroOrdenSeleccionado == filtro) { Html.Raw("selected=\"selected\""); }>@filtro</option>
+        }
+    </select>
+</span>}
+
+        @{ string styleVistas = "display:none";
+            if (Model.ViewList.Count > 1)
+            {
+                styleVistas = "";
+                        } }
+        <ul class="vista-selector" style="@styleVistas">
+            @foreach (SearchViewModel.ViewTypeModel vista in Model.ViewList)
+            {
+                if (vista.ViewType == SearchViewModel.ViewTypeModel.ViewTypeSearch.Grid)
+                {
+                    string selected = "";
+                    if (vista.Active)
+                    {
+                        selected = " selected";
+                    }
+<li class="miniaturas @selected" data-mode="miniaturas"><a>@Html.Translate("IMAGENES")</a></li>                    break;
+                }
+            }
+            @foreach (SearchViewModel.ViewTypeModel vista in Model.ViewList)
+            {
+                if (vista.ViewType == SearchViewModel.ViewTypeModel.ViewTypeSearch.List)
+                {
+                    string selected = "";
+                    if (vista.Active)
+                    {
+                        selected = " selected";
+                    }
+<li class="listado @selected" data-mode="listado"><a>@Html.Translate("LISTADO")</a></li>                    break;
+                }
+            }
+            @foreach (SearchViewModel.ViewTypeModel vista in Model.ViewList)
+            {
+                if (vista.ViewType == SearchViewModel.ViewTypeModel.ViewTypeSearch.Map)
+                {
+                    string selected = "";
+                    if (vista.Active)
+                    {
+                        selected = " selected";
+                    }
+<li class="galeria @selected" data-mode="big-galeria"><a>@Html.Translate("GALERIA")</a></li>                    break;
+                }
+            }
+        </ul>
+       
+        <a class="ico-rdf" id="descargarRDF" href="@location.AbsoluteUri?rdf">RDF</a>
+    </form>
+</section>
+
+@{ string css = "buscador-coleccion-resultados";
+    if (Html.GetBodyClassPestanya().Contains("bicentenariocss"))
+    {
+        css = "buscador-coleccion-resultados bicentenario";
+                } }
+
+
+<section class="@css">
+    <div class="busca-mob botones-centrados"><a class="open-popup-link" href="#modal-filtros">@Html.Translate("FILTRARRESULTADOS")</a></div>
+    <div id="modal-autor" class="mfp-hide modal-blanco modal-normal modal-resultados">
+        <h2>@Html.Translate("AUTOR")</h2>
+        <div class="buscador-coleccion">
+            <form>
+                <div>
+                    <span class="buscar lupa">
+                        <input type="text" title='@Html.Translate("BUSCAPORNOMBREOAPELLIDODELAUTOR")' value="@Html.Translate("BUSCAPORNOMBREOAPELLIDODELAUTOR")" valueaux="@Html.Translate("BUSCAPORNOMBREOAPELLIDODELAUTOR")" class="texto"><a>@Html.Translate("BUSCAR")</a>
+                    </span>
+                </div>
+            </form>
+            <script>
+                $(document).ready(function () {
+                    $(".buscador-coleccion .buscar input").on("focus", function () {
+                        $(this).val("");
+                    });
+                });
+            </script>
+        </div>
+        <div class="indice-lista no-letra">
+        </div>
+    </div>
+    <div id="panFacetas" class="menu-filtros facetedSearch">
+        @Html.Raw(htmlFacetas)
+    </div>
+    <div id="modal-filtros" class="menu-filtros-movil mfp-hide modal-blanco modal-normal">
+        <h1 class="tit">@Html.Translate("FILTROSRESULTADOS")</h1>
+    </div>
+    <div class="resultados">
+        <div id="panListadoFiltros" class="etiquetas"></div>
+        <div id="panResultados">
+            @if (string.IsNullOrEmpty(htmlResultados) && Model.JSONResourceList != null)
+            {
+                
+                    @Html.PartialView("../CargadorResultados/CargarResultados", Model.JSONResourceList);
+               
+            }
+            else
+{ @* Envoltorio de los items devueltos por el buscador *@ @* Cargar los resultados obtenidos del servicio "Cargador Resultados" *@
+                @Html.Raw(htmlResultados)            }
+
+                
+        </div>
+        <div class="numero-resultados paginadorResultados" id="panNavegador" style="display: none"></div>
+    </div>
+    <script>        @Html.Raw(ViewBag.JSExtra);      </script>
+</section>
+<section class="big-galeria oculto"></section>
+

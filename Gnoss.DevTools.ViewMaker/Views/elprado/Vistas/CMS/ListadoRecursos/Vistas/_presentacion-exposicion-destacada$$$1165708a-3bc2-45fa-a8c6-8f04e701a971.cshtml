@@ -1,0 +1,69 @@
+@model ResourceModel
+@if (Model != null)
+{
+
+    string fechaInicioExibitionKey = "ecidoc:p4_p79_has_time-span_beginning";
+    DateTime? fechaInicioExibition = null;
+    string fechaFinExibitionKey = "ecidoc:p4_p80_has_time-span_end";
+    DateTime? fechaFinExibition = null;
+    string comisarioKey = "ecidoc:p14_carried_out_by_curator";
+    string comisario = "";
+    string comisarioTipoKey = "pm:p14_carried_out_by_curator_type@@@multiLan:textValue";
+    string comisarioTipo = Html.Translate("COMISARIO");
+    string descripcion = Es.Riam.Util.UtilCadenas.EliminarHtmlDeTexto(System.Web.HttpUtility.HtmlDecode(Model.Description));
+    if (descripcion.Length > 100)
+    {
+        descripcion = descripcion.Substring(0, 350) + "...";
+    }
+
+    if (Model.ViewSettings != null && Model.ViewSettings.SemanticProperties != null)
+    {
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(comisarioKey))
+        {
+            comisario = Html.DeleteFirstParagraph(Model.ViewSettings.SemanticProperties[comisarioKey][0].Name.Trim().Replace("<P>", "<p>").Replace("</P>", "</p>"));
+        }
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaInicioExibitionKey))
+        {
+            fechaInicioExibition = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaInicioExibitionKey][0].Name);
+        }
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(fechaFinExibitionKey))
+        {
+            fechaFinExibition = Html.GetDate(Model.ViewSettings.SemanticProperties[fechaFinExibitionKey][0].Name);
+        }
+        if (Model.ViewSettings.SemanticProperties.ContainsKey(comisarioTipoKey))
+        {
+            comisarioTipo = Model.ViewSettings.SemanticProperties[comisarioTipoKey][0].Name;
+            comisarioTipo = comisarioTipo.Substring(0, 1).ToUpper() + comisarioTipo.Substring(1).ToLower();
+        }
+    }
+
+    <figure class="actualidad-items expo-destacada">
+        @if (!string.IsNullOrEmpty(Model.UrlPreview))
+        {
+            <a href="@Model.CompletCardLink"><img src="@Model.UrlPreview.Replace("_300","")" alt="@Model.Title"></a>
+        }
+        <figcaption class="flex">
+            <strong class="tipo">@Html.Translate("EXPOSICION")</strong>
+            <h2><a href="@Model.CompletCardLink">@Model.Title</a></h2>
+
+            @if (fechaInicioExibition.HasValue && fechaFinExibition.HasValue && fechaFinExibition.Value.ToString("dd/MM/yyyy").Substring(0, 10).Equals(Html.Translate("FECHAEXPOSICIONINDEFINIDA")))
+            {
+                <p class="atributo">@fechaInicioExibition.Value.ToString("d")-@Html.Translate("VALOREXPOSICIONINDEFINIDA")</p>
+            }
+
+            else if (fechaInicioExibition.HasValue && fechaFinExibition.HasValue)
+            {
+                <p class="atributo">@fechaInicioExibition.Value.ToString("d")-@fechaFinExibition.Value.ToString("d")</p>
+            }
+
+            @if (!string.IsNullOrEmpty(descripcion))
+            {
+                <p class="descripcion flex">@descripcion</p>
+            }
+            @if (!string.IsNullOrEmpty(comisario))
+            {
+                <p class="descripcion flex"><strong>@comisarioTipo: </strong>@Html.Raw(comisario)</p>
+            }
+        </figcaption>
+    </figure>
+}
