@@ -78,16 +78,22 @@
 
                     if (consultaSparqlTematica != null)
                     {
-                        <div class="form-check">
-                            <label for="Tematica">@Html.Translate("TEMATICA")*</label><br />                            
-                                @foreach (System.Data.DataRow fila in consultaSparqlTematica.DataSetResult.Tables[0].Rows)
-                                {
-                                    string idGnoss = fila["s"].ToString();
-                                    string titulo = fila["titulo"].ToString();                                    
-                                    <input class="form-check-input" type="checkbox" value="@idGnoss"  name="Tematica">
-                                    <label class="form-check-label" for="Tematica">@titulo</label><br>
-                                                                       
-                                }                            
+                        <div class="form-group mb-3 campomultievaluado">    
+                            <div class="cont cont_foaf_interest">                           
+
+                            <label class="control-label d-block lb_foaf_interest" for="Tematica">@Html.Translate("TEMATICA")*</label><br />     
+                                <select id="tematicaSelect" class="select big form-control not-outline">   
+                                    <option value=""></option>
+                                    @foreach (System.Data.DataRow fila in consultaSparqlTematica.DataSetResult.Tables[0].Rows)
+                                    {
+                                        string idGnoss = fila["s"].ToString();
+                                        string titulo = fila["titulo"].ToString();   
+                                        <option value="@idGnoss">@titulo</option>                                                                                                             
+                                    }  
+                                </select>
+                                <input id="addItemMultipleSelect" type="button" class="btn btn-primary mb-3" value="Añadir">                                
+                                <div id="opcionesSeleccionadasTematicaUsuario"></div>
+                             </div>
                         </div>
                     }
                 }
