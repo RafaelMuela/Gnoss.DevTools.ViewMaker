@@ -1,0 +1,608 @@
+@*[security|||activityform|||elprado]*@
+@model ResourceViewModel
+
+@{
+    ResourceModel FichaDocumento = Model.Resource;
+    SemanticResourceModel semCmsModel = Model.SemanticFrom;
+
+    string idiomaNav = ViewBag.UtilIdiomas.LanguageCode;
+
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+
+    string tituloFormulario = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#titleForm");
+    string descripcionFormulario = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#descriptionForm");
+
+    SemanticPropertyModel propActividades = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#activity");
+
+    //Familias
+    //Adolescentes
+    //LSE
+    string tipoFormulario = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#formType");
+
+
+    //bool tipoFamilia=semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#formType").Equals("Familias");
+    //bool tipoAdolescentes=semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#formType").Equals("Adolescentes");
+    //bool tipoLSE=semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#formType").Equals("LSE");
+    bool tipoSesion = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#callType").Equals("Sesión");
+    int edadMinima = int.Parse(semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#minimumAge"));
+    int edadMaxima = int.Parse(semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#maximumAge"));
+    int numeroMaximoParticipantes = int.Parse(semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#maximumParticipantsNumber"));
+    int numeroMaximoAdultos = int.Parse(semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#maximumAdultsNumber"));
+    if (tipoFormulario == "Adolescentes" || tipoFormulario == "LSE")
+    {
+        numeroMaximoAdultos = 1;
+    }
+
+    string idFormularioActividad = semCmsModel.RootEntities[0].Entity.Uri;
+
+    string error = "";
+
+
+    if (edadMinima >= edadMaxima)
+    {
+        error += "<p>La edad máxima debe ser mayor a la edad mínima</p>";
+    }
+    if (edadMinima < 0 || edadMinima > 100)
+    {
+        error += "<p>La edad mínima debe estar comprendida entre 0 y 100</p>";
+    }
+    if (edadMaxima < 0 || edadMaxima > 100)
+    {
+        error += "<p>La edad máxima debe estar comprendida entre 0 y 100</p>";
+    }
+    if (numeroMaximoParticipantes < 1 || numeroMaximoParticipantes > 20)
+    {
+        error += "<p>El número máximo de participantes debe estar comprendido entre 1 y 20</p>";
+    }
+    if (numeroMaximoAdultos < 1 || numeroMaximoAdultos > 5)
+    {
+        error += "<p>El número máximo de adultos debe estar comprendido entre 1 y 5</p>";
+    }
+    if (!string.IsNullOrEmpty(Context.Request.Query["layout"]))
+    {
+        Layout = null;
+    }
+}
+
+
+@if(!string.IsNullOrEmpty(error))
+{
+    @Html.Raw(error)
+}
+else
+{
+    <section class="imagen-cabecera" data-img="@urlPersonalizacion/cms/bnr-formularios.jpg">
+</section>
+
+<section class="res-basica no-nav">
+    <div class="res-cont detalle-conferencia full">
+        <strong class="rastro beige">@Html.Translate("FORMULARIOINSCRIPCION")</strong>
+        <div class="cabecera">						
+            <h1>
+	            <span class="titulo">@tituloFormulario</span>
+            </h1>
+        <span class="descripcion">@Html.Raw(@descripcionFormulario)</span>				
+    </div>
+    <!-- ELEMENTOS DE FORMULARIO -->
+    <form class="form-general">				
+		<fieldset id="diasAsistenciaActividad">
+			<legend>@Html.Translate("DIASDEPREFERENCIAPARAACTIVIDAD")</legend>         		
+            <p>
+                @if(tipoSesion)
+                {
+                    <label>@Html.Translate("SESIONENLAQUEASISTIRALAACTIVIDAD"):</label>
+                }else
+                {
+                    <label>@Html.Translate("SEMANAENLAQUEASISTIRALAACTIVIDAD"):</label>
+                }
+				<select title="Selector Actividad" class="select-custom" id="select-actividad">
+                    @if(tipoSesion)
+                    {
+					    <option value='0'>@Html.Translate("SELECCIONEUNASESION")</option>
+                    }else
+                    {
+                        <option value='0'>@Html.Translate("SELECCIONEUNASEMANA")</option>
+                    }
+					@{
+						
+						List<Actividad> listaActividades = ObtenerActividades(propActividades);
+						
+						if (listaActividades != null && listaActividades.Count() > 0)
+						{						
+							List<string> listaOpciones=new List<string>();
+							bool aniadirSesionListaEspera=false;
+							int valueSelect = 1;
+							// Muestra las actividades cuyo titulo no es vacío ni nulo y tiene convocatorias asociadas
+							foreach (Actividad actividad in listaActividades.OrderBy(actividad => actividad.orden))
+							{
+								// Si hay más de una actividad se muestra el título de la actividad
+								if (listaActividades.Count() > 1)
+								{
+									listaOpciones.Add("<option disabled>"+actividad.titulo+"</option>");
+									valueSelect = valueSelect + 1;
+								}
+								DateTime hoy = DateTime.Today;
+								
+								// Muestra todas las convocatorias de la actividad  
+								foreach (Convocatoria convocatoria in actividad.ListaConvocatorias)
+								{
+									int comparacionFechas = DateTime.Compare(convocatoria.fechaInicio, hoy);
+									if ((comparacionFechas > 0 && convocatoria.numPlazasDisponibles > 0)) 
+									{
+										listaOpciones.Add("<option value=\""+valueSelect+"\">"+convocatoria.fechaTextual+" ("+convocatoria.numPlazasDisponibles+" "+ Html.Translate("PLAZASDISPONIBLES")+")</option>");
+									}
+									else
+									{
+										aniadirSesionListaEspera=true;
+										listaOpciones.Add("<option value=\""+valueSelect+"\" disabled>"+convocatoria.fechaTextual+" ("+convocatoria.numPlazasDisponibles+" "+ Html.Translate("PLAZASDISPONIBLES")+")</option>");
+									}
+									valueSelect = valueSelect + 1;
+								}
+							}
+							if(aniadirSesionListaEspera && tipoFormulario.ToUpper()!="LSE")
+							{
+								<option value="@valueSelect">Lista de espera</option>
+							}
+							foreach(string option in listaOpciones)
+							{
+								@Html.Raw(option)
+							}
+						}
+					}
+				</select>               
+            </p>
+            <select title="Selector oculto" id="idFormAux" class="oculto">
+                @if (listaActividades != null && listaActividades.Count() > 0)
+                {
+                    int idValue = 1;
+                    foreach (Actividad actividad in listaActividades.OrderBy(actividad => actividad.orden))
+                    {
+                        // Si hay más de una actividad se muestra el título de la actividad
+                        if (listaActividades.Count() > 1)
+                        {
+                            idValue++;
+                        }
+                        // Muestra todas las convocatorias de la actividad  
+                        foreach (Convocatoria convocatoria in actividad.ListaConvocatorias)
+                        {
+                            <option plazasdisponibles="@convocatoria.numPlazasDisponibles" amigosmuseo="@((convocatoria.amigosDelMuseo).ToString())" idactividad="@actividad.identificador" idconvocatoria="@convocatoria.identificador" value='@idValue'></option>
+                            idValue++;
+                        }
+                    }
+					<option plazasdisponibles="5" amigosmuseo="false" idactividad="" idconvocatoria="" value="@idValue"></option>
+                }
+            </select>
+                            
+            <input type="hidden" title="Titulo" name="Titulo" value="@tituloFormulario" />
+            <input type="hidden"  title="Descripcion" name="Descripcion" value="@System.Net.WebUtility.UrlEncode(descripcionFormulario)" />
+            <input type="hidden" title="IdFormulario" name="IdFormulario" value="@idFormularioActividad"/>
+            <input type="hidden" title="TipoFormulario" name="TipoFormulario" value="@tipoFormulario.ToString()" />   	
+            <input type="hidden" title="EdadMinima" name="EdadMinima" value="@edadMinima" />   	
+            <input type="hidden" title="EdadMaxima" name="EdadMaxima" value="@edadMaxima" />   	
+            <input type="hidden"  title="MaxParticipantes"name="MaxParticipantes" value="@numeroMaximoParticipantes" />   	
+            <input type="hidden"  title="MaxAdultos" name="MaxAdultos" value="@numeroMaximoAdultos" /> 
+
+			<input type="hidden" title="@Html.Translate("SOLICITUDENVIADACORRECTAMENTE")" id="enviook" value="@Html.Translate("SOLICITUDENVIADACORRECTAMENTE")."/>
+                            
+            <input title="convocatoria" type="hidden" name="IdConvocatoria" value="" />
+            <input title="actividad" type="hidden" name="IdActividad" value="" />
+            <div class="check-radio first oculto" id="divListaEspera" >
+		        <label for="checkListaEspera">
+					<span></span>
+					@Html.Translate("TEXTOLISTAESPERA")
+				</label>
+	        </div>
+		</fieldset>
+
+        <fieldset id="datosAdultoResponsable">
+			@switch(tipoFormulario)
+			{
+				case "Familias":
+				case "Actividades culturales":
+					if (numeroMaximoAdultos>1)
+					{
+						<legend>@Html.Translate("DATOSDELOSADULTOSASISTENTES")</legend>
+						
+					}else
+					{
+						<legend>@Html.Translate("DATOSDELADULTOASISTENTE")</legend>
+					}
+					break;
+				case "Adolescentes":
+					<legend>@Html.Translate("DATOSDELADULTORESPONSABLE")</legend>
+					break;
+				case "LSE":
+					break;
+			}
+		
+            @if (numeroMaximoAdultos>1)
+            {
+			    <p class="numResponsablesAdicionales">
+                    <label for="select-numResponsables">@Html.Translate("NUMEROADULTOSASISTENTES"):</label>
+				    <select  id="select-numResponsables" class="select-custom" name="numero-responsables">	
+                        <option value='0'>0</option>				                
+				    </select>                
+                </p>
+            }
+            @{
+                string cssResponsablePrincipal = "oculto";
+                if (numeroMaximoAdultos == 1)
+                {
+                    cssResponsablePrincipal = "";
+                }
+            }    
+
+			<div id="responsablePrincipal" class="@cssResponsablePrincipal">
+				<div class="row">
+					<input type="text" id="nombre-adulto" class="obligatorio" name="Responsable.Nombre" placeholder="@Html.Translate("NOMBREYAPELLIDOS")*" />
+					<label for="nombre-adulto">@Html.Translate("NOMBREYAPELLIDOS")*</label>
+				</div>
+				<div class="row">
+					<input type="text" id="telefono-adulto" class="obligatorio" name="Responsable.Telefono" placeholder="@Html.Translate("TELEFONO")*" />
+					<label for="telefono-adulto">@Html.Translate("TELEFONO")*</label>
+				</div>
+				<div class="row">
+					<input type="text" id="correo-adulto" class="obligatorio" name="Responsable.Correo" placeholder="@Html.Translate("CORREOELECTRONICO")*" />
+					<label for="correo-adulto">@Html.Translate("CORREOELECTRONICO")*</label>
+					@{<!--<div class="help">
+						<div class="arr-lft"><span></span></div>
+						@Html.Raw(Html.Translate("NOCOMPARTIMOSTUEMAILGARANTIZADO")).
+					</div>-->}
+				</div>
+				<div class="row">
+					<input type="text" id="confirmar-correo-adulto" class="obligatorio"  placeholder="@Html.Translate("CONFIRMARCORREOELECTRONICO")*" />
+					<label for="confirmar-correo-adulto">@Html.Translate("CONFIRMARCORREOELECTRONICO")*</label>                
+				</div>
+				<div class="row oculto" id="numAmigo">
+					<input type="text" id="numAmigo-adulto" name="Responsable.NumeroAmigosMuseo" placeholder="@Html.Translate("NUMEROAMIGODELMUSEO")" />
+					<label for="numAmigo-adulto">@Html.Translate("NUMEROAMIGODELMUSEO")</label>
+				</div> 
+			</div>		
+            @if (numeroMaximoAdultos>1)
+            {	
+            <div id="responsableAdicionalBase" style="display:none;">
+                <div class="row">
+		            <input type="text" name="RespAdicionalBase" class="obligatorioBase" placeholder="@Html.Translate("NOMBREYAPELLIDOSDELADULTOADICIONAL")*" />
+		            <label>@Html.Translate("NOMBREYAPELLIDOSDELADULTOADICIONAL")*</label>
+	            </div>                                    
+            </div>			           
+            }
+	    </fieldset>
+		@if(tipoFormulario!="LSE" && tipoFormulario!="Actividades culturales")
+		{
+			<fieldset id="datosParticipantes">
+				@switch(tipoFormulario)
+				{
+					case "Familias":
+						<legend>@Html.Translate("DATOSDELOSPARTICIPANTESNINOS")</legend>	
+						break;
+					case "Adolescentes":
+						<legend>@Html.Translate("DATOSDELOSPARTICIPANTESADOLESCENTES")</legend>	
+						break;
+				}
+				<p>
+					@switch(tipoFormulario)
+					{
+						case "Familias":
+							 <label>@Html.Translate("NUMERODEPARTICIPANTESNINOS"):</label>
+							break;
+						case "Adolescentes":
+							<label>@Html.Translate("NUMERODEPARTICIPANTESADOLESCENTES"):</label>	
+							break;
+					}
+					<select title="Número de participantes" id="select-numParticipantes" class="select-custom" name="numero-participante">		
+						<option value='0'>0</option>			                
+					</select>                
+				</p>                     
+				<div id="participanteBase" style="display:none;">
+					<div class="row">
+						<input type="text" name="ListaParticipantes.Nombre" class="obligatorio" placeholder="@Html.Translate("NOMBREYAPELLIDOS")*" />
+						<label>@Html.Translate("NOMBREYAPELLIDOS")*</label>
+					</div>                    
+					<p>
+						<label>@Html.Translate("EDAD"):</label>
+						@{	
+							<select class="select-custom-base obligatorio"  name="ListaParticipantes.Edad">
+								<option value='-1'>@Html.Translate("EDAD")*</option>
+								@for(int i=edadMinima;i<=edadMaxima;i++)
+								{
+									<option value='@i'>@i</option>
+								}
+							</select>
+						}      
+					</p>                     
+					<div class="row">
+						<textarea rows="4" cols="20" name="ListaParticipantes.OtrosDatos" placeholder="@Html.Translate("OTROSDATOS")"></textarea>
+						<label>@Html.Translate("OTROSDATOS")</label>
+					</div>                                        
+					<div class="check-radio first">
+						<input id="ListaParticipantes.InconvenienteFotos" type="checkbox" name="ListaParticipantes.InconvenienteFotos"/>
+						<label for="ListaParticipantes.InconvenienteFotos"><span></span><div class="texto">@Html.Translate("MARQUECASILLASITIENEINCONVENIENTEENSERFOTOGRAFIADO").</div></label>
+					</div>                                    
+				</div>
+				<p class="disclaim">@Html.Translate("LOSCAMPOSCON*SONREQUERIDOS")</p>
+			</fieldset>  
+		}
+		<fieldset>  
+			<div class="check-radio first">	     
+				@if(tipoFormulario=="LSE")
+				{
+					<input type="text" title="LSE" name="pNombreGrupoFormulario" value="LSE" class="oculto"/>		
+				}else if(tipoFormulario=="Actividades culturales")
+				{
+					<input type="text" name="pNombreGrupoFormulario" title="Actividades culturales" value="Actividades culturales" class="oculto"/>		
+				}
+				else{
+					<input type="text" name="pNombreGrupoFormulario" title="Formulario de actividad" value="Formulario de actividad" class="oculto"/>				
+				}
+				<input name="pChkRecibirInfoFormulario"  type="checkbox" id="pChkRecibirInfoFormulario">
+				<label for="pChkRecibirInfoFormulario"><span></span><div class="texto"><p>@Html.Raw(Html.Translate("RECIBIRINFORMACIONFORMULARIOACTIVIDAD"))</p></div></label>
+			</div>
+			<div class="check-radio first">	                
+				<input name="chkAceptoCondiciones" title="Acepto Condiciones" type="checkbox" id="chkAceptoCondiciones">
+				@if(tipoFormulario=="LSE")
+				{
+					string urlpolitica=ViewBag.Comunidad.Url;
+					if(!urlpolitica.EndsWith("/"))
+					{
+						urlpolitica+="/";
+					}
+					//urlpolitica+="politica-privacidad/necesidades-especiales";
+					urlpolitica+="politica-privacidad";
+					<label for="chkAceptoCondiciones"><span></span><div class="texto"><p>Acepto la <a href="@urlpolitica" target="_blank">política de protección de datos</a></p>*</div></label>
+				}else
+				{
+					<label for="chkAceptoCondiciones"><span></span><div class="texto"><p>@Html.Raw(Html.Translate("ACEPTOCONDICIONES"))</p>*</div></label>
+				}
+			</div>
+		</fieldset>  
+        <a id="envioFormActividad" class="botones-centrados bc-estandar hv-estandar load-boton">
+			<span class="txt">@Html.Translate("ENVIARSOLICITUD")</span>
+			<div class="loader">Cargando</div>
+			<span class="txt-msg ok">@Html.Translate("MENSAJE_ESPEREPROCESARSOLICITUD")</span>
+		</a>
+		
+		<div class="warning seleccionasemana oculto">@Html.Translate("SELECCIONASESIONPARAACTIVIDAD")</div>			
+		<div class="warning aceptacondiciones oculto">@Html.Translate("ACEPTACONDICIONES")</div>			
+		<div class="warning obligatorios oculto">@Html.Translate("LOSCAMPOSCON*SONREQUERIDOS")</div>		
+		<div class="warning telefonoincorrecto oculto">@Html.Translate("FORMATOTELEFONOINCORRECTO")</div>
+		<div class="warning emailincorrecto oculto">@Html.Translate("ERRORREGISTROFORMATOEMAIL")</div>
+		<div class="warning emailnocoincide oculto">@Html.Translate("ERRORLADIRECCIONDECORREONOCOINCIDE")</div>
+		<div class="warning adultos oculto">@Html.Translate("DEBESINDICARALMENOSUNADULTO")</div>
+		<div class="warning participantes oculto">@Html.Translate("NOHASANIADIDOPARTICIPANTES")</div>	
+		<div class="warning numamigoincorrecto oculto">@Html.Translate("NUMERODEAMIGOMUSEOINCORRECTO")</div>					
+		
+	</form>		  
+    @if (FichaDocumento.Actions.Edit)
+    {
+	    <form class="oculto formExportarSolicitudes" action="@ViewBag.Comunidad.Url/externalservice" method="POST">
+		    <input type="hidden" name="pNombreServicio" value="Formularios"></input>
+		    <input type="hidden" name="pNombreAccion" value="ExportarFormularioActividad"></input>
+		    <input type="hidden" name="IdFormulario" value="@idFormularioActividad"></input>
+	    </form>
+	    <a id="envioForm" class="botones-centrados bc-estandar hv-estandar exportarSolicitudes">
+		    <span class="txt">Exportar solicitudes</span>
+                </a>
+            }
+            <!-- Fin ELEMENTOS DE FORMULARIO -->
+        <p> <a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a></p>
+        </div>
+    </section>
+
+}
+
+
+@{
+    ResourceModel fichaRecurso = Model.Resource;
+    ResourceModel.ActionsModel acciones = fichaRecurso.Actions;
+    
+    if (acciones.Edit)
+    {
+		<a class="botones-centrados bc-estandar hv-estandar" href="@Model.UrlEdit">
+             <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "EDITAR")</span>
+		</a>		
+    }
+
+    if (acciones.Delete)
+    {
+		<a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
+            <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")</span>
+		</a>
+		<div class="confirmarBorrar oculto">@Html.Translate("PREGUNTAESTASSEGURO") 
+			<a onclick="AccionRecurso_Eliminar_Aceptar('@fichaRecurso.ListActions.UrlDelete', '@fichaRecurso.Key')">@Html.GetText("COMMON", "SI")</a> 
+			<a onclick="$('.preguntarBorrar').show();$('.confirmarBorrar').hide();">@Html.GetText("COMMON", "NO")</a>
+		</div>
+    }	
+}
+
+
+@functions
+    {
+    public class Actividad
+    {
+        public Actividad(string pTitulo, int pOrden, List<Convocatoria> pListaConvocatorias, string pIdentificador)
+        {
+            this.titulo = pTitulo;
+            this.orden = pOrden;
+            this.ListaConvocatorias = pListaConvocatorias;
+            this.identificador = pIdentificador;
+        }
+   
+        public string identificador { get; set; }
+        public string titulo { get; set; }
+        public int orden { get; set; }
+        public List<Convocatoria> ListaConvocatorias { get; set; }
+    }
+
+
+    public class Convocatoria
+    {
+        public Convocatoria(DateTime pFechaInicio, string pFechaTextual, int pNumPlazasDisponibles, bool pAmigosDelMuseo, string pIdentificador)
+        {
+            this.fechaInicio = pFechaInicio;
+            this.fechaTextual = pFechaTextual;
+            this.numPlazasDisponibles = pNumPlazasDisponibles;
+            this.amigosDelMuseo = pAmigosDelMuseo;
+            this.identificador = pIdentificador;
+        }
+
+        public string identificador { get; set; }
+        public DateTime fechaInicio { get; set; }
+        public string fechaTextual { get; set; }
+        public int numPlazasDisponibles { get; set; }
+        public bool amigosDelMuseo { get; set; }
+    }
+    
+    // Obtiene todas las actividades del formulario, que tienen convocatorias (aunque sean fuera de fecha porque se mostrarán deshabilitadas)
+    private List<Actividad> ObtenerActividades(SemanticPropertyModel pPropActividades)
+    {
+        List<Actividad> listaActividades = new List<Actividad>();
+
+        if (pPropActividades != null && pPropActividades.PropertyValues != null && pPropActividades.PropertyValues.Count() > 0)
+        {
+            foreach (SemanticPropertyModel.PropertyValue actividad in pPropActividades.PropertyValues)
+            {
+                try
+                {
+                    string tituloActividad = actividad.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#titleActivity");
+
+                    string ordenActividad = actividad.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#orderActivity");
+                    int numOrdenActividad = Int32.Parse(ordenActividad);
+                       
+                    SemanticPropertyModel propConvocatorias = actividad.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#call");
+
+                    List<Convocatoria> listaConvocatorias = ObtenerConvocatorias(propConvocatorias);
+
+                    if (!string.IsNullOrEmpty(tituloActividad) && listaConvocatorias != null && listaConvocatorias.Count() > 0)
+                    {
+                        //Sólo se van a mostrar en la web las actividades en las que no se ha producido un error al obtener el orden y la lista de convocatorias 
+                        listaActividades.Add(new Actividad(tituloActividad, numOrdenActividad, listaConvocatorias, actividad.RelatedEntity.Entity.Uri));
+                    }
+                }
+                catch (Exception e)
+                {
+                    // TODO catch
+                }
+            }
+        }
+
+        return listaActividades;
+    }
+
+
+    private List<Convocatoria> ObtenerConvocatorias(SemanticPropertyModel propConvocatorias)
+    {
+        List<Convocatoria> listaConvocatorias = new List<Convocatoria>();
+
+        if (propConvocatorias != null && propConvocatorias.PropertyValues != null && propConvocatorias.PropertyValues.Count() > 0)
+        {
+            SortedDictionary<int, SemanticPropertyModel.PropertyValue> diccionarioConvocatorias = new SortedDictionary<int, SemanticPropertyModel.PropertyValue>();
+			foreach (SemanticPropertyModel.PropertyValue convocatoria in propConvocatorias.PropertyValues)
+            {
+				int orden =int.Parse(convocatoria.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#orderCall"));
+				diccionarioConvocatorias.Add(orden,convocatoria);
+			}
+
+
+            foreach (SemanticPropertyModel.PropertyValue convocatoria in diccionarioConvocatorias.Values)
+            {
+                try
+                {				
+                    string fechaInicio = convocatoria.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#startDateCall");
+                    DateTime fechaIni = new DateTime();
+
+                    if (!string.IsNullOrEmpty(fechaInicio))
+                    {
+                        fechaIni = FechaStringToDate(fechaInicio);
+                    }
+
+                    string fechaTextual = convocatoria.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#dateCall");
+
+                    string plazasDisponibles = convocatoria.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#numberVacancies");
+                    int numPlazasDisponibles = Int32.Parse(plazasDisponibles);
+
+                    string amigos = convocatoria.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#friendsMuseum");
+                    bool amigosMuseo = false;
+
+                    if (amigos.Equals(Html.GetText("COMMON", "SI")))
+                    {
+                        amigosMuseo = true;
+                    }
+
+                    // De cada actividad sólo se van a mostrar en la web, las convocatorias que no hayan producido una excepcion al obtenerlas y tengan fecha de inicio (para saber si se debe mostrar la convocatoria y ordenarla por fecha)
+                    if (!fechaIni.Equals(DateTime.MinValue) && !string.IsNullOrEmpty(fechaTextual))
+                    {
+                        listaConvocatorias.Add(new Convocatoria(fechaIni, fechaTextual, numPlazasDisponibles, amigosMuseo, convocatoria.RelatedEntity.Entity.Uri));
+                    }
+                }
+                catch (Exception e)
+                {
+                    //TODO
+                }
+            }
+        }
+
+        return listaConvocatorias;
+    }
+
+
+    private static DateTime FechaStringToDate(string pFecha)
+    {
+        DateTime fecha = new DateTime();
+
+        int[] fechaNormalizada = ObtenerFechaNormalizada(pFecha);
+
+        if (fechaNormalizada != null && fechaNormalizada.Count() == 3)
+        {
+            int dia = fechaNormalizada[0];
+            int mes = fechaNormalizada[1];
+            int anio = fechaNormalizada[2];
+
+            if (anio != null && mes != null && dia != null)
+            {
+                fecha = new DateTime(anio, mes, dia);
+            }
+        }
+
+        return (fecha);
+    }
+
+
+    private static int[] ObtenerFechaNormalizada(string pFecha)
+    {
+        int[] fechaNormalizada = null;
+
+        try
+        {
+            if (!string.IsNullOrEmpty(pFecha) && pFecha.Length >= 8)
+            {
+                fechaNormalizada = new int[3];
+                if (pFecha.Contains("/"))
+                {
+                    //dia
+                    fechaNormalizada[0] = Int32.Parse(pFecha.Substring(0, 2));
+                    //mes
+                    fechaNormalizada[1] = Int32.Parse(pFecha.Substring(3, 2));
+                    //anio
+                    fechaNormalizada[2] = Int32.Parse(pFecha.Substring(6, 4));
+                }
+                else
+                {
+                    //dia
+                    fechaNormalizada[0] = Int32.Parse(pFecha.Substring(6, 2));
+                    //mes
+                    fechaNormalizada[1] = Int32.Parse(pFecha.Substring(4, 2));
+                    //anio
+                    fechaNormalizada[2] = Int32.Parse(pFecha.Substring(0, 4));
+                }
+            }
+        }
+        catch (FormatException e)
+        {
+            fechaNormalizada = null;
+        }
+
+        return (fechaNormalizada);
+    }
+
+    }

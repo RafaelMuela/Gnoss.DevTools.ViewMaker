@@ -1,0 +1,43 @@
+@using Es.Riam.Gnoss.Web.MVC.Models;
+@model CMSComponentQuerySPARQL
+@if (Model != null)
+{
+    <form class="oculto formExportarEntradas" action="@ViewBag.Comunidad.Url/externalservice" method="POST">
+        <input type="hidden" name="pNombreServicio" value="Audioguias"  title="Audioguias"></input>
+        <input type="hidden" name="pNombreAccion" value="PrintTickets" title="PrintTickets"></input>
+        <input type="hidden" name="pIdTicketsGroup" value="" title="PrintTicketsGrupo"></input>
+    </form>
+    <table class="informe">
+
+        <tbody>
+            <tr class="cabecera">
+                <th>Fecha</th>
+                <th>Entradas canjeadas</th>
+                <th>Entradas totales</th>
+                <th>Descargar entradas</th>
+            </tr>
+            @foreach (System.Data.DataRow fila in Model.DataSetResult.Tables[0].Rows)
+            {
+
+                string idEntradas = fila["ticketsGroup"].ToString();
+                string fecha = fila["date"].ToString();
+                fecha = fecha.Substring(6, 2) + "/" + fecha.Substring(4, 2) + "/" + fecha.Substring(0, 4) + " " + fecha.Substring(8, 2) + ":" + fecha.Substring(10, 2) + ":" + fecha.Substring(12, 2);
+                string numTickets = fila["numTickets"].ToString();
+                string ticketsUsed = fila["ticketsUsed"].ToString();
+                <tr class="sep">
+                    <td class="txt-l">@fecha</td>
+                    <td>@ticketsUsed</td>
+                    <td>@numTickets</td>
+                    <td class="txt-l">
+                        <a id="envioForm" param="@idEntradas" class="botones-centrados bc-estandar hv-estandar descargarEntradas">
+                            <span class="txt">Descargar entradas</span>
+                        </a>
+                    </td>
+                </tr>
+
+            }
+
+
+        </tbody>
+    </table>
+}
