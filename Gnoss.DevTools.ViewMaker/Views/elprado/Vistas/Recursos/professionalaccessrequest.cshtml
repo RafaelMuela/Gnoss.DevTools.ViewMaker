@@ -11,9 +11,9 @@
     string Apellido2 = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#additional-name");
     string Telefono = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#tel");
 
-    string Puesto = !string.IsNullOrEmpty(semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#title"))
-            ? semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#title")
-            : semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasRole@@@http://purl.org/dc/elements/1.1/title");
+    string Puesto = !string.IsNullOrEmpty(semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasRole@@@http://purl.org/dc/elements/1.1/title"))   
+            ?  semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasRole@@@http://purl.org/dc/elements/1.1/title")
+            : semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#title");
     string Medio = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#organization-name");
     string Direccion = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#street-address");
     string Ciudad = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#locality");
@@ -31,9 +31,9 @@
             Tematica.Add(valor);
         }
     }
-    string Pais = !string.IsNullOrEmpty(semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#country-name"))
-                   ? semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#country-name")
-                   : semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasCountry@@@http://purl.org/dc/elements/1.1/title");
+    string Pais = !string.IsNullOrEmpty(semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasCountry@@@http://purl.org/dc/elements/1.1/title"))
+                   ? semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasCountry@@@http://purl.org/dc/elements/1.1/title")                   
+                   : semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#country-name");
 
     string CodigoPostal = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#postal-code");
     string Correo = semCmsModel.GetFirstValuePropertyByPath("http://www.w3.org/2006/vcard/ns#hasEmail");
@@ -94,7 +94,7 @@
             {
                 <fieldset class="edicionSolicitudAcceso ">
                     <div class="cargarGruposComunidad">
-                        <input type="checkbox" class="oculto" pertenece="false" name="nombreCortoGrupo" checked="checked" value="prensa-gral">
+                        <input type="checkbox" class="oculto" pertenece="false" name="nombreCortoGrupo" title="Solicitud de acceso" checked="checked" value="prensa-gral">
                     </div>
                     <div class="datosUsuario">
                         <input id="Nombre" type="hidden" value="@Nombre" name="Nombre">
@@ -128,7 +128,7 @@
             {
                 <fieldset class="edicionSolicitudAcceso ">
                     <div class="cargarGruposComunidad" identidadID="@identidadUsuarioID" usuarioID="@Usuario">
-                        <input type="checkbox" class="oculto" pertenece="false" name="nombreCortoGrupo" checked="checked" value="prensa-gral">
+                        <input type="checkbox" class="oculto" pertenece="false" name="nombreCortoGrupo" title="Solicitud aceptada" checked="checked" value="prensa-gral">
                     </div>
                     @*<div class="datosUsuario">
                         <a href="#" idSolicitud="@FichaDocumento.Key" class="botones-centrados bc-estandar hv-estandar editarSolicitud">@Html.GetText("COMMON", "GUARDAR")</a>
@@ -141,7 +141,7 @@
                 {
                     <fieldset class="edicionSolicitudAcceso ">
                     <div class="cargarGruposComunidad">
-                        <input type="checkbox" class="oculto" pertenece="false" name="nombreCortoGrupo" checked="checked" value="prensa-gral">
+                        <input type="checkbox" class="oculto" pertenece="false" name="nombreCortoGrupo" title="Solicitud pendiente" checked="checked" value="prensa-gral">
                     </div>
                     <div class="datosUsuario">
                         <input id="Nombre" type="hidden" value="@Nombre" name="Nombre">
@@ -238,7 +238,7 @@
 			            if (listaGrupos[i].Pertenece) {
 			                checked = 'checked="checked"';
 			            }
-			            grupos[indice] = new Array(listaGrupos[i].Nombre, '<input type="checkbox" name="nombreCortoGrupo" ' + checked + ' value="' + listaGrupos[i].NombreCorto + '">' + listaGrupos[i].Nombre + '<br>');
+			            grupos[indice] = new Array(listaGrupos[i].Nombre, '<input type="checkbox"  name="nombreCortoGrupo" ' + checked + ' value="' + listaGrupos[i].NombreCorto + '"  + ' title="' + listaGrupos[i].NombreCorto + '">' + listaGrupos[i].Nombre + '<br>');
 			            indice++;
 			        }
 					if (listaGrupos[i].NombreCorto == "prensa-gral") {
@@ -309,7 +309,7 @@
 			});
         }*@
 		
-		
+        var nombreInputTematica = $(".form-check input").length > 0 ? $(".form-check input").attr("name") : "Tematica";
         //Reprocesar hubspot 
         $("form.formularioAceptarSolicitudProfesional .reprocesarHubspot").click(function (event) {
             event.preventDefault();
@@ -328,7 +328,9 @@
                 }                
             });
             if (tematica.length > 0) {
-                arg["Tematica"] = tematica;
+                for (let index = 0; index < tematica.length; index++) {
+                    arg[`${nombreInputTematica}[${index}]`] = tematica[index]
+            }
             }
             var numGrupo = 0;
             $('.cargarGruposComunidad input:checked').each(function () {
@@ -346,6 +348,7 @@
 			        parent.showInfoBar(data.message, true, true);
 			    }
 			    OcultarUpdateProgress(); 
+			    location.reload();
 			});
         });
 		
@@ -368,7 +371,9 @@
                 }                
             });
             if (tematica.length > 0) {
-                arg["Tematica"] = tematica;
+                for (let index = 0; index < tematica.length; index++) {
+                    arg[`${nombreInputTematica}[${index}]`] = tematica[index]
+            }
             }
             var numGrupo = 0;
             $('.cargarGruposComunidad input:checked').each(function () {
@@ -386,6 +391,7 @@
 			        parent.showInfoBar(data.message, true, true);
 			    }
 			    OcultarUpdateProgress(); 
+			    location.reload();
 			});
         });
 
