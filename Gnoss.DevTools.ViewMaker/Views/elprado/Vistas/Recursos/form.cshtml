@@ -1,0 +1,632 @@
+@*[security|||form|||elprado]*@
+@model ResourceViewModel
+@using System.Data;
+@{
+    ResourceModel FichaDocumento = Model.Resource;
+    SemanticResourceModel semCmsModel = Model.SemanticFrom;
+    ResourceModel.ActionsModel acciones = FichaDocumento.Actions;
+
+    string idiomaNav = ViewBag.UtilIdiomas.LanguageCode;
+
+    string urlPersonalizacion = ViewBag.BaseURLContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+
+    string idFormulario = semCmsModel.RootEntities[0].Entity.Uri;
+    string tituloFormulario = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#titleForm");
+    string antetitulo = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#preTitle");
+    string descripcionFormulario = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#descriptionForm");
+    SemanticPropertyModel propConvocatorias = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#lseCall");
+    string tipoFormulario = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#formType");
+    List<Convocatoria> listaConvocatorias = ObtenerConvocatorias(propConvocatorias);
+
+    string texto = string.Empty;
+    bool esFormularioOpinion = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#isOpinionForm") == Html.GetText("COMMON", "SI");
+    string IdGnoss = semCmsModel.RootEntities[0].Entity.Uri;
+
+    @functions
+    {
+        public class Bloque
+        {
+            public Bloque(string pTitulo, int pOrden, List<Pregunta> pListaPreguntas)
+            {
+                this.titulo = pTitulo;
+                this.orden = pOrden;
+                this.ListaPreguntas = pListaPreguntas;
+            }
+
+            public string titulo { get; set; }
+            public int orden { get; set; }
+            public List<Pregunta> ListaPreguntas { get; set; }
+        }
+
+
+        public class Pregunta
+        {
+            public Pregunta(string pTipo, string pNombreCampo, int pOrden, bool pObligatorio, bool pPedirConfirmacion, Dictionary<int, OrdenPregunta> pDicPreguntasOrden)
+            {
+                this.tipo = pTipo;
+                this.nombreCampo = pNombreCampo;
+                this.orden = pOrden;
+                this.obligatorio = pObligatorio;
+                this.pedirConfirmacion = pPedirConfirmacion;
+                this.dicPreguntasOrden = pDicPreguntasOrden;
+            }
+
+            public string tipo { get; set; }
+            public string nombreCampo { get; set; }
+            public int orden { get; set; }
+            public bool obligatorio { get; set; }
+            public bool pedirConfirmacion { get; set; }
+            //public Dictionary<int, KeyValuePair<string, bool>> dicPreguntasOrden { get; set; }
+            public Dictionary<int, OrdenPregunta> dicPreguntasOrden { get; set; }
+        }
+
+        public class Convocatoria
+        {
+            public Convocatoria(string pFechaTextual, string pIdentificador)
+            {
+                this.fechaTextual = pFechaTextual;
+                this.identificador = pIdentificador;
+            }
+
+            public string identificador { get; set; }
+            public string fechaTextual { get; set; }
+        }
+
+        public class OrdenPregunta
+        {
+            public int orden { get; set; }
+            public bool addFile { get; set; }
+            public string moreInfo { get; set; }
+            public string respuestaPosible { get; set; }
+
+            public OrdenPregunta(string pRespuestaPosible, int pOrden, bool pAddFile, string pMoreInfo)
+            {
+                this.orden = pOrden;
+                this.respuestaPosible = pRespuestaPosible;
+                this.addFile = pAddFile;
+                this.moreInfo = pMoreInfo;
+            }
+        }
+
+        // Obtiene todos los bloques del formulario con sus preguntas
+        private static List<Bloque> ObtenerBloques(SemanticPropertyModel propBloques, IHtmlHelper pHtmlHelper)
+        {
+            List<Bloque> listaBloques = new List<Bloque>();
+
+            if (propBloques != null && propBloques.PropertyValues != null && propBloques.PropertyValues.Count() > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue bloque in propBloques.PropertyValues)
+                {
+                    try
+                    {
+                        string tituloBloque = bloque.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#titleBlock");
+
+                        string ordenBloque = bloque.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#orderBlock");
+                        int numOrdenBloque = Int32.Parse(ordenBloque);
+
+                        SemanticPropertyModel propPreguntas = bloque.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#question");
+
+                        List<Pregunta> listaPreguntas = ObtenerPreguntas(propPreguntas, pHtmlHelper);
+
+                        if (!string.IsNullOrEmpty(tituloBloque) && listaPreguntas != null && listaPreguntas.Count() > 0)
+                        {
+                            listaBloques.Add(new Bloque(tituloBloque, numOrdenBloque, listaPreguntas));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // TODO catch
+                    }
+                }
+            }
+
+            return listaBloques;
+        }
+
+        // Obtiene las preguntas del formulario
+        private static List<Pregunta> ObtenerPreguntas(SemanticPropertyModel propPreguntas, IHtmlHelper pHtmlHelper)
+        {
+            List<Pregunta> listaPreguntas = new List<Pregunta>();
+
+            if (propPreguntas != null && propPreguntas.PropertyValues != null && propPreguntas.PropertyValues.Count() > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue pregunta in propPreguntas.PropertyValues)
+                {
+                    try
+                    {
+                        string tipo = pregunta.RelatedEntity.Entity.TipoEntidad;
+                        string tipoPregunta = string.Empty;
+
+                        if (!string.IsNullOrEmpty(tipo) && tipo.Contains("#"))
+                        {
+                            tipoPregunta = tipo.Substring(tipo.IndexOf("#") + 1);
+                        }
+
+
+                        // #region Propiedades comunes a todas las preguntas
+
+                        string nombreCampoPregunta = pregunta.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#fieldName");
+                        string orden = pregunta.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#orderQuestion");
+                        int numOrdenPregunta = Int32.Parse(orden);
+
+
+                        string obligatorio = pregunta.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#request");
+                        bool obligatorioPregunta = false;
+
+                        if (obligatorio.Equals(pHtmlHelper.GetText("COMMON", "SI")))
+                        {
+                            obligatorioPregunta = true;
+                        }
+
+
+                        string pedirConfirmacion = pregunta.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#requestConfirmation");
+                        bool pedirConfirmacionPregunta = false;
+
+                        if (pedirConfirmacion.Equals(pHtmlHelper.GetText("COMMON", "SI")))
+                        {
+                            pedirConfirmacionPregunta = true;
+                        }
+
+
+                        // # endregion
+
+                        // #region Propiedades dependiendo del tipo de pregunta
+
+
+                        // TODO corregir tipos pregunta
+
+                        Dictionary<int, OrdenPregunta> dicPreguntasOrden = new Dictionary<int, OrdenPregunta>();
+
+                        if (!string.IsNullOrEmpty(tipoPregunta) && (tipoPregunta.Equals("ComboQuestion") || tipoPregunta.Equals("RadioButtonQuestion")))
+                        {
+                            SemanticPropertyModel propPreguntaOrden = pregunta.RelatedEntity.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#question_orden");
+
+                            if (propPreguntaOrden != null && propPreguntaOrden.PropertyValues != null && propPreguntaOrden.PropertyValues.Count() > 0)
+                            {
+                                foreach (SemanticPropertyModel.PropertyValue preguntaOrden in propPreguntaOrden.PropertyValues)
+                                {
+                                    string orden_PreguntaOrden = preguntaOrden.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#order");
+                                    int numOrden_PreguntaOrden = Int32.Parse(orden_PreguntaOrden);
+
+                                    string respuestaPosible = preguntaOrden.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#answerPossible");
+
+                                    string tieneFichero = preguntaOrden.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#addFile");
+                                    bool file = false;
+                                    if (!string.IsNullOrEmpty(tieneFichero) && tieneFichero.Equals(pHtmlHelper.GetText("COMMON", "SI")))
+                                    {
+                                        file = true;
+                                    }
+                                    string moreInfo = preguntaOrden.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#moreInfo");
+
+                                    if (!string.IsNullOrEmpty(respuestaPosible))
+                                    {
+                                        dicPreguntasOrden.Add(numOrden_PreguntaOrden, new OrdenPregunta(respuestaPosible, numOrden_PreguntaOrden, file, moreInfo));
+                                    }
+                                }
+                            }
+                        }
+                        //else if(!string.IsNullOrEmpty(tipoPregunta) && (tipoPregunta.Equals("DateQuestion")))
+                        //{
+                        // TODO DateQuestion
+                        //}
+
+                        // #endregion
+
+                        if (!string.IsNullOrEmpty(tipoPregunta) && !string.IsNullOrEmpty(nombreCampoPregunta))
+                        {
+                            listaPreguntas.Add(new Pregunta(tipoPregunta, nombreCampoPregunta, numOrdenPregunta, obligatorioPregunta, pedirConfirmacionPregunta, dicPreguntasOrden));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        //TODO
+                    }
+                }
+            }
+
+            return listaPreguntas;
+        }
+
+
+        private static DateTime FechaStringToDate(string pFecha)
+        {
+            DateTime fecha = new DateTime();
+
+            int[] fechaNormalizada = ObtenerFechaNormalizada(pFecha);
+
+            if (fechaNormalizada != null && fechaNormalizada.Count() == 3)
+            {
+                int dia = fechaNormalizada[0];
+                int mes = fechaNormalizada[1];
+                int anio = fechaNormalizada[2];
+
+                if (anio != null && mes != null && dia != null)
+                {
+                    fecha = new DateTime(anio, mes, dia);
+                }
+            }
+
+            return (fecha);
+        }
+
+
+        private static int[] ObtenerFechaNormalizada(string pFecha)
+        {
+            int[] fechaNormalizada = null;
+
+            try
+            {
+                if (!string.IsNullOrEmpty(pFecha) && pFecha.Length >= 8)
+                {
+                    fechaNormalizada = new int[3];
+                    if (pFecha.Contains("/"))
+                    {
+                        //dia
+                        fechaNormalizada[0] = Int32.Parse(pFecha.Substring(0, 2));
+                        //mes
+                        fechaNormalizada[1] = Int32.Parse(pFecha.Substring(3, 2));
+                        //anio
+                        fechaNormalizada[2] = Int32.Parse(pFecha.Substring(6, 4));
+                    }
+                    else
+                    {
+                        //dia
+                        fechaNormalizada[0] = Int32.Parse(pFecha.Substring(6, 2));
+                        //mes
+                        fechaNormalizada[1] = Int32.Parse(pFecha.Substring(4, 2));
+                        //anio
+                        fechaNormalizada[2] = Int32.Parse(pFecha.Substring(0, 4));
+                    }
+                }
+            }
+            catch (FormatException e)
+            {
+                fechaNormalizada = null;
+            }
+
+            return (fechaNormalizada);
+        }
+
+        private List<Convocatoria> ObtenerConvocatorias(SemanticPropertyModel propConvocatorias)
+        {
+            List<Convocatoria> listaConvocatorias = new List<Convocatoria>();
+            if (propConvocatorias != null && propConvocatorias.PropertyValues != null && propConvocatorias.PropertyValues.Count() > 0)
+            {
+                SortedDictionary<int, SemanticPropertyModel.PropertyValue> diccionarioConvocatorias = new SortedDictionary<int, SemanticPropertyModel.PropertyValue>();
+                foreach (SemanticPropertyModel.PropertyValue convocatoria in propConvocatorias.PropertyValues)
+                {
+                    int orden = int.Parse(convocatoria.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#orderCall"));
+                    diccionarioConvocatorias.Add(orden, convocatoria);
+                }
+
+                foreach (SemanticPropertyModel.PropertyValue convocatoria in diccionarioConvocatorias.Values)
+                {
+                    try
+                    {
+                        string fechaTextual = convocatoria.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#dateCall");
+
+                        listaConvocatorias.Add(new Convocatoria(fechaTextual, convocatoria.RelatedEntity.Entity.Uri));
+                    }
+                    catch (Exception e)
+                    {
+                        //TODO
+                    }
+                }
+            }
+            return listaConvocatorias;
+        }
+    }
+}
+
+<section class="imagen-cabecera" data-img="@urlPersonalizacion/cms/bnr-formularios.jpg"></section>
+<section class="res-basica no-nav">
+    <div class="res-cont detalle-conferencia full">
+        @if (!string.IsNullOrEmpty(antetitulo))
+        {
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    $(".bt-menu-lateral").remove();
+                    $(".header li").removeClass("activo");
+                });
+            </script>
+            <strong class="rastro beige">@antetitulo</strong> }
+        else
+        {
+            <strong class="rastro beige">@Html.Translate("FORMULARIOINSCRIPCION")</strong>}
+        <div class="cabecera">
+            <h1>
+                <span class="titulo">@tituloFormulario</span>
+            </h1>
+            <p>@Html.Raw(@descripcionFormulario)</p>
+        </div>
+        <input title="Campos obligatorios" type="hidden" id="camposobligatorios" value="@Html.Translate("LOSCAMPOSCON*SONREQUERIDOS")" />
+        <input title="Campos confirmados" type="hidden" id="camposconfirmados" value="@Html.Translate("ELCAMPONOCOINCIDE")" />
+        <input title="Seleccionar convocatoria" type="hidden" id="convocatorialse" value="@Html.Translate("DEBESSELECCIONARALMENOSUNACONVOCATORIA")" />
+        <input type="hidden" id="enviook" title="Solicitud enviada correctamente" value="@Html.Translate("SOLICITUDENVIADACORRECTAMENTE")." />
+        @{ SemanticPropertyModel propBloques = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#block");
+
+            List<Bloque> listaBloques = ObtenerBloques(propBloques, Html);
+
+
+            int numPregunta = 0;
+            <form class="form-general">
+                <input type="hidden" name="TipoFormulario" value="@tipoFormulario" />
+                @if (tipoFormulario == "LSE")
+                {
+                    <fieldset>
+                        <legend>Datos personales</legend>
+                        <div class="row">
+                            <input type="text" title="Nombre" id="NombreUsuario" name="NombreUsuario" placeholder="Nombre*" class="obligatorio">
+                        </div>
+                        <div class="row">
+                            <input type="text" id="ApellidosUsuario" name="ApellidosUsuario" placeholder="Apellidos*" title="Apellidos" class="obligatorio">
+                        </div>
+                        <div class="row">
+                            <input type="text" id="EmailUsuario" name="EmailUsuario" placeholder="Correo electrónico*" title="Correo electrónico" class="obligatorio">
+                        </div>
+                        <div class="row">
+                            <input type="text" id="EmailUsuarioconfirmacion" class="confirmacion" name="EmailUsuarioconfirmacion" title="Repetir correo electrónico" placeholder="Repetir Correo electrónico*">
+                        </div>
+                    </fieldset>}
+                @if (listaBloques != null && listaBloques.Count() > 0)
+                {
+                    foreach (Bloque bloque in listaBloques.OrderBy(bloque => bloque.orden))
+                    {
+                        <fieldset>
+                            <legend>@bloque.titulo</legend>
+                            @foreach (Pregunta pregunta in bloque.ListaPreguntas.OrderBy(pregunta => pregunta.orden))
+                            {
+                                if (!string.IsNullOrEmpty(pregunta.tipo) && !string.IsNullOrEmpty(pregunta.nombreCampo))
+                                {@*<p>Tipo: @pregunta.tipo</p>*@ string identificador = string.Format("bloque{0}pregunta{1}", bloque.orden, pregunta.orden);
+                                string classObligatorio = "";
+                                if (pregunta.obligatorio)
+                                {
+                                    pregunta.nombreCampo = string.Format("{0}*", pregunta.nombreCampo);
+                                    classObligatorio = " class=\"obligatorio\" ";
+                                }
+
+                                if (pregunta.tipo.Equals("TextQuestion"))
+                                {
+                                    <div class="row">
+                                        <input type="hidden" title="Texto pregunta" name="ListaRespuestas[@numPregunta].TextoPregunta" value="@pregunta.nombreCampo" />
+                                        <input type="hidden" title="orden pregunta" name="ListaRespuestas[@numPregunta].Orden" value="@pregunta.orden" />
+                                        <input @Html.Raw(classObligatorio) type="text" id="@identificador" name="ListaRespuestas[@numPregunta].TextoRespuesta" placeholder="@pregunta.nombreCampo" />
+                                        <label for="@identificador">@pregunta.nombreCampo</label>
+                                    </div>if (pregunta.pedirConfirmacion)
+                                    {
+                                        string identificador2 = string.Format("{0}confirmacion", identificador);
+                                        <div class="row">
+                                            <input type="text" id="@identificador2" class="confirmacion" name="@identificador2" placeholder="@string.Format("{0} {1}", Html.Translate("REPETIR"), pregunta.nombreCampo)" />
+                                            <label for="@identificador2">@string.Format("{0} {1}", Html.Translate("REPETIR"), pregunta.nombreCampo)</label>
+                                        </div>}
+                                }
+                                else if (pregunta.tipo.Equals("TextAreaQuestion"))
+                                {
+                                    <div class="row">
+                                        <input type="hidden" name="ListaRespuestas[@numPregunta].TextoPregunta" value="@pregunta.nombreCampo" />
+                                        <input type="hidden" name="ListaRespuestas[@numPregunta].Orden" value="@pregunta.orden" />
+                                        <textarea @Html.Raw(classObligatorio) rows="4" cols="50" id="especialidad" name="ListaRespuestas[@numPregunta].TextoRespuesta" placeholder="@pregunta.nombreCampo" @(esFormularioOpinion ? "maxlength = 300" : "")></textarea>
+                                        <label for="@identificador">@pregunta.nombreCampo</label>
+                                    </div> }
+                                else if (pregunta.tipo.Equals("CheckQuestion"))
+                                {
+
+                                    <div class="check-radio first">
+                                        <input type="hidden" name="ListaRespuestas[@numPregunta].TextoPregunta" value="@Es.Riam.Util.UtilCadenas.EliminarHtmlDeTexto(pregunta.nombreCampo)" />
+                                        <input type="hidden" name="ListaRespuestas[@numPregunta].Orden" value="@pregunta.orden" />
+                                        <input @Html.Raw(classObligatorio) name="ListaRespuestas[@numPregunta].TextoRespuesta" type="checkbox" id="@identificador">
+                                        <label for="@identificador"><span></span><div class="texto">@Html.Raw(pregunta.nombreCampo)</div></label>
+                                    </div> }
+                                else if (pregunta.tipo.Equals("RadioButtonQuestion"))
+                                {
+                                    <p>@pregunta.nombreCampo</p> int valorRadioButton = 1;
+                                    foreach (KeyValuePair<int, OrdenPregunta> parPreguntaOrden in pregunta.dicPreguntasOrden.OrderBy(par => par.Key))
+                                    {
+                                        string identificadorOpcionRadioButton = string.Format("{0}respuestaPosible{1}", identificador, parPreguntaOrden.Key);
+                                        if (parPreguntaOrden.Value.addFile)
+                                        { <!-- ======================  Script ADJUNTAR ARCHIVO  ====================== -->
+                                            <script language="javascript">
+                                                    $(document).ready(function() {
+                                                        $('input:radio[name="ListaRespuestas[@numPregunta].TextoRespuesta"]').change(function() {
+                                                            if ($(this).val()==@valorRadioButton) {
+                                                              $('#div_@identificadorOpcionRadioButton').slideDown(500).removeClass('oculto');
+                                                        } else {
+																$('#div_@identificadorOpcionRadioButton').slideUp(500).addClass('oculto');
+                                                    }
+                                                    });
+                                                    });
+                                            </script>
+                                            <!-- =====================  Script fin ADJUNTAR ARCHIVO  ==================== --> }
+
+                                        <div class="check-radio first">
+                                            <input type="hidden" name="ListaRespuestas[@numPregunta].TextoPregunta" value="@pregunta.nombreCampo" />
+                                            <input type="hidden" name="ListaRespuestas[@numPregunta].Orden" value="@pregunta.orden" />
+                                            <input @Html.Raw(classObligatorio) name="ListaRespuestas[@numPregunta].TextoRespuesta" type="radio" title="@identificadorOpcionRadioButton" text="@parPreguntaOrden.Value.respuestaPosible" value="@valorRadioButton" id="@identificadorOpcionRadioButton">
+                                            <label for="@identificadorOpcionRadioButton"><span></span><div class="texto">@parPreguntaOrden.Value.respuestaPosible</div></label>
+                                            @if (parPreguntaOrden.Value.addFile)
+                                            {<!-- ======================  ADJUNTAR ARCHIVO  ====================== -->
+                                                <style>
+                                                    .adjuntarDocumentacion {
+                                                        font-size: 12px;
+                                                        font-family: 'Gotham SSm A', 'Gotham SSm B';
+                                                        padding: 11px 0 0 37px;
+                                                    }
+
+                                                    .archivoAdjuntado {
+                                                        font-weight: 500;
+                                                    }
+
+                                                        .archivoAdjuntado span {
+                                                            color: #7acc81;
+                                                        }
+
+                                                    .adjuntarDocumentacion .error {
+                                                        color: #eb8484;
+                                                    }
+                                                </style>
+                                                <div class="adjuntarDocumentacion oculto" id="div_@identificadorOpcionRadioButton">
+                                                    @if (string.IsNullOrEmpty(parPreguntaOrden.Value.moreInfo))
+                                                    {
+                                                        <p>@Html.Translate("TEXTOADJUNTARDOCFORMULARIO")</p> }
+                                                    else
+                                                    {
+                                                        <p>@parPreguntaOrden.Value.moreInfo @Html.Translate("TEXTOSIMPLEADJUNTARDOCFORMULARIO")</p>}
+
+
+                                                    <input type="button" class="button" value="Adjuntar" id="fakeBrowse" onclick="javascript: $(this).next().click();">
+                                                    <input type="file" class="oculto" accept="image/jpeg,image/jpg,application/pdf" name="ListaRespuestas[@numPregunta].File" onchange="javascript: if($(this).get(0).files[0]!=null && ($(this).get(0).files[0].size/1024)<512){$('.archivoAdjuntado.div_@identificadorOpcionRadioButton').show();$('.error.div_@identificadorOpcionRadioButton').hide();$('.archivoAdjuntado.div_@identificadorOpcionRadioButton .name').html($(this).get(0).files[0].name);}else{$('.archivoAdjuntado.div_@identificadorOpcionRadioButton').hide();$('.error.div_@identificadorOpcionRadioButton').show();$(this).val(null);};" />
+
+                                                    <p class="oculto archivoAdjuntado div_@identificadorOpcionRadioButton">
+                                                        <span class="name">nombre_archivo.pdf</span> <span>&#10004;</span>
+                                                    </p>
+                                                    <p class="oculto error div_@identificadorOpcionRadioButton">@Html.Translate("ERRORSUBIRARCHIVO")</p>
+                                                </div> <!-- =====================  fin ADJUNTAR ARCHIVO  ==================== -->}
+                                        </div> valorRadioButton++;
+                                    }
+                                }
+                                else if (pregunta.tipo.Equals("ComboQuestion"))
+                                {
+                                    <p>
+                                        <input type="hidden" name="ListaRespuestas[@numPregunta].TextoPregunta" value="@pregunta.nombreCampo" />
+                                        <input type="hidden" name="ListaRespuestas[@numPregunta].Orden" value="@pregunta.orden" />
+                                        <select title="Preguntas" @Html.Raw(classObligatorio) class="select-custom" name="ListaRespuestas[@numPregunta].TextoRespuesta">
+                                            <option value='0'>@pregunta.nombreCampo</option>
+                                            @{ int valorSelect = 1;
+                                                foreach (KeyValuePair<int, OrdenPregunta> parPreguntaOrden in pregunta.dicPreguntasOrden.OrderBy(par => par.Key))
+                                                {
+                                                    <option value='@valorSelect'>@parPreguntaOrden.Value.respuestaPosible</option>
+                                                    valorSelect++;
+                                                } }
+                                        </select>
+                                    </p>}
+                            }
+                            numPregunta++;
+                        }
+                        </fieldset>}
+                }
+                @if (tipoFormulario == "LSE")
+                {
+                    <fieldset>
+                        <legend>Actividades a las que desea inscribirse</legend>
+                        @{ int i = 0;
+                            foreach (Convocatoria convocatoria in listaConvocatorias)
+                            {
+                                <div class="check-radio first">
+                                    <input type="hidden" name="ListaConvocatorias[@i].IdConvocatoria" value="@convocatoria.identificador" />
+                                    <input name="ListaConvocatorias[@i].ValorRespuesta" type="checkbox" id="convocatoria_@i">
+                                    <label for="convocatoria_@i"><span></span><div class="texto">@convocatoria.fechaTextual</div></label>
+                                </div> i++;
+                            } }
+                    </fieldset>}
+
+                @{ if (!string.IsNullOrEmpty(tipoFormulario))
+                    {
+
+
+                        string mensajeRecibirFormulario = Html.Translate("RECIBIRINFORMACIONFORMULARIOACTIVIDAD");
+                        string cssExtra = "";
+                        string check = "";
+                        if (esFormularioOpinion)
+                        {
+                            mensajeRecibirFormulario = Html.Translate("RECIBIRINFORMACIONFORMULARIOMUSEODELPRADO");
+                        }
+                        else if (tipoFormulario == "Escuela Prado")
+                        {
+                            mensajeRecibirFormulario = Html.Translate("RECIBIRINFORMACIONFORMULARIOESCUELAPRADO");
+                        }
+                        else if (tipoFormulario == "Sordos")
+                        {
+                            cssExtra = " oculto";
+                            check = "checked";
+                        }
+                        else if (tipoFormulario == "LSE")
+                        {
+                            mensajeRecibirFormulario = Html.Translate("RECIBIRINFORMACIONFORMULARIOLSE");
+                        }
+
+
+
+                                <fieldset>
+                                    <legend>@Html.Translate("POLITICAPRIVACIDAD")</legend>
+
+                                    <div class="check-radio first">
+                                        <input class="obligatorio" name="chkPolitica" id="chkPolitica" type="checkbox">
+                                        <label for="chkPolitica">
+                                            <span></span>
+                                            <div class="texto">
+                                                <p>@Html.Raw(Html.Translate("ACEPTOCONDICIONESFORMULARIOGENERICO"))</p>*
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="check-radio first @cssExtra">
+                                        <input type="text" name="pNombreGrupoFormulario" title="Tipo de formulario" value="@tipoFormulario" class="oculto" />
+                                        <input name="pChkRecibirInfoFormulario" type="checkbox" @check id="pChkRecibirInfoFormulario">
+                                        <label for="pChkRecibirInfoFormulario"><span></span><div class="texto"><p>@Html.Raw(mensajeRecibirFormulario)</p></div></label>
+                                    </div>
+                                </fieldset> } }
+                <input type="hidden" name="IdFormulario" title="ID del formulario" value="@idFormulario" />
+                <input type="hidden" name="Titulo" title="Titulo" value="@tituloFormulario" />
+                <input type="hidden" name="IsOpinionForm" title="Es formulario de opinión" value="@esFormularioOpinion.ToString()" />
+                <input type="hidden" name="Descripcion" title="Descripción" value="@System.Net.WebUtility.UrlEncode(descripcionFormulario)" />
+                <a id="envioFormGenerico" class="botones-centrados bc-estandar hv-estandar">
+                    @if (esFormularioOpinion)
+                    {
+                        <span class="txt">@Html.Translate("ENVIAR")</span>
+                    }
+                    else
+                    {
+                        <span class="txt">@Html.Translate("ENVIARSOLICITUD")</span>}
+                </a>
+            </form> if (acciones.Edit)
+            {
+                string solicitudes = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#numberApplications");
+                int numeroSolicitudes = 0;
+
+                if (!string.IsNullOrEmpty(solicitudes))
+                {
+                    try
+                    {
+                        numeroSolicitudes = Int32.Parse(solicitudes);
+                    }
+                    catch (Exception e)
+                    {
+                        numeroSolicitudes = 0;
+                    }
+                }
+
+                if (FichaDocumento.Actions.Edit)
+                {
+                    <form class="oculto formExportarSolicitudes" action="@ViewBag.Comunidad.Url/externalservice" method="POST">
+                        <input type="hidden" title="Nombre Servicio" name="pNombreServicio" value="Formularios">
+                        <input type="hidden" title="Nombre Acción" name="pNombreAccion" value="ExportarFormularioGenerico">
+                        <input type="hidden" title="ID del formulario" 0 name="IdFormulario" value="@idFormulario">
+                        <input type="hidden" title="¿Es un formulario de opinión?" name="pIsOpinionForm" value="@esFormularioOpinion.ToString()" />
+                    </form>
+                    <p>Número de solicitudes:  @numeroSolicitudes</p>
+                    <a class="botones-centrados bc-estandar hv-estandar exportarSolicitudes">
+                        <span class="txt">Exportar solicitudes</span>
+                    </a> }
+
+
+            } }
+    </div>
+    <a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a>
+</section>
+@{
+    ResourceModel fichaRecurso = Model.Resource;
+
+    if (acciones.Edit)
+    {
+        <a class="botones-centrados bc-estandar hv-estandar" href="@Model.UrlEdit">
+            <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "EDITAR")</span>
+        </a>
+        <a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
+            <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")</span>
+        </a>
+        <div class="confirmarBorrar oculto">
+            @Html.Translate("PREGUNTAESTASSEGURO")
+            <a onclick="AccionRecurso_Eliminar_Aceptar('@fichaRecurso.ListActions.UrlDelete', '@fichaRecurso.Key')">@Html.GetText("COMMON", "SI")</a>
+            <a onclick="$('.preguntarBorrar').show();$('.confirmarBorrar').hide();">@Html.GetText("COMMON", "NO")</a>
+        </div>
+    }
+}
