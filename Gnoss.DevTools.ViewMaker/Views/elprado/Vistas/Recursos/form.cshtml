@@ -622,7 +622,11 @@
         </a>
         <a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
             <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")</span>
+        </a>       
+        <a id="copiarFormularioGenerico" class="botones-centrados bc-estandar hv-estandar">
+            <span class="txt">@Html.Translate("COPIAR_FORMULARIO")</span>
         </a>
+                
         <div class="confirmarBorrar oculto">
             @Html.Translate("PREGUNTAESTASSEGURO")
             <a onclick="AccionRecurso_Eliminar_Aceptar('@fichaRecurso.ListActions.UrlDelete', '@fichaRecurso.Key')">@Html.GetText("COMMON", "SI")</a>

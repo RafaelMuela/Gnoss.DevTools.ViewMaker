@@ -236,8 +236,16 @@ else
 
 			<div id="responsablePrincipal" class="@cssResponsablePrincipal">
 				<div class="row">
-					<input type="text" id="nombre-adulto" class="obligatorio" name="Responsable.Nombre" placeholder="@Html.Translate("NOMBREYAPELLIDOS")*" />
+					<input type="text" id="nombre-adulto" class="obligatorio" name="Responsable.Nombre" placeholder="@Html.Translate("NOMBRE")*" />
 					<label for="nombre-adulto">@Html.Translate("NOMBREYAPELLIDOS")*</label>
+				</div>
+                <div class="row">
+					<input type="text" id="apellido1-adulto" class="obligatorio" name="Responsable.Apellido1" placeholder="@Html.Translate("Apellido1")*" />
+					<label for="apellido1-adulto">@Html.Translate("Apellido1")*</label>
+				</div>
+                <div class="row">
+					<input type="text" id="apellido2-adulto" class="obligatorio" name="Responsable.Apellido2" placeholder="@Html.Translate("Apellido2")" />
+					<label for="apellido2-adulto">@Html.Translate("Apellido2")</label>
 				</div>
 				<div class="row">
 					<input type="text" id="telefono-adulto" class="obligatorio" name="Responsable.Telefono" placeholder="@Html.Translate("TELEFONO")*" />
