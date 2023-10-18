@@ -1,5 +1,6 @@
 @*[security|||activityform|||elprado]*@
 @model ResourceViewModel
+
 @{
     ResourceModel FichaDocumento = Model.Resource;
     SemanticResourceModel semCmsModel = Model.SemanticFrom;
@@ -27,7 +28,7 @@
     int edadMaxima = int.Parse(semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#maximumAge"));
     int numeroMaximoParticipantes = int.Parse(semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#maximumParticipantsNumber"));
     int numeroMaximoAdultos = int.Parse(semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#maximumAdultsNumber"));
-    if (tipoFormulario == "Adolescentes" || tipoFormulario == "LSE")
+    if (tipoFormulario == "Adolescentes" || tipoFormulario == "LSE" || tipoFormulario == "Discapacidad auditiva" || tipoFormulario == "Discapacidad visual")
     {
         numeroMaximoAdultos = 1;
     }
@@ -90,8 +91,7 @@ else
                 @if(tipoSesion)
                 {
                     <label>@Html.Translate("SESIONENLAQUEASISTIRALAACTIVIDAD"):</label>
-                        }
-                        else
+                }else
                 {
                     <label>@Html.Translate("SEMANAENLAQUEASISTIRALAACTIVIDAD"):</label>
                 }
@@ -99,8 +99,7 @@ else
                     @if(tipoSesion)
                     {
 					    <option value='0'>@Html.Translate("SELECCIONEUNASESION")</option>
-                            }
-                            else
+                    }else
                     {
                         <option value='0'>@Html.Translate("SELECCIONEUNASEMANA")</option>
                     }
@@ -140,7 +139,7 @@ else
 									valueSelect = valueSelect + 1;
 								}
 							}
-							if(aniadirSesionListaEspera && tipoFormulario.ToUpper()!="LSE")
+							if(aniadirSesionListaEspera )
 							{
 								<option value="@valueSelect">Lista de espera</option>
 							}
@@ -204,8 +203,7 @@ else
 					{
 						<legend>@Html.Translate("DATOSDELOSADULTOSASISTENTES")</legend>
 						
-                            }
-                            else
+					}else
 					{
 						<legend>@Html.Translate("DATOSDELADULTOASISTENTE")</legend>
 					}
@@ -214,6 +212,8 @@ else
 					<legend>@Html.Translate("DATOSDELADULTORESPONSABLE")</legend>
 					break;
 				case "LSE":
+				case "Discapacidad auditiva":
+				case "Discapacidad visual":
 					break;
 			}
 		
@@ -254,8 +254,7 @@ else
 				<div class="row">
 					<input type="text" id="correo-adulto" class="obligatorio" name="Responsable.Correo" placeholder="@Html.Translate("CORREOELECTRONICO")*" />
 					<label for="correo-adulto">@Html.Translate("CORREOELECTRONICO")*</label>
-                            @{
-                                <!--<div class="help">
+					@{<!--<div class="help">
 						<div class="arr-lft"><span></span></div>
 						@Html.Raw(Html.Translate("NOCOMPARTIMOSTUEMAILGARANTIZADO")).
 					</div>-->}
@@ -279,7 +278,7 @@ else
             </div>			           
             }
 	    </fieldset>
-		@if(tipoFormulario!="LSE" && tipoFormulario!="Actividades culturales")
+		@if(tipoFormulario!="Actividades culturales")
 		{
 			<fieldset id="datosParticipantes">
 				@switch(tipoFormulario)
@@ -336,28 +335,24 @@ else
 		}
 		<fieldset>  
 			<div class="check-radio first">	     
-                    <input name="chkAceptoCondiciones" title="Acepto Condiciones" type="checkbox" id="chkAceptoCondiciones">
-
-                    <label for="chkAceptoCondiciones"><span></span><div class="texto"><p>@Html.Raw(Html.Translate("ACEPTOCONDICIONESFORMULARIOACTIVIDAD"))</p>*</div></label>
-
-                </div>
-                <div class="check-radio first">
-				@if(tipoFormulario=="LSE")
+				@if(tipoFormulario=="LSE" || tipoFormulario == "Discapacidad auditiva" || tipoFormulario == "Discapacidad visual")
 				{
 					<input type="text" title="LSE" name="pNombreGrupoFormulario" value="LSE" class="oculto"/>		
-                    }
-                    else if (tipoFormulario == "Actividades culturales")
+				}else if(tipoFormulario=="Actividades culturales")
 				{
 					<input type="text" name="pNombreGrupoFormulario" title="Actividades culturales" value="Actividades culturales" class="oculto"/>		
 				}
-                    else
-                    {
+				else{
 					<input type="text" name="pNombreGrupoFormulario" title="Formulario de actividad" value="Formulario de actividad" class="oculto"/>				
 				}
 				<input name="pChkRecibirInfoFormulario"  type="checkbox" id="pChkRecibirInfoFormulario">
 				<label for="pChkRecibirInfoFormulario"><span></span><div class="texto"><p>@Html.Raw(Html.Translate("RECIBIRINFORMACIONFORMULARIOACTIVIDAD"))</p></div></label>
 			</div>
-
+			<div class="check-radio first">	                
+				<input name="chkAceptoCondiciones" title="Acepto Condiciones" type="checkbox" id="chkAceptoCondiciones">				
+				<label for="chkAceptoCondiciones"><span></span><div class="texto"><p>@Html.Raw(Html.Translate("ACEPTOCONDICIONES"))</p>*</div></label>
+				
+			</div>
 		</fieldset>  
         <a id="envioFormActividad" class="botones-centrados bc-estandar hv-estandar load-boton">
 			<span class="txt">@Html.Translate("ENVIARSOLICITUD")</span>
@@ -411,8 +406,7 @@ else
 		<a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
             <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")</span>
 		</a>
-        <div class="confirmarBorrar oculto">
-            @Html.Translate("PREGUNTAESTASSEGURO")
+		<div class="confirmarBorrar oculto">@Html.Translate("PREGUNTAESTASSEGURO") 
 			<a onclick="AccionRecurso_Eliminar_Aceptar('@fichaRecurso.ListActions.UrlDelete', '@fichaRecurso.Key')">@Html.GetText("COMMON", "SI")</a> 
 			<a onclick="$('.preguntarBorrar').show();$('.confirmarBorrar').hide();">@Html.GetText("COMMON", "NO")</a>
 		</div>

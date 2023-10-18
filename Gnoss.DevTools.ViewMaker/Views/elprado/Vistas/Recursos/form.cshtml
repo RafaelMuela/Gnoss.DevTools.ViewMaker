@@ -351,23 +351,26 @@
             int numPregunta = 0;
             <form class="form-general">
                 <input type="hidden" name="TipoFormulario" value="@tipoFormulario" />
-                @if (tipoFormulario == "LSE")
-                {
-                    <fieldset>
-                        <legend>Datos personales</legend>
-                        <div class="row">
-                            <input type="text" title="Nombre" id="NombreUsuario" name="NombreUsuario" placeholder="Nombre*" class="obligatorio">
-                        </div>
-                        <div class="row">
-                            <input type="text" id="ApellidosUsuario" name="ApellidosUsuario" placeholder="Apellidos*" title="Apellidos" class="obligatorio">
-                        </div>
-                        <div class="row">
-                            <input type="text" id="EmailUsuario" name="EmailUsuario" placeholder="Correo electrónico*" title="Correo electrónico" class="obligatorio">
-                        </div>
-                        <div class="row">
-                            <input type="text" id="EmailUsuarioconfirmacion" class="confirmacion" name="EmailUsuarioconfirmacion" title="Repetir correo electrónico" placeholder="Repetir Correo electrónico*">
-                        </div>
-                    </fieldset>}
+                @*if (tipoFormulario == "LSE" || tipoFormulario == "Discapacidad auditiva" || tipoFormulario == "Discapacidad visual")
+                //{
+                //    <fieldset>
+                //        <legend>Datos personales</legend>
+                //        <div class="row">
+                //            <input type="text" title="Nombre" id="NombreUsuario" name="NombreUsuario" placeholder="Nombre*" class="obligatorio">
+                //        </div>
+                //        <div class="row">
+                //            <input type="text" id="Apellido1" name="ApellidosUsuario" placeholder="Apellido 1*" title="Apellidos" class="obligatorio">
+                //        </div>
+                //        <div class="row">
+                //            <input type="text" id="Apellido2" name="ApellidosUsuario" placeholder="Apellido 2" title="Apellidos" >
+                //        </div>
+                //        <div class="row">
+                //            <input type="text" id="EmailUsuario" name="EmailUsuario" placeholder="Correo electrónico*" title="Correo electrónico" class="obligatorio">
+                //        </div>
+                //        <div class="row">
+                //            <input type="text" id="EmailUsuarioconfirmacion" class="confirmacion" name="EmailUsuarioconfirmacion" title="Repetir correo electrónico" placeholder="Repetir Correo electrónico*">
+                //        </div>
+                //    </fieldset>}*@
                 @if (listaBloques != null && listaBloques.Count() > 0)
                 {
                     foreach (Bloque bloque in listaBloques.OrderBy(bloque => bloque.orden))
@@ -504,7 +507,7 @@
                         }
                         </fieldset>}
                 }
-                @if (tipoFormulario == "LSE")
+                @*@if (tipoFormulario == "LSE" || tipoFormulario == "Discapacidad auditiva" || tipoFormulario == "Discapacidad visual")
                 {
                     <fieldset>
                         <legend>Actividades a las que desea inscribirse</legend>
@@ -517,7 +520,7 @@
                                     <label for="convocatoria_@i"><span></span><div class="texto">@convocatoria.fechaTextual</div></label>
                                 </div> i++;
                             } }
-                    </fieldset>}
+                    </fieldset>}*@
 
                 @{ if (!string.IsNullOrEmpty(tipoFormulario))
                     {
@@ -534,15 +537,15 @@
                         {
                             mensajeRecibirFormulario = Html.Translate("RECIBIRINFORMACIONFORMULARIOESCUELAPRADO");
                         }
-                        else if (tipoFormulario == "Sordos")
-                        {
-                            cssExtra = " oculto";
-                            check = "checked";
-                        }
-                        else if (tipoFormulario == "LSE")
-                        {
-                            mensajeRecibirFormulario = Html.Translate("RECIBIRINFORMACIONFORMULARIOLSE");
-                        }
+                        //else if (tipoFormulario == "Sordos" || tipoFormulario == "Discapacidad auditiva" || tipoFormulario == "Discapacidad visual")
+                        //{
+                        //    cssExtra = " oculto";
+                        //    check = "checked";
+                        //}
+                        //else if (tipoFormulario == "LSE" || tipoFormulario == "Discapacidad auditiva" || tipoFormulario == "Discapacidad visual")
+                        //{
+                        //    mensajeRecibirFormulario = Html.Translate("RECIBIRINFORMACIONFORMULARIOLSE");
+                        //}
 
 
 
