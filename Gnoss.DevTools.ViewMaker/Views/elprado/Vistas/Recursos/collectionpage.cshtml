@@ -1,0 +1,361 @@
+@*[security|||collectionpage|||elprado]*@
+@using System.Data;
+@using System.Reflection;
+@using System.Drawing;
+@using Newtonsoft.Json;
+@model ResourceViewModel
+@{
+    ResourceModel FichaDocumento = Model.Resource;
+    CommunityModel Comunidad = Html.GetComunidad();
+    UserIdentityModel IdentidadActual = Html.GetIdentidadActual();
+    Html.AddBodyClass(" CollectionPageModel ");
+    string UrlContent = Html.GetBaseUrlContent();
+    string urlPersonalizacion = UrlContent + "/imagenes/proyectos/personalizacion/" + ViewBag.Comunidad.Key.ToString();
+	
+    if (FichaDocumento.ItemLinkedFotoVersion != 0 && !string.IsNullOrEmpty(FichaDocumento.ItemLinked.ToString()) && FichaDocumento.ItemLinked != Guid.Empty)
+    {
+        //string urlPersonalizacion = $"{Html.GetBaseUrlContent()}/{Es.Riam.Util.UtilArchivos.ContentOntologias}/Archivos/{FichaDocumento.ItemLinked.ToString().Substring(0, 3)}";
+        Html.GetListaJS().Add($"{urlPersonalizacion}/{FichaDocumento.ItemLinked.ToString()}.js?v= {FichaDocumento.ItemLinkedFotoVersion}");
+        Html.GetListaCSS().Add($"{urlPersonalizacion}/{FichaDocumento.ItemLinked.ToString()}.css?v= {FichaDocumento.ItemLinkedFotoVersion}");
+    }
+
+    string versionCSS = "";
+    if (Comunidad.VersionCSS.HasValue)
+    {
+        versionCSS = Comunidad.VersionCSS.Value.ToString();
+    }
+    SemanticResourceModel semCmsModel = Model.SemanticFrom;
+    string titulo = semCmsModel.GetFirstValuePropertyByPath("http://schema.org/name");
+
+    string rutaJS = semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_JS");
+    
+    @*ViewBag.ListaJS.Add(urlPersonalizacion + "/ElPrado/js/collectionpage/vendor.js?v="+versionCSS);*@
+    if (ViewBag.ListaJS != null)
+    {
+        ViewBag.ListaJS.Add(urlPersonalizacion + "/ElPrado/" + rutaJS);
+    }
+
+    string imagen = semCmsModel.GetFirstValuePropertyByPath("http://schema.org/image");
+
+
+    GnossOCBase.LanguageEnum idiomaUsuario = (GnossOCBase.LanguageEnum)Enum.Parse(typeof(GnossOCBase.LanguageEnum), Html.GetUtilIdiomas().LanguageCode.ToLower());
+
+    List<string> Pm_path_CSS = GetMultiplePropertyValueSemCms(semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_CSS"));
+
+    ViewBag.ListaCSS.Add(urlPersonalizacion + "/ElPrado/css/modulos/collectionpage.css?v="+versionCSS);
+    foreach (string csspath in Pm_path_CSS)
+    {
+        ViewBag.ListaCSS.Add(urlPersonalizacion + "/ElPrado/" + csspath);
+    }
+    
+}
+
+<div class="row">
+    <div class="col01 col col-12 col-lg-9">
+        <div typeof="http://schema.org/CollectionPage:collectionpage">
+            <div class="contentGroup contenidoPrincipal">
+                <div class="group title">
+                </div>
+            </div>
+            <div class="group content semanticView">
+                <div class="group group_info">
+                    <div class="contentGroup">
+                        <div>
+                            @{
+                                SemanticPropertyModel embeddedHTML = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#embeddedHTML");
+                                List<EmbeddedHTML> embeddedHTMLs = new List<EmbeddedHTML>();
+                                foreach (SemanticPropertyModel.PropertyValue em in embeddedHTML.PropertyValues)
+                                {
+                                    string desc = em.RelatedEntity.GetFirstValuePropertyByPath("http://schema.org/description");
+                                    int orden = Convert.ToInt32(em.RelatedEntity.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#order"));
+                                    embeddedHTMLs.Add(new EmbeddedHTML(orden,desc));
+                                }
+
+                                embeddedHTMLs = embeddedHTMLs.OrderBy(row => row.order).ToList();
+                                if (embeddedHTMLs != null && embeddedHTMLs.Count() > 0)
+                                {
+                                    @foreach (EmbeddedHTML emFinal in embeddedHTMLs)
+                                    {
+                                        if (!string.IsNullOrEmpty(emFinal.descripcion))
+                                        {
+                                           <p>@Html.Raw(emFinal.descripcion)</p>
+                                        }
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    ResourceModel fichaRecurso = Model.Resource;
+    ResourceModel.ActionsModel acciones = fichaRecurso.Actions;
+
+    if (acciones.Edit)
+    {
+        <a class="botones-centrados bc-estandar hv-estandar" href="@Model.UrlEdit">
+            <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "EDITAR")</span>
+        </a>
+        <a class="preguntarBorrar botones-centrados bc-estandar hv-estandar" onclick="$('.preguntarBorrar').hide();$('.confirmarBorrar').show();">
+            <span class="txt">@Html.GetText("PERFILBASERECURSOSFICHA", "BORRAR")</span>
+        </a>
+        <div class="confirmarBorrar oculto">
+            @Html.Translate("PREGUNTAESTASSEGURO")
+            <a onclick="AccionRecurso_Eliminar_Aceptar('@fichaRecurso.ListActions.UrlDelete', '@fichaRecurso.Key')">@Html.GetText("COMMON", "SI")</a>
+            <a onclick="$('.preguntarBorrar').show();$('.confirmarBorrar').hide();">@Html.GetText("COMMON", "NO")</a>
+        </div>
+    }
+}
+
+@functions
+{
+    public static List<string> GetMultiplePropertyValueSemCms(SemanticPropertyModel pProperty)
+    {
+        List<string> listString = new List<string>();
+        if (pProperty != null && pProperty.PropertyValues.Count > 0)
+        {
+            foreach (SemanticPropertyModel.PropertyValue propValue in pProperty.PropertyValues)
+            {
+                listString.Add(propValue.Value);
+            }
+        }
+        return listString;
+    }
+
+    public class GnossOCBase
+    {
+        public enum LanguageEnum
+        {
+            es, en
+        }
+        internal List<string> prefList = new List<string>();
+        internal string mGNOSSID;
+        internal string mURL;
+        public GnossOCBase()
+        {
+            prefList.Add("xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"");
+            prefList.Add("xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"");
+            prefList.Add("xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"");
+            prefList.Add("xmlns:owl=\"http://www.w3.org/2002/07/owl#\"");
+            prefList.Add("xmlns:dc=\"http://purl.org/dc/elements/1.1/\"");
+            prefList.Add("xmlns:pm=\"http://museodelprado.es/ontologia/pradomuseum.owl#\"");
+        }
+
+        public string GNOSSID
+        {
+            get { return mGNOSSID; }
+        }
+        public string URL
+        {
+            get { return mURL; }
+        }
+        public static string GetPropertyValueSemCms(SemanticPropertyModel pProperty)
+        {
+            if (pProperty != null && pProperty.PropertyValues.Count > 0)
+            {
+                return pProperty.PropertyValues[0].Value;
+            }
+            return "";
+        }
+        public static List<string> GetMultiplePropertyValueSemCms(SemanticPropertyModel pProperty)
+        {
+            List<string> listString = new List<string>();
+            if (pProperty != null && pProperty.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propValue in pProperty.PropertyValues)
+                {
+                    listString.Add(propValue.Value);
+                }
+            }
+            return listString;
+        }
+
+        public static int? GetNumberIntPropertyValueSemCms(SemanticPropertyModel pProperty)
+        {
+            if (pProperty != null && pProperty.PropertyValues.Count > 0 && !string.IsNullOrEmpty(pProperty.PropertyValues[0].Value))
+            {
+                return int.Parse(pProperty.PropertyValues[0].Value);
+            }
+            return null;
+        }
+        public static List<int> GetMultipleNumberIntPropertyValueSemCms(SemanticPropertyModel pProperty)
+        {
+            List<int> listNumbers = new List<int>();
+            if (pProperty != null && pProperty.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propValue in pProperty.PropertyValues)
+                {
+                    listNumbers.Add(int.Parse(propValue.Value));
+                }
+            }
+            return listNumbers;
+        }
+
+        public static float? GetNumberFloatPropertyValueSemCms(SemanticPropertyModel pProperty)
+        {
+            if (pProperty != null && pProperty.PropertyValues.Count > 0 && !string.IsNullOrEmpty(pProperty.PropertyValues[0].Value))
+            {
+                return float.Parse(pProperty.PropertyValues[0].Value.Replace('.', ','));
+            }
+            return 0;
+        }
+        public static List<float> GetMultipleNumberFloatPropertyValueSemCms(SemanticPropertyModel pProperty)
+        {
+            List<float> listNumbers = new List<float>();
+            if (pProperty != null && pProperty.PropertyValues.Count > 0)
+            {
+                foreach (SemanticPropertyModel.PropertyValue propValue in pProperty.PropertyValues)
+                {
+                    listNumbers.Add(float.Parse(propValue.Value));
+                }
+            }
+            return listNumbers;
+        }
+
+        public static DateTime? GetDateValuePropertySemCms(SemanticPropertyModel pProperty)
+        {
+            string stringDate = GetPropertyValueSemCms(pProperty);
+            if (!string.IsNullOrEmpty(stringDate))
+            {
+                int year = 0;
+                int month = 0;
+                int day = 0;
+                if (stringDate.Contains('/'))
+                {
+                    day = int.Parse(stringDate.Split('/')[0]);
+                    month = int.Parse(stringDate.Split('/')[1]);
+                    year = int.Parse(stringDate.Split('/')[2]);
+                }
+                else
+                {
+                    year = int.Parse(stringDate.Substring(0, 4));
+                    month = int.Parse(stringDate.Substring(4, 2));
+                    day = int.Parse(stringDate.Substring(6, 2));
+                }
+                if (stringDate.Length == 14)
+                {
+                    if (month == 0 || day == 0)
+                    {
+                        return new DateTime(year);
+                    }
+                    else
+                    {
+                        return new DateTime(year, month, day, int.Parse(stringDate.Substring(7, 2)), int.Parse(stringDate.Substring(9, 2)), int.Parse(stringDate.Substring(11, 2)));
+                    }
+                }
+                else
+                {
+                    return new DateTime(year, month, day);
+                }
+            }
+            return null;
+        }
+
+        public static bool? GetBooleanPropertyValueSemCms(SemanticPropertyModel pProperty)
+        {
+            if (pProperty != null && pProperty.PropertyValues.Count > 0 && !string.IsNullOrEmpty(pProperty.PropertyValues[0].Value))
+            {
+                if (pProperty.PropertyValues[0].Value.Equals("S�") || pProperty.PropertyValues[0].Value.Equals("Si") || pProperty.PropertyValues[0].Value.Equals("Yes"))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            return null;
+        }
+        public string GetPropertyURI(string nombrePropiedad)
+        {
+            Type type = this.GetType();
+            PropertyInfo mInfo = type.GetProperty(nombrePropiedad);
+            if (mInfo != null)
+            {
+                Attribute attr = Attribute.GetCustomAttribute(mInfo, typeof(RDFPropertyAttribute));
+                if (attr != null)
+                {
+                    return ((RDFPropertyAttribute)attr).RDFProperty;
+                }
+            }
+            return "";
+        }
+
+
+
+        public string GetLabel(string nombrePropiedad, LanguageEnum pLang)
+        {
+            Type type = this.GetType();
+            PropertyInfo mInfo = type.GetProperty(nombrePropiedad);
+
+            if (mInfo != null)
+            {
+                Attribute[] attr = Attribute.GetCustomAttributes(mInfo, typeof(LABELAttribute));
+                {
+                    foreach (Attribute atributo in attr)
+                    {
+                        if (atributo != null)
+                        {
+                            if (!((LABELAttribute)atributo).LABEL(pLang).Equals(""))
+                            {
+                                return ((LABELAttribute)atributo).LABEL(pLang);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return "";
+        }
+    }
+
+    public class RDFPropertyAttribute : Attribute
+    {
+        public RDFPropertyAttribute(string pRDFA)
+        {
+            mRDFA = pRDFA;
+        }
+        protected string mRDFA;
+        public string RDFProperty
+        {
+            get { return mRDFA; }
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+    public class LABELAttribute : Attribute
+    {
+        private GnossOCBase.LanguageEnum IdiomaDefecto = GnossOCBase.LanguageEnum.es;
+        private GnossOCBase.LanguageEnum midioma;
+        private string mlabel;
+        public LABELAttribute(GnossOCBase.LanguageEnum idioma, string label)
+        {
+            mlabel = label;
+            midioma = idioma;
+        }
+        public string LABEL(GnossOCBase.LanguageEnum pLang)
+        {
+            if (midioma.Equals(pLang))
+            {
+                return mlabel;
+            }
+            return "";
+        }
+    }
+
+    public class EmbeddedHTML
+    {
+        public int order { get; set; }
+        public string descripcion { get; set; }
+        public EmbeddedHTML(int order, string descripcion)
+        {
+            this.order = order;
+            this.descripcion = descripcion;
+        }
+    }
+}
