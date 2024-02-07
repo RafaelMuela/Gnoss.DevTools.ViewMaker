@@ -42,6 +42,8 @@
 
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\bime\Vistas\CMS\" />
+    <Folder Include="Views\bime\Vistas\Recursos\" />
   </ItemGroup>
 
   <ItemGroup>
