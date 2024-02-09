@@ -1,4 +1,6 @@
+@*[security|||busqueda/index.cshtml|||bime]*@
 @model SearchViewModel
+@using Gnoss.DevTools.ViewMaker.Areas.Gnoss.DevTools.ViewMaker.Fake
 @*
     Descripción
     -----------------------------------------------
@@ -20,7 +22,7 @@
     string htmlFacetas = Model.HTMLFaceted;
     Dictionary<string, string> listaFiltrosOrden = Model.FilterOrderList;
     string FiltroOrdenSeleccionado = Model.FilterOrderSelected;
-
+    bool isMapa = false;
 }
 
 @*
@@ -85,30 +87,26 @@
     }
 
     @* Header o cabecera donde aparecen los resultados o recursos de una comunidad *@
-    @Html.PartialView("_partial-views/_list-header", Model)
+    @*    @Html.PartialView("_partial-views/_list-header", Model)*@
 
     @if (ViewData["BodyClassPestanya"] != null && ViewData["BodyClassPestanya"].ToString().Contains("buscador-mapa"))
     {
-         @* Panel izquierdo de Facetas *@
+        isMapa = true;
+        @* Panel izquierdo de Facetas *@
         <div class="col col-12 col-xl-3 col-facetas col-lateral izquierda">
-            @Html.PartialView("_partial-views/_list-content-facetes", Model)
+            @*@Html.PartialView("_partial-views/_list-content-facetes", Model)*@
         </div>
 
         @* Panel derecho-central donde estará el contenido del "buscador"*@
         <div class="col col-12 col-xl-9 col-contenido derecha">
-            @* Div que envuelve todo el contenido central-derecho*@
-            <div class="wrapCol">
-                @* Buscador de recursos *@
-                @if (Model.SearchBoxVisible)
-                {
-                    @Html.PartialView("_partial-views/_searcher", Model)
-                }
-
-                @* Listado de resultados (resource-list) donde aparecerán los recursos-items *@
-                @Html.PartialView("_partial-views/_list-content", Model)
-               
+            
+            <div class="item-dropdown aMapView activeView"></div>
+            <div class="map_iframe-container mapView activeView" id="panResultados">
             </div>
-        </div>
+           
+            @Html.PartialView("../Busqueda/_partial-views/_list-content", Model)
+        </div>   
+        
     }
     else
     {
@@ -175,9 +173,9 @@
     @if (htmlFacetas == null && htmlResultados == null)
     {
         <text>
-                    $(document).ready(function () {
-                        FiltrarPorFacetas(filtrosDeInicio);
-                    });
+                        $(document).ready(function () {
+                            FiltrarPorFacetas(filtrosDeInicio);
+                        });
         </text>
     }
 
@@ -190,4 +188,7 @@
     {
         @Html.Raw(Html.GetJSGraficos())
     }
+    
+   
 </script>
+
