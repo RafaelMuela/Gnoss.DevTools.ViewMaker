@@ -49,12 +49,11 @@
         @* Carga de la Cabecera *@
         @Html.PartialView("../Shared/_cabecera/_header")
 
-
-        <main role="main-wrapper">
-            <div class="background-gradient"></div>
-            <div class="padding-global">
-                <div class="container-large">
-                    <div class="search_columns">
+        @if (ViewData["BodyClassPestanya"] != null && ViewData["BodyClassPestanya"].ToString().Contains("buscador-mapa"))
+        {
+            <main role="main" style="padding-top: 100px;">
+                <div class="container">
+                    <div class="row-content">
                         @* Mostrar o no el Aviso de Cookies *@
                         @if (!Html.GetUrlPagina().Contains(Html.GetText("URLSEM", "PERSONALIZARCOOKIES")))
                         {
@@ -77,9 +76,42 @@
                     @Html.PartialView("../Shared/_pie/_Pie")
 
                 </div>
+            </main>
+        }
+        else
+        {
+            <main role="main-wrapper">
+                <div class="background-gradient"></div>
+                <div class="padding-global">
+                    <div class="container-large">
+                        <div class="search_columns">
+                            @* Mostrar o no el Aviso de Cookies *@
+                            @if (!Html.GetUrlPagina().Contains(Html.GetText("URLSEM", "PERSONALIZARCOOKIES")))
+                            {
+                                @Html.PartialView("../Shared/Layout/_modal-views/_accept-cookies")
+                                @Html.PartialView("../Shared/Layout/_modal-views/_manage-cookies")
+                            }
 
-            </div>
-</main>
+                            @* Mostrar o no el posibles mensajes acerca del estado de la comunidad *@
+                            @Html.PartialView("../Shared/Layout/_partial-views/_layout-admin-messages-community")
+
+                            @* Carga de Migas de Pan*@
+                            @RenderSection("breadcrumb", required: false)
+
+                            @* Carga contenido de la página *@
+                            @RenderBody()
+
+                        </div>
+
+                        @* Carga del footer *@
+                        @Html.PartialView("../Shared/_pie/_Pie")
+
+                    </div>
+
+                </div>
+            </main>
+        }
+
 
         @* Cargar o no la vista modal Login emergente*@
         @Html.PartialView("../Registro/_modal-views/_login")
@@ -90,7 +122,7 @@
         @* Menús del usuario -> Paneles Laterales *@
         @if (!IdentidadActual.IsGuestUser)
         {
-            // Mostrar paneles asociados a la cabecera con usuario logeado
+        // Mostrar paneles asociados a la cabecera con usuario logeado
             @* @Html.PartialView("../Shared/_cabecera/_menu-lateral")
                 @Html.PartialView("../Shared/_cabecera/_menu-lateral-usuario") *@
         }
@@ -111,30 +143,30 @@
         }
 
         <script type="text/javascript">
-        $(document).ready(function () {
-            EjecutarScriptsIniciales2();
-        });
-
-         function getSubscription(reg) {
-            reg.pushManager.getSubscription().then(function (sub) {
-                if (sub === null) {
-                    reg.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: "@ViewBag.applicationServerKey"
-                    }).then(function (sub) {
-                        fillSubscribeFields(sub);
-                    }).catch(function (e) {
-                        console.error("Unable to subscribe to push", e);
-                    });
-                } else {
-                    fillSubscribeFields(sub);
-                }
+            $(document).ready(function () {
+                EjecutarScriptsIniciales2();
             });
-        }
+
+             function getSubscription(reg) {
+                reg.pushManager.getSubscription().then(function (sub) {
+                    if (sub === null) {
+                        reg.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: "@ViewBag.applicationServerKey"
+                        }).then(function (sub) {
+                            fillSubscribeFields(sub);
+                        }).catch(function (e) {
+                            console.error("Unable to subscribe to push", e);
+                        });
+                    } else {
+                        fillSubscribeFields(sub);
+                    }
+                });
+            }
         </script>
 
         @* Analytics Matomo *@
         @Html.PartialView("../Shared/Layout/_partial-views/_AnalyticsMatomo")
-        </div>
+    </div>
 </body>
 </html>

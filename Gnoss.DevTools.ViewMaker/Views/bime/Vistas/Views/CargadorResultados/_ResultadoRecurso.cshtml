@@ -115,57 +115,60 @@
 
 @if (Model != null)
 {
-    @* Detectar privacidad de un recurso *@
-    string clasePrivado = "";
-    if (Model.Private)
+    @if (Model.RdfType.ToLower().Equals("organization") && ViewData["BodyClassPestanya"] != null && ViewData["BodyClassPestanya"].ToString().Contains("buscador-mapa"))
     {
-        clasePrivado = "private";
-    }
 
-    @*Item devuelto de tipo "Recurso"*@
-<article id="resource_@Model.Key" style="opacity: 1; transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg); transform-style: preserve-3d;" typeof="sioc_t:Item" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:sioc_t="http://rdfs.org/sioc/types#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:sioc="http://rdfs.org/sioc/ns#" class="resource is-shadow w-inline-block @claseTipoRecurso @clasePrivado">
-
-    @* Permitir checkbox en el título del Recurso (Mantenida funcionalidad para nuevo Front) *@
-    @if (Model.SelectionCheckAvailable)
-    {
-        string idCheck = "ficha_" + Model.Key;
-
-        <div class="check-wrapper">
-            @* Checkbox que permitirá seleccionar/deseleccionar *@
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input ListaRecursosCheckBox" id="@idCheck">
-                <label class="custom-control-label" for="@idCheck"></label>
+        <div class="map_result result-1">
+            <div class="map_result-image-container"><img src="@Html.GetBaseUrlPersonalizacion()/images/people.jpg" loading="lazy" alt="" class="map_result-image"></div>
+            <div class="map_result-text">
+                <div class="map_result-category">
+                    <img src="@Html.GetBaseUrlPersonalizacion()/images/persona.svg" loading="lazy" alt="" class="map_result-category-image">
+                    <p class="paragraph-2 margin-0 text-color-mediumgrey">@Model.RdfType</p>
+                </div>
+                <h2 class="title-6 margin-0">@Model.Title<br></h2>
             </div>
         </div>
     }
-    <div class="resource_image-container">
-        <img src="https://serviciosdevbime.gnoss.com/imagenes/proyectos/personalizacion/d02d11b0-e388-475b-9951-34751d57203b/images/EZ1.jpeg" loading="lazy" sizes="(max-width: 479px) 80vw, (max-width: 767px) 85vw, (max-width: 991px) 25vw, 21vw"  alt="" class="resource_image">
-    </div>
-    @* Título del recurso *@
-    <div class="middle-wrap resource_text-container">
-        <p class="resource_type">@Model.RdfType</p>
-        <h2 class="title-5 margin-xsmall">
-            <a href="@Model.CompletCardLink">@Model.Title</a>
-        </h2>
-        <p class="paragraph-2 text-color-darkgrey margin-0">@Model.Description</p>
+    else
+    {
+        @* Detectar privacidad de un recurso *@
+        string clasePrivado = "";
+        if (Model.Private)
+        {
+            clasePrivado = "private";
+        }
 
+        @*Item devuelto de tipo "Recurso"*@
+        <article id="resource_@Model.Key" style="opacity: 1; transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg); transform-style: preserve-3d;" href="recursos-noticia-single.html" class="resource is-shadow w-inline-block @claseTipoRecurso @clasePrivado">
 
-        @* Imagen Miniatura del recurso *@
-        <div class="content-wrap">
-            @if (!string.IsNullOrEmpty(Model.UrlPreview))
+            @* Permitir checkbox en el título del Recurso (Mantenida funcionalidad para nuevo Front) *@
+            @if (Model.SelectionCheckAvailable)
             {
-                <div class="image-wrap">
-                    <div class="image">
-                        <a href="@Model.CompletCardLink">
-                            <img alt="@Model.Title" title="@Model.Title"
-                                 src="@Model.UrlPreview" />
-                        </a>
+                string idCheck = "ficha_" + Model.Key;
+
+                <div class="check-wrapper">
+                    @* Checkbox que permitirá seleccionar/deseleccionar *@
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input ListaRecursosCheckBox" id="@idCheck">
+                        <label class="custom-control-label" for="@idCheck"></label>
                     </div>
                 </div>
             }
-        </div>
-    </div>
-</article>
+            <div class="resource_image-container">
+                <img src="@Html.GetBaseUrlPersonalizacion()/images/EZ1.jpeg" loading="lazy" alt="" class="resource_image">
+            </div>
+            @* Título del recurso *@
+            <div class="resource_text-container">
+                <p class="resource_type">@Model.RdfType</p>
+                <h3 class="title-6">
+                    <a href="@Model.CompletCardLink">@Model.Title</a>
+                </h3>
+                <p class="paragraph-2 text-color-darkgrey margin-small margin-top">@Model.Description</p>
+
+            </div>
+        </article>
+    }
+
 }
 
 

@@ -65,16 +65,16 @@
 else
 {
     @* Contenedor de items (recursos) de resultados *@
-    <div id="panResultados" class="resource-list listView">
+    <div id="panResultados" class="padding-small padding-top">
 
         @* Mostrado de resultados *@
         @if (string.IsNullOrEmpty(htmlResultados) && Model.JSONResourceList != null)
         {
-            Html.PartialView("../CargadorResultados/CargarResultados", Model.JSONResourceList);
+
+            @Html.PartialView("../CargadorResultados/CargarResultados", Model.JSONResourceList);
         }
         else
         {
-
             @* Envoltorio de los items devueltos por el buscador *@
             <div class="resource-list-wrap">
                 @* Cargar los resultados obtenidos del servicio "Cargador Resultados" *@

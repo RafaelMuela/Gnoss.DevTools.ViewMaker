@@ -94,14 +94,14 @@
         isMapa = true;
         @* Panel izquierdo de Facetas *@
         <div class="col col-12 col-xl-3 col-facetas col-lateral izquierda">
-            @*@Html.PartialView("_partial-views/_list-content-facetes", Model)*@
+            @Html.PartialView("../Busqueda/_partial-views/_list-content-facetes", Model)
         </div>
 
         @* Panel derecho-central donde estará el contenido del "buscador"*@
         <div class="col col-12 col-xl-9 col-contenido derecha">
             
             <div class="item-dropdown aMapView activeView"></div>
-            <div class="map_iframe-container mapView activeView" id="panResultados">
+            <div class="map_iframe-container mapa mapView activeView" id="panResultados">
             </div>
            
             @Html.PartialView("../Busqueda/_partial-views/_list-content", Model)
@@ -112,7 +112,7 @@
     {
         @* Panel izquierdo de Facetas *@
         <div class="col col-12 col-xl-3 col-facetas col-lateral izquierda">
-            @Html.PartialView("_partial-views/_list-content-facetes", Model)
+            @Html.PartialView("../Busqueda/_partial-views/_list-content-facetes", Model)
         </div>
 
         @* Panel derecho-central donde estará el contenido del "buscador"*@
@@ -122,11 +122,11 @@
                 @* Buscador de recursos *@
                 @if (Model.SearchBoxVisible)
                 {
-                    @Html.PartialView("_partial-views/_searcher", Model)
+                    @Html.PartialView("../Busqueda/_partial-views/_searcher", Model)
                 }
 
                 @* Listado de resultados (resource-list) donde aparecerán los recursos-items *@
-                @Html.PartialView("_partial-views/_list-content", Model)
+                @Html.PartialView("../Busqueda/_partial-views/_list-content", Model)
 
                 @* Leyenda cuando en modo desconectado se trata de ver Personas *@
                 @if (IdentidadActual.IsGuestUser && nombrePestanyaActual == Html.GetText("COMMON", "PERSONASYORGANIZACIONES"))
