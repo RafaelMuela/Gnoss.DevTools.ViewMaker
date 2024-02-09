@@ -1,0 +1,34 @@
+@*[security|||shared/head/_ficherosjavascriptpersonalizado.cshtml|||bime]*@
+@*
+    Descripción
+    -----------------------------------------------
+    Vista donde se podrá añadir código JS personalizado por cualquier persona que necesite añadir funcionalidad adicional al Front. Por defecto estará vacío.
+    Esta vista se carga desde FicherosJavascript.cshtml
+
+    Variables
+    ----------------------------------------------------------------
+*@
+@{
+    CommunityModel Comunidad = Html.GetComunidad();    
+}
+
+@*
+    ----------------------------------------------------------------
+    -------------------- Vista parcial para código JS personalizado --------------------
+*@
+
+@if (Comunidad != null && Comunidad.VersionJS.HasValue)
+{
+    
+        
+        @* <script type="text/javascript" src="@Html.GetBaseUrlPersonalizacion()/js/bime2023.js?v=@Comunidad.VersionJS"></script> *@
+}
+
+<!--LEAFLET-->
+<script src="@Html.GetBaseUrlPersonalizacion()/js/libraries/leaflet/leaflet.js?v=@Html.GetVersion()"></script>
+<script src="@Html.GetBaseUrlPersonalizacion()/js/libraries/leaflet/leaflet.responsive.popup.js?v=@Html.GetVersion()"></script>
+<script src="@Html.GetBaseUrlPersonalizacion()/js/libraries/leaflet/leaflet.markercluster-src.js?v=@Html.GetVersion()"></script>
+<script src="@Html.GetBaseUrlPersonalizacion()/js/libraries/leaflet/leaflet.wms.js?v=@Html.GetVersion()"></script>
+
+<!--Mapa-->
+<script type="text/javascript" src="@Html.GetBaseUrlPersonalizacion()/js/mapa/mapa.js?v=@Html.GetVersion()"></script>

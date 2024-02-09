@@ -1,0 +1,44 @@
+@*[security|||shared/head/_hojasdeestilopersonalizado.cshtml|||bime]*@
+@*
+    Descripción
+    -----------------------------------------------
+    Vista donde se podrá añadir código CSS personalizado por cualquier persona que necesite un diseño adicional que sobreescribirá a los añadidos por defecto. Por defecto estará vacío.
+    Esta vista se carga desde _HojasdeEstilo.cshtml
+
+    Variables
+    ----------------------------------------------------------------
+*@
+@{
+    CommunityModel Comunidad = Html.GetComunidad();
+}
+
+@*
+    ----------------------------------------------------------------
+    -------------------- Vista parcial para código CSS personalizados --------------------
+*@
+
+
+@if (Comunidad != null)
+{
+
+
+    <link media="screen" type="text/css" rel="stylesheet" href="@Html.GetBaseUrlPersonalizacion()/css/bime2023.css?v=@Html.GetVersion()" />
+    <link media="screen" type="text/css" rel="stylesheet" href="@Html.GetBaseUrlPersonalizacion()/css/components.css??v=@Html.GetVersion()" />
+    <link media="screen" type="text/css" rel="stylesheet" href="@Html.GetBaseUrlPersonalizacion()/css/normalize.css?v=@Html.GetVersion()" />
+    <link media="screen" type="text/css" rel="stylesheet" href="@Html.GetBaseUrlPersonalizacion()/css/BIMEstyleGnoss.css?v=@Html.GetVersion()" />
+
+
+}
+
+@if (ViewData["BodyClassPestanya"] != null && ViewData["BodyClassPestanya"].ToString().Contains("buscador-mapa"))
+{
+    <!--LEAFLET-->
+    <link rel="stylesheet" href="@Html.GetBaseUrlPersonalizacion()/css/libraries/leaflet/leaflet.css?v=@Html.GetVersion()" />
+    <link rel="stylesheet" href="@Html.GetBaseUrlPersonalizacion()/css/libraries/leaflet/leaflet.responsive.popup.css?v=@Html.GetVersion()" />
+    <link rel="stylesheet" href="@Html.GetBaseUrlPersonalizacion()/css/libraries/leaflet/MarkerCluster.css?v=@Html.GetVersion()" />
+    <link rel="stylesheet" href="@Html.GetBaseUrlPersonalizacion()/css/libraries/leaflet/MarkerCluster.Default.css?v=@Html.GetVersion()" />
+
+    <!--MAPA-->
+    <link rel="stylesheet" href="@Html.GetBaseUrlPersonalizacion()/css/mapa.css?v=@Html.GetVersion()" />
+}
+
