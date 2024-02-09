@@ -1,0 +1,64 @@
+@*[security|||busqueda/_partial-views/_list-content-facetes.cshtml|||bime]*@
+@model SearchViewModel
+@*
+    Descripción
+    -----------------------------------------------
+    Nueva vista contenedora que contiene cada una de las Facetas que se utilizarán para poder hacer filtros de los resultados obtenidos por "Buscador".
+    Esta vista se situará en la zona izquierda de la pantalla. Básicamente son filtros disponibles para los resultados del buscador
+
+
+    Plantillas - Archivos de dewenir
+    ----------------------------------------------------------------
+
+
+
+    Variables
+    ----------------------------------------------------------------
+*@
+@{
+    string nombrePestanyaActual = Model.PageName;
+    UserIdentityModel IdentidadActual = Html.GetIdentidadActual();
+    string htmlFacetas = Model.HTMLFaceted;
+}
+
+@{
+
+
+}
+
+@*
+    ----------------------------------------------------------------
+    -------------------- Contenedor de las facetas para los resultados del buscador --------------------
+*@
+
+@if (!(IdentidadActual.IsGuestUser && nombrePestanyaActual == Html.GetText("COMMON", "PERSONASYORGANIZACIONES")))
+{
+    <div id="col01">
+        @* Cabecera de Filtros de Facetas *@
+        <div class="header-facetas">
+            @*<p>@Html.GetText("COMADMINFACETAS", "FILTROS")</p>*@
+            <a href="javascript: void(0);" class="cerrar">
+                <span class="material-icons">close</span>
+            </a>
+        </div>
+        <form method="post" id="formPanFacetas" action="@(new Uri($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}").AbsoluteUri)">
+            <fieldset style="display: block">
+                @*<legend>Container to hold the facets</legend>*@
+                <div id="panFacetas" style="opacity: 1;" class="admin-columns_sidebar facetas-wrap custom-css-scroll">
+                    @if (Model.FacetedVisible)
+                    {
+                        if (string.IsNullOrEmpty(htmlFacetas) && Model.JSONFaceted != null)
+                        {
+                            @Html.PartialView("../CargadorFacetas/CargarFacetas", Model.JSONFaceted);
+                        }
+                        else
+                        {
+                            @Html.Raw(htmlFacetas);
+                        }
+                    }
+                </div>
+                <input type="submit" style="display: none;" id="enviarFormPanFacetas" value="enviar" title="enviar" />
+            </fieldset>
+        </form>
+    </div>
+}
