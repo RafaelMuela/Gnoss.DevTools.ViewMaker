@@ -1,0 +1,177 @@
+@*[security|||cargadorresultados/_resultadorecurso.cshtml|||bime]*@
+@model ResourceModel
+@*
+    Descripción
+    -----------------------------------------------
+    Vista perteneciente al servicio externo "ServicioResultados" que se utiliza para mostrar los resultados obtenidos al realizar una búsqueda de Recursos.
+
+
+    Variables
+    ----------------------------------------------------------------
+*@
+@{
+    // Cadena de texto para un recurso de tipo "Privado". Utilizarlo para HTML
+    string privado = "";
+    // Texto para añadir a modo de clase extra al contenido o descripción del Recurso
+    string claseExtraDescripcion = "";
+    //string fechaRecurso = Model.PublishDate.ToString("dddd, MMMM. yyyy");
+    string fechaRecurso = Model.PublishDate.ToString("dd/MM/yyyy");
+    // Publicador del recurso
+    ProfileModel publicador = Model.Publisher;
+    // Nombre que se mostrará para "Seguir" dependiendod el tipo de "Publicador"
+    String nombrePublicador = "";
+    Boolean permitirFollow = false;
+
+    UserIdentityModel IdentidadActual = Html.GetIdentidadActual();
+
+    // Funciones para seguir o no seguir a un publicador
+    string funcion_seguir = "";
+    // Icono seguir-no seguir
+    string icono_seguir = "";
+    // Título del botón para seguir o no seguir
+    string titulo_seguir = "";
+
+    // Nombre adicional para el tipo de recurso y ser usado a modo de clase
+    string claseTipoRecurso = Html.ObtenerNombreClasePorTipoRecurso(Model.TypeDocument);
+    // Data-Attribute que indicará si se está siguiendo al Publisher del recurso
+    string dataAttributeFollowing = "";
+    // Contador de categorias y labels
+    int cont = 0;
+}
+
+@*
+    ----------------------------------------------------------------
+    -------------------- Lista donde se mostrarán los los items o recursos del buscador --------------------
+*@
+
+@{
+    @* Controlar el tipo de recurso (Privado?)*@
+    if (Model.Private)
+    {
+        privado = " privado";
+    }
+
+    @* Obtener el nombre, organizacion o información del publicador para poder seguir *@
+    switch (publicador.TypeProfile)
+    {
+        case ProfileType.Personal:
+            nombrePublicador = publicador.NamePerson;
+            break;
+        case ProfileType.Organization:
+            nombrePublicador = publicador.NamePerson;
+            break;
+        case ProfileType.ProfessionalCorporate:
+            // code block
+            nombrePublicador = publicador.NameOrganization;
+            break;
+        case ProfileType.ProfessionalPersonal:
+            // code block
+            nombrePublicador = publicador.NamePerson;
+            break;
+
+        case ProfileType.Teacher:
+            // code block
+            nombrePublicador = publicador.NamePerson;
+            break;
+        default:
+            // code block
+            nombrePublicador = "";
+            break;
+    }
+
+    @* Obtener el nombre para la acción de Seguir/NoSeguir*@
+    int indexNameActionFollowUnFollow = publicador.ListActions.UrlFollow.Count(f => f == '/') - 1;
+    List<string> publisherNameActionFollowUnFollowList = new List<string>(
+    publicador.ListActions.UrlFollow.Split(new string[] { "/" }, StringSplitOptions.None));
+    string publisherNameActionFollowUnFollow = publisherNameActionFollowUnFollowList[indexNameActionFollowUnFollow];
+
+    @* Comprobar si es posible seguir al publicador *@
+    if (!IdentidadActual.IsGuestUser && IdentidadActual.KeyPerson != publicador.KeyPerson)
+    {
+        permitirFollow = true;
+        @* Comprobar si se puede seguir o no seguir *@
+        if (publicador.Actions.FollowingProfile)
+        {
+            //funcion_seguir = "AccionPerfil_NoSeguir(this, '" + publicador.ListActions.UrlUnfollow + "')";
+            funcion_seguir = "AccionPerfil_Seguir_Listado(this, '" + publicador.ListActions.UrlUnfollow + "','" + publisherNameActionFollowUnFollow + "')";
+            icono_seguir = "person_remove_alt_1";
+            titulo_seguir = "Dejar de seguir";
+            dataAttributeFollowing = "data-follow";
+        }
+        else
+        {
+            //funcion_seguir = "AccionPerfil_Seguir(this, '" + publicador.ListActions.UrlFollow + "')";
+            funcion_seguir = "AccionPerfil_Seguir_Listado(this, '" + publicador.ListActions.UrlFollow + "','" + publisherNameActionFollowUnFollow + "')";
+            icono_seguir = "person_add_alt_1";
+            titulo_seguir = "Seguir";
+        }
+    }
+    else
+    {
+        permitirFollow = false;
+    }
+}
+
+
+@if (Model != null)
+{
+    @* Detectar privacidad de un recurso *@
+    string clasePrivado = "";
+    if (Model.Private)
+    {
+        clasePrivado = "private";
+    }
+
+    @*Item devuelto de tipo "Recurso"*@
+<article id="resource_@Model.Key" style="opacity: 1; transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg); transform-style: preserve-3d;" typeof="sioc_t:Item" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:sioc_t="http://rdfs.org/sioc/types#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:sioc="http://rdfs.org/sioc/ns#" class="resource is-shadow w-inline-block @claseTipoRecurso @clasePrivado">
+
+    @* Permitir checkbox en el título del Recurso (Mantenida funcionalidad para nuevo Front) *@
+    @if (Model.SelectionCheckAvailable)
+    {
+        string idCheck = "ficha_" + Model.Key;
+
+        <div class="check-wrapper">
+            @* Checkbox que permitirá seleccionar/deseleccionar *@
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input ListaRecursosCheckBox" id="@idCheck">
+                <label class="custom-control-label" for="@idCheck"></label>
+            </div>
+        </div>
+    }
+    <div class="resource_image-container">
+        <img src="https://serviciosdevbime.gnoss.com/imagenes/proyectos/personalizacion/d02d11b0-e388-475b-9951-34751d57203b/images/EZ1.jpeg" loading="lazy" sizes="(max-width: 479px) 80vw, (max-width: 767px) 85vw, (max-width: 991px) 25vw, 21vw"  alt="" class="resource_image">
+    </div>
+    @* Título del recurso *@
+    <div class="middle-wrap resource_text-container">
+        <p class="resource_type">@Model.RdfType</p>
+        <h2 class="title-5 margin-xsmall">
+            <a href="@Model.CompletCardLink">@Model.Title</a>
+        </h2>
+        <p class="paragraph-2 text-color-darkgrey margin-0">@Model.Description</p>
+
+
+        @* Imagen Miniatura del recurso *@
+        <div class="content-wrap">
+            @if (!string.IsNullOrEmpty(Model.UrlPreview))
+            {
+                <div class="image-wrap">
+                    <div class="image">
+                        <a href="@Model.CompletCardLink">
+                            <img alt="@Model.Title" title="@Model.Title"
+                                 src="@Model.UrlPreview" />
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</article>
+}
+
+
+
+
+
+
+
+
