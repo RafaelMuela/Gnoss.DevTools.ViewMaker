@@ -37,6 +37,15 @@
     string dataAttributeFollowing = "";
     // Contador de categorias y labels
     int cont = 0;
+    bool isMap = false;
+    if (Context.Request.Form != null)
+    {
+
+        var isShowfichaMap = Context.Request.Form["isMap"];
+        bool.TryParse(isShowfichaMap, out isMap);
+
+    }
+   
 }
 
 @*
@@ -114,8 +123,8 @@
 
 
 @if (Model != null)
-{
-    @if (Model.RdfType.ToLower().Equals("organization") && ViewData["BodyClassPestanya"] != null && ViewData["BodyClassPestanya"].ToString().Contains("buscador-mapa"))
+{    
+    @if (Model.RdfType.ToLower().Equals("organization") && isMap)
     {
 
         <div class="map_result result-1">

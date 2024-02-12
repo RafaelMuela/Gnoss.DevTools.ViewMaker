@@ -51,9 +51,8 @@
 
         @if (ViewData["BodyClassPestanya"] != null && ViewData["BodyClassPestanya"].ToString().Contains("buscador-mapa"))
         {
-            <main role="main" style="padding-top: 100px;">
-                <div class="container">
-                    <div class="row-content">
+            <main role="main" class="main-wrapper">
+                <section class="section_content">                    
                         @* Mostrar o no el Aviso de Cookies *@
                         @if (!Html.GetUrlPagina().Contains(Html.GetText("URLSEM", "PERSONALIZARCOOKIES")))
                         {
@@ -69,13 +68,12 @@
 
                         @* Carga contenido de la página *@
                         @RenderBody()
+                    
 
-                    </div>
+                        @* Carga del footer *@
+                        @Html.PartialView("../Shared/_pie/_Pie")
 
-                    @* Carga del footer *@
-                    @Html.PartialView("../Shared/_pie/_Pie")
-
-                </div>
+                </section>
             </main>
         }
         else

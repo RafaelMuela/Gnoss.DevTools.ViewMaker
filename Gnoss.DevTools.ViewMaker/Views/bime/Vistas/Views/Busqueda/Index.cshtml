@@ -1,6 +1,6 @@
 @*[security|||busqueda/index.cshtml|||bime]*@
 @model SearchViewModel
-@using Gnoss.DevTools.ViewMaker.Areas.Gnoss.DevTools.ViewMaker.Fake
+@*@using Gnoss.DevTools.ViewMaker.Areas.Gnoss.DevTools.ViewMaker.Fake*@
 @*
     Descripción
     -----------------------------------------------
@@ -22,7 +22,7 @@
     string htmlFacetas = Model.HTMLFaceted;
     Dictionary<string, string> listaFiltrosOrden = Model.FilterOrderList;
     string FiltroOrdenSeleccionado = Model.FilterOrderSelected;
-    bool isMapa = false;
+   
 }
 
 @*
@@ -49,123 +49,63 @@
 }
 
 
-<div class="row">
-    @if (Comunidad.Key != ProyectoAD.MetaProyecto)
-    {
-        @*Breadcrumb / Migas de pan en la ficha del recurso*@
-        <div class="col col-12 col-breadcrumb" id="breadcrumb">
-            <ul>
-                <li><a href="@Comunidad.Url"><strong>@Html.GetText("COMMON", "HOME")</strong></a></li>
-                <li>@nombrePestanyaActual</li>
-            </ul>
-        </div>
-    }
-    else
-    {
-        @*Breadcrumb / Migas de pan en la ficha del recurso*@
-        <div class="col col-12 col-breadcrumb" id="breadcrumb">
-            <ul>
-                @if (@Comunidad.Url != null)
-                {
-                    <li><a href="@Comunidad.Url"><strong>@Html.GetText("COMMON", "HOME")</strong></a></li>
-                }
-                else
-                {
-                    <li><strong>@Html.GetText("COMMON", "HOME")</strong></li>
-                }
 
-                @if (@nombrePestanyaActual != null)
-                {
-                    <li>@nombrePestanyaActual</li>
-                }
-                else if (Comunidad.Url != null)
-                {
-                    <li>@Comunidad.Name</li>
-                }
-            </ul>
-        </div>
-    }
+
 
     @* Header o cabecera donde aparecen los resultados o recursos de una comunidad *@
     @*    @Html.PartialView("_partial-views/_list-header", Model)*@
 
     @if (ViewData["BodyClassPestanya"] != null && ViewData["BodyClassPestanya"].ToString().Contains("buscador-mapa"))
     {
-        isMapa = true;
-        @* Panel izquierdo de Facetas *@
-        <div class="col col-12 col-xl-3 col-facetas col-lateral izquierda">
-            @Html.PartialView("../Busqueda/_partial-views/_list-content-facetes", Model)
-        </div>
-
-        @* Panel derecho-central donde estará el contenido del "buscador"*@
-        <div class="col col-12 col-xl-9 col-contenido derecha">
-            
-            <div class="item-dropdown aMapView activeView"></div>
-            <div class="map_iframe-container mapa mapView activeView" id="panResultados">
+        <div class="row">           
+            @* Panel izquierdo de Facetas *@
+            <div class="col col-12 col-xl-3 col-facetas col-lateral izquierda">
+                @Html.PartialView("../Busqueda/_partial-views/_list-content-facetes", Model)
             </div>
-           
-            @Html.PartialView("../Busqueda/_partial-views/_list-content", Model)
-        </div>   
-        
+
+            @* Panel derecho-central donde estará el contenido del "buscador"*@
+            <div class="map">
+                <div class="col col-12 col-xl-9 col-contenido derecha">
+
+                    <div class="item-dropdown aMapView activeView"></div>
+                    <div class="map_iframe-container mapa mapView activeView" id="panResultados">
+                    </div>
+
+                    @Html.PartialView("../Busqueda/_partial-views/_list-content", Model)
+                </div>
+            </div>
+        </div>
     }
     else
     {
-        @* Panel izquierdo de Facetas *@
-        <div class="col col-12 col-xl-3 col-facetas col-lateral izquierda">
-            @Html.PartialView("../Busqueda/_partial-views/_list-content-facetes", Model)
-        </div>
+        <div class="row search_columns">
 
-        @* Panel derecho-central donde estará el contenido del "buscador"*@
-        <div class="col col-12 col-xl-9 col-contenido derecha">
-            @* Div que envuelve todo el contenido central-derecho*@
-            <div class="wrapCol">
-                @* Buscador de recursos *@
-                @if (Model.SearchBoxVisible)
-                {
-                    @Html.PartialView("../Busqueda/_partial-views/_searcher", Model)
-                }
+            @* Header o cabecera donde aparecen los resultados o recursos de una comunidad *@
+            @Html.PartialView("../Busqueda/_partial-views/_list-header", Model)
 
-                @* Listado de resultados (resource-list) donde aparecerán los recursos-items *@
-                @Html.PartialView("../Busqueda/_partial-views/_list-content", Model)
-
-                @* Leyenda cuando en modo desconectado se trata de ver Personas *@
-                @if (IdentidadActual.IsGuestUser && nombrePestanyaActual == Html.GetText("COMMON", "PERSONASYORGANIZACIONES"))
-                {
-                    @* Tipo de comunidad *@
-                    switch ((CommunityModel.TypeAccessProject)Comunidad.AccessType)
-                    {
-                        case CommunityModel.TypeAccessProject.Public:
-                            @* PÚBLICA *@
-                            <p>
-                                @Html.GetText("BUSQUEDAAVANZADA", "INICIOPEROSNASYORG")
-                                <a id="hlBotonInicio" href="@Comunidad.Url/@Html.GetText("URLSEM", "HAZTEMIEMBRO")">@Html.GetText("COMINICIOLOGIN", "REGISTRATEPARTICIPA")</a>
-                                @Html.GetText("PERFIL", "VISITANTEPERFILO")
-                                <a id="hlBotonInicio2" href="@Comunidad.Url/@Html.GetText("URLSEM", "LOGIN")">@Html.GetText("COMINICIOLOGIN", "INICIASESION")</a>
-                            </p>
-                            break;
-
-                        case CommunityModel.TypeAccessProject.Restricted:
-                            @* RESTRINGIDA *@
-                            <p>
-                                @Html.GetText("BUSQUEDAAVANZADA", "INICIOPEROSNASYORG")
-                                @{
-                                    String requestCommunityAccessUrl = $"{@Comunidad.Url}/{@Html.GetText("URLSEM", "SOLICITARACCESO")}";
-                                }
-                                <br />
-                                <a id="hlBotonInicio" href="@requestCommunityAccessUrl">@Html.GetText("COMINICIOLOGIN", "TIENESQUESOLICITAR")</a>
-                                @Html.GetText("PERFIL", "VISITANTEPERFILO")
-                                <a id="hlBotonInicio2" href="@Comunidad.Url/@Html.GetText("URLSEM", "LOGIN")">@Html.GetText("COMINICIOLOGIN", "INICIASESION")</a>
-                            </p>
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
+            @* Panel izquierdo de Facetas *@
+            <div class="col col-12 col-xl-3 col-facetas col-lateral izquierda">
+                @Html.PartialView("../Busqueda/_partial-views/_list-content-facetes", Model)
             </div>
+
+            @* Panel derecho-central donde estará el contenido del "buscador"*@
+            <div class="col col-12 col-xl-9 col-contenido derecha">
+                @* Div que envuelve todo el contenido central-derecho*@
+                <div class="wrapCol">
+                    @* Buscador de recursos *@
+                    @if (Model.SearchBoxVisible)
+                    {
+                        @Html.PartialView("../Busqueda/_partial-views/_searcher", Model);
+                    }
+
+                    @* Listado de resultados (resource-list) donde aparecerán los recursos-items *@
+                    @Html.PartialView("../Busqueda/_partial-views/_list-content", Model)
+                </div>
+            </div>
+
         </div>
     }
-</div>
+
 
 <script type="text/javascript">
     @Html.Raw(jsExtra)
@@ -173,9 +113,9 @@
     @if (htmlFacetas == null && htmlResultados == null)
     {
         <text>
-                        $(document).ready(function () {
-                            FiltrarPorFacetas(filtrosDeInicio);
-                        });
+                            $(document).ready(function () {
+                                FiltrarPorFacetas(filtrosDeInicio);
+                            });
         </text>
     }
 
@@ -188,7 +128,7 @@
     {
         @Html.Raw(Html.GetJSGraficos())
     }
-    
-   
+
+
 </script>
 
