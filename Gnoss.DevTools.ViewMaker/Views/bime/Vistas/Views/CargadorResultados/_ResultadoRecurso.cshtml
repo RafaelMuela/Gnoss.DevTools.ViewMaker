@@ -126,7 +126,7 @@
 {    
     @if (Model.RdfType.ToLower().Equals("organization") && isMap)
     {
-
+        Organization organization = new Organization(Model);
         <div class="map_result result-1">
             <div class="map_result-image-container"><img src="@Html.GetBaseUrlPersonalizacion()/images/people.jpg" loading="lazy" alt="" class="map_result-image"></div>
             <div class="map_result-text">
@@ -135,6 +135,17 @@
                     <p class="paragraph-2 margin-0 text-color-mediumgrey">@Model.RdfType</p>
                 </div>
                 <h2 class="title-6 margin-0">@Model.Title<br></h2>
+            </div>
+            <div class="oculto">
+                @if (!string.IsNullOrEmpty(organization.latitud))
+                {
+                    <span class="latitud-obra">@organization.latitud</span>
+                }
+                @if (!string.IsNullOrEmpty(organization.latitud))
+                {
+                    <span class="longitud-obra">@organization.longitud</span>
+                }
+                <span class="document-id">@organization.id</span>
             </div>
         </div>
     }
@@ -181,7 +192,60 @@
 }
 
 
+@functions{
+    public class Organization
+    {
+        public Guid id { get; set; }
+        public string dFoto { get; set; }        
+        public string latitud { get; set; }
+        public string longitud { get; set; }
+        public string urlObra { get; set; }
 
+        public Organization(ResourceModel pModel)
+        {
+            id = pModel.Key;
+            if (!string.IsNullOrEmpty(pModel.CompletCardLink))
+            {
+                urlObra = pModel.CompletCardLink;
+            }
+            
+            //BASIC
+            if (pModel.ViewSettings.CustomSemanticProperties != null && pModel.ViewSettings.CustomSemanticProperties.Exists(x => x.Id == "BASIC"))
+            {
+                foreach (Dictionary<string, string>
+                fila in pModel.ViewSettings.CustomSemanticProperties.First(x => x.Id == "BASIC").Rows)
+                {
+                    
+                    if (fila.ContainsKey("latitud") && !string.IsNullOrEmpty(fila["latitud"].ToString()))
+                    {
+                        latitud = fila["latitud"].ToString();
+                    }
+                    if (fila.ContainsKey("longitud") && !string.IsNullOrEmpty(fila["longitud"].ToString()))
+                    {
+                        longitud = fila["longitud"].ToString();
+                    }
+                    
+
+                }
+            }
+
+            //VISUALITEM
+            if (pModel.ViewSettings.CustomSemanticProperties != null && pModel.ViewSettings.CustomSemanticProperties.Exists(x => x.Id == "VISUALITEM"))
+            {
+                foreach (Dictionary<string, string>
+                fila in pModel.ViewSettings.CustomSemanticProperties.First(x => x.Id == "VISUALITEM").Rows)
+                {
+                    if (!string.IsNullOrEmpty(fila["dfoto"].ToString()))
+                    {
+                        dFoto = fila["dfoto"].ToString();
+                    }
+                }
+            }          
+            
+            
+        }
+    }
+}
 
 
 
