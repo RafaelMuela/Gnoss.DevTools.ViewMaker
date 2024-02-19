@@ -1,3 +1,4 @@
+@*[security|||multimediaresource|||elprado]*@
 @model ResourceViewModel
 @using System.Data;
 @using System.Reflection;
@@ -25,6 +26,9 @@
     {
         esInvitadas = esInvitadas || IdGnoss.Contains(guid);
     }
+
+    TimeZoneInfo zonaHoraria = TimeZoneInfo.FindSystemTimeZoneById("Europe/Madrid");
+    DateTime datetimenow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zonaHoraria);
 
     //Acceder al tipo de Ontología
     string tipoEntidadOntologia = string.Empty;
@@ -83,10 +87,10 @@
     string[] grupos = nombreCortoGrupos.Split(',');
     bool esAdmin = grupos.Contains("administrado");
     bool codigoCanjeado = false;
-    string fechaActual = "MP" + IdGnoss + DateTime.Now.ToString("yyyyMMdd");
-    string fechaAyer = "MP" + IdGnoss + DateTime.Now.Date.AddDays(-1).ToString("yyyyMMdd");
-    string hashFechaActual = fechaActual.GetHashCode().ToString();
-    string hashFechaAyer = fechaAyer.GetHashCode().ToString();
+    string fechaActual = "MP" + IdGnoss + datetimenow.ToString("yyyyMMdd");
+    string fechaAyer = "MP" + IdGnoss + datetimenow.Date.AddDays(-1).ToString("yyyyMMdd");
+    string hashFechaActual = GetStringSha256Hash(fechaActual).ToString();
+    string hashFechaAyer = GetStringSha256Hash(fechaAyer).ToString();
     string nombreCookie = "authorization_" + FichaDocumento.Key.ToString().ToLower();
     if (Context.Request.Cookies[nombreCookie] != null && (Context.Request.Cookies[nombreCookie] == hashFechaActual || Context.Request.Cookies[nombreCookie] == hashFechaAyer))
     {
@@ -177,7 +181,7 @@
                     @Html.Raw(descripcion)
                 </div>
                 <div class="row">
-                    <input type="text" id="inputNumEntradas" placeholder="Introduzca nº de entradas">
+                    <input type="text" id="inputNumEntradas" placeholder="Introduzca nº de entradas" title="Número de entradas">
 
                     <a class="botones-centrados bc-estandar hv-estandar generarEntradas">
                         <span class="txt">Generar entradas</span>
@@ -271,13 +275,13 @@
                 <p>@Html.Translate("ENVIARACCESOCORREODESCRIPCIONFORM")</p>
                 <form class="form-general minimo">
                     <div class="warning oculto"></div>
-                    <fieldset>
+                    <div>
                         <div class="row">
-                            <input type="text" id="email" name="email" placeholder="@Html.Translate("CORREOELECTRONICO")">
+                            <input type="text" id="email" name="email" placeholder="@Html.Translate("CORREOELECTRONICO")" title="email">
                             <label for="nombre">@Html.Translate("CORREOELECTRONICO")</label>
                             <a class="botones-centrados bc-estandar hv-estandar" id="bt_envioEmail" href="#">@Html.Translate("ENVIAR")</a>
                         </div>
-                    </fieldset>
+                    </div>
                 </form>
             </div>
         </div>
@@ -302,7 +306,7 @@
                             <div class="row">
                                 <!--<div class="row error">-->
                                 <input class="obligatorio" type="text" id="email" name="email" placeholder="@Html.Translate("CORREOELECTRONICO")*">
-                                <label for="nombre">@Html.Translate("CORREOELECTRONICO")*</label>
+                                <label for="email">@Html.Translate("CORREOELECTRONICO")*</label>
                                 <!--<div class="error" style="color:#fff;">Necesitamos que rellenes este campo</div>-->
                             </div>
                             @if (!string.IsNullOrEmpty(pm_price_museumfriends))
@@ -330,16 +334,15 @@
                         <input type="hidden" name="Ds_MerchantParameters" value="" />
                         <input type="hidden" name="Ds_Signature" value="" />
                         <input type="hidden" name="Ds_SignatureVersion" value="" />
-                        <input type="submit" />
+                        <input type="submit" value="Enviar" />
                     </form>
                     <br />
                     <br />
-                    <dl style="font-size:60%;">
-                        @Html.Raw(pm_recomendedBrowsers)
-                    </dl>
+
                 </div>
             </figure>
         </section>
+
         <section class="res-basica">
             <div class="res-cont" style="margin-left:0;">
                 @Html.Raw(pm_gigapixelDescription)
@@ -372,6 +375,9 @@
                 </div>
             </section>
         }
+        <section class="colabora res-basica">
+            @Html.Raw(pm_recomendedBrowsers)
+        </section>
 
 
     }
@@ -420,12 +426,13 @@ else
                         <div class="videoWrapper" id="playerVideo">
                             <!-- Para vídeos en 4:3, videoWrapper debe tener también la clase .prop4-3 -->
                             <!--Vídeo en 16:9-->
-                            <iframe width="100%" height="100%" src="@urlVideoCompleta" frameborder="0" allowfullscreen @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#url"))></iframe>
+                            <iframe title="Video del museo " width="100%" height="100%" src="@urlVideoCompleta" frameborder="0" allowfullscreen @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#url"))></iframe>
                             <!--Vídeo en 4:3-->
                             <!-- <iframe width="100%" height="100%" src="//www.youtube-nocookie.com/embed/-S6TCGKkxns?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe> -->
                         </div>
                     </div>
-                </section>}
+                </section>
+        }
         }
 
         @if (esInvitadas)
@@ -443,7 +450,8 @@ else
                     </div>
 
                 </div>
-            </section> }
+            </section>
+        }
         else
         {
             <section class="res-basica no-nav">
@@ -459,14 +467,15 @@ else
                     }
                 </div>
 
-                @{ if (nombreOntologia.Equals("Audio") || nombreOntologia.Equals("Audioguide"))
+                @{
+                    if (nombreOntologia.Equals("Audio") || nombreOntologia.Equals("Audioguide") || nombreOntologia.Equals("AudioDescription"))
                     {
                         <script type="text/javascript">
                             var video = $('nav ul li a.on');
                             video.removeClass('on');
                             video.parent().parent().next().next().find('a').addClass('on');
                         </script>
-                        // ficheroAudio es para Audio y Audioguia
+                        // ficheroAudio es para Audio, Audioguia y AudioDescription
                         SemanticPropertyModel propFicheroAudio = semCmsModel.GetPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#audioFile");
                         ficheroAudio = "";
 
@@ -536,20 +545,28 @@ else
                             <div class="res-cont detalle-audio @(esAmigoBool?"":"full")">
                                 @if (nombreOntologia.Equals("Audio"))
                                 {
-                                    <strong class="rastro">@Html.Translate("AUDIO")</strong> }
+                                    <strong class="rastro">@Html.Translate("AUDIO")</strong>
+                                }
                                 else if (nombreOntologia.Equals("Audioguide"))
                                 {
-                                    <strong class="rastro">@Html.Translate("AUDIOGUIA")</strong>}
+                                    <strong class="rastro">@Html.Translate("AUDIOGUIA")</strong>
+                                }
+                                else if (nombreOntologia.Equals("AudioDescription"))
+                                {
+                                    <strong class="rastro">@Html.Translate("AUDIODESCRIPTION")</strong>
+                                }
 
                                 <div class="cabecera">
                                     <h1 about="@IdGnoss">
                                         @if (!string.IsNullOrEmpty(titulo))
                                         {
-                                            <span class="titulo"><em @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation"))>@titulo</em></span>}
+                                            <span class="titulo"><em @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation"))>@titulo</em></span>
+                                        }
 
                                         @if (!string.IsNullOrEmpty(fechaPublicacionGnossFormateada))
                                         {
-                                            <span class="fecha">@fechaPublicacionGnossFormateada</span>}
+                                            <span class="fecha">@fechaPublicacionGnossFormateada</span>
+                                        }
 
                                         @if (!string.IsNullOrEmpty(autores))
                                         {@*<span class="autor"><strong>@autores</strong></span>*@}
@@ -557,7 +574,8 @@ else
                                 </div>
                                 @if (!string.IsNullOrEmpty(descripcion))
                                 {
-                                    <p @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3016_has_summarization_of_content"))>@Html.Raw(descripcion)</p>}
+                                    <p @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3016_has_summarization_of_content"))>@Html.Raw(descripcion)</p>
+                                }
                                 <figure>
                                     @if (!string.IsNullOrEmpty(ficheroAudio))
                                     {
@@ -565,45 +583,59 @@ else
                                             <div class="flecha-play"></div>
                                             @if (!string.IsNullOrEmpty(imagen))
                                             {
-                                                <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image"))><img src="@ViewBag.BaseUrlContent/@imagen" /></span>}
+                                                <span @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#image"))><img src="@ViewBag.BaseUrlContent/@imagen" /></span>
+                                            }
                                             <audio src="@ficheroAudio" preload="auto" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#audioFile")) />
-                                        </div>}
+                                        </div>
+                                    }
                                     @if (!string.IsNullOrEmpty(urlObraDeArte) && !string.IsNullOrEmpty(tituloObraDeArte))
                                     {
                                         <figcaption>
                                             <a class="botones-centrados bc-estandar hv-estandar" href="@urlObraDeArte">@Html.Translate("ACCEDERALAOBRA")</a>
-                                        </figcaption>}
+                                        </figcaption>
+                                    }
                                 </figure>
-                            </div> }
+                            </div>
+                        }
                         else
                         {
                             <div class="res-cont detalle-audio @(esAmigoBool?"":"full")">
                                 @if (nombreOntologia.Equals("Audio"))
                                 {
-                                    <strong class="rastro">Audio</strong> }
+                                    <strong class="rastro">Audio</strong>
+                                }
                                 else if (nombreOntologia.Equals("Audioguide"))
                                 {
-                                    <strong class="rastro">@Html.Translate("AUDIOGUIA")</strong>}
+                                    <strong class="rastro">@Html.Translate("AUDIOGUIA")</strong>
+                                }
+                                else if (nombreOntologia.Equals("AudioDescription"))
+                                {
+                                    <strong class="rastro">@Html.Translate("AUDIODESCRIPTION")</strong>
+                                }
                                 <div class="cabecera">
                                     <h1 about="@IdGnoss">
                                         <span class="titulo" @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation"))>@Html.Raw(titulo)</span>
 
                                         @if (!string.IsNullOrEmpty(fechaPublicacionGnossFormateada))
                                         {
-                                            <span class="fecha">@fechaPublicacionGnossFormateada</span>}
+                                            <span class="fecha">@fechaPublicacionGnossFormateada</span>
+                                        }
 
                                         @if (!string.IsNullOrEmpty(autores))
                                         {
-                                            <span class="autor"><strong>@autores</strong></span>}
+                                            <span class="autor"><strong>@autores</strong></span>
+                                        }
                                     </h1>
                                 </div>
 
                                 @if (!string.IsNullOrEmpty(descripcion))
                                 {
-                                    <p @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3016_has_summarization_of_content"))>@Html.Raw(descripcion)</p>}
+                                    <p @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3016_has_summarization_of_content"))>@Html.Raw(descripcion)</p>
+                                }
 
                                 <audio src="@ficheroAudio" preload="none" @Html.Raw(semCmsModel.GetRDFAProperty(propFicheroAudio)) />
-                            </div> }
+                            </div>
+                        }
                     }
                     else if (nombreOntologia.Equals("Video") || nombreOntologia.Equals("Signguide"))
                     {
@@ -679,13 +711,16 @@ else
                                         {
                                             <span class="fecha">@fechaPublicacionGnossFormateada</span>
                                         }
-                                    </h1>}
+                                    </h1>
+                                }
 
                                 @if (!string.IsNullOrEmpty(descripcion))
                                 {
-                                    <p @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3016_has_summarization_of_content"))>@Html.Raw(descripcion)</p>}
+                                    <p @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3016_has_summarization_of_content"))>@Html.Raw(descripcion)</p>
+                                }
                             </div>
-                        </div>}
+                        </div>
+                    }
 
                     else if (nombreOntologia.Equals("Interactive"))
                     {
@@ -754,15 +789,20 @@ else
                                 {
                                     <h1 class="noborde">
                                         <span class="titulo"><em @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3020_has_title_of_the_manifestation"))>@titulo</em></span>
-                                    </h1>}
+                                    </h1>
+                                }
                                 @if (!string.IsNullOrEmpty(descripcion))
                                 {
-                                    <p @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3016_has_summarization_of_content"))>@Html.Raw(descripcion)</p>}
+                                    <p @Html.Raw(semCmsModel.GetRDFAPropertyByPath("http://purl.org/vocab/frbr/core#p3016_has_summarization_of_content"))>@Html.Raw(descripcion)</p>
+                                }
                             </div>
 
-                        </div>} }
+                        </div>
+                    }
+                }
                 <a class="ico-rdf" href="@Html.GetURLRDF()">RDF</a>
-            </section>}
+            </section>
+        }
         @if (nombreOntologia.Equals("Interactive"))
         {
             <script type="text/javascript">
@@ -773,11 +813,10 @@ else
             <section class="ficha-res">
 
                 @Html.Raw(semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#main_HTML").Replace("URLCONTENTINTERACTIVOS", urlPersonalizacion + "/ElPrado/interactivos"))
-            </section>ViewBag.ListaJS.Add(urlPersonalizacion + "/ElPrado/interactivos/" + semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_JS"));
+            </section>
+            ViewBag.ListaJS.Add(urlPersonalizacion + "/ElPrado/interactivos/" + semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_JS"));
             ViewBag.ListaCSS.Add(urlPersonalizacion + "/ElPrado/interactivos/" + semCmsModel.GetFirstValuePropertyByPath("http://museodelprado.es/ontologia/pradomuseum.owl#path_CSS"));
         }
-
-
 
         @if (!nombreOntologia.Equals("Interactive"))
         {
@@ -805,10 +844,12 @@ else
                         <div>
                             @if (cargado)
                             {
-                                @Html.PartialView("ControlesMVC/_FichaGadget", gadgetContextoMultimediaRelacionados)}
+                                @Html.PartialView("ControlesMVC/_FichaGadget", gadgetContextoMultimediaRelacionados)
+                            }
                             <div class="contenedorGadget" aux="contenido-relacionado" pag="@pag" id="@idGadgetMultimediaRelacionados.ToString().ToLower()"></div>
                         </div>
-                    </section>}
+                    </section>
+                }
             }
         }
     </section>
@@ -832,12 +873,13 @@ else
             @Html.Translate("PREGUNTAESTASSEGURO")
             <a onclick="AccionRecurso_Eliminar_Aceptar('@fichaRecurso.ListActions.UrlDelete', '@fichaRecurso.Key')">@Html.GetText("COMMON", "SI")</a>
             <a onclick="$('.preguntarBorrar').show();$('.confirmarBorrar').hide();">@Html.GetText("COMMON", "NO")</a>
-        </div> }
+        </div>
+    }
 
     Dictionary<string, List<object>> propsJsonLD = new Dictionary<string, List<object>>();
     propsJsonLD.Add("@context", new List<object>(new string[] { "http://schema.org" }));
 
-    if (nombreOntologia.Equals("Audio") || nombreOntologia.Equals("Audioguide"))
+    if (nombreOntologia.Equals("Audio") || nombreOntologia.Equals("Audioguide") || nombreOntologia.Equals("AudioDescription"))
     {
         propsJsonLD.Add("@type", new List<object>(new string[] { "AudioObject" }));
 
@@ -932,7 +974,17 @@ else
         }
         return listString;
     }
+    public static string GetStringSha256Hash(string text)
+    {
+        if (String.IsNullOrEmpty(text)) return String.Empty;
 
+        using (var sha = new System.Security.Cryptography.SHA256Managed())
+        {
+            byte[] textData = System.Text.Encoding.UTF8.GetBytes(text);
+            byte[] hash = sha.ComputeHash(textData);
+            return BitConverter.ToString(hash).Replace("-", String.Empty);
+        }
+    }
     public class RDFPropertyAttribute : Attribute
     {
         public RDFPropertyAttribute(string pRDFA)
@@ -1189,4 +1241,5 @@ else
         }
 
     }
+
 }
